@@ -142,11 +142,17 @@ test('f. importar .zip desde archivo (válido y corrupto)', async ({ page }) => 
 
   // Zip sin pack.json y zip con pack.json inválido: error, el paquete activo no cambia.
   await page.getByTestId('pack-import-input').setInputFiles({ name: 'vacio.zip', mimeType: 'application/zip', buffer: Buffer.from(zipSync({ 'otro.txt': strToU8('x') })) });
-  await expect(page.getByTestId('pack-error')).toContainText('missing_pack_json');
+  // Criterio 3: los códigos técnicos van en data-errors, no como texto visible (solo ⚠️).
+  const packError = page.getByTestId('pack-error');
+  await expect(packError).toHaveAttribute('data-errors', /missing_pack_json/);
+  await expect(packError).toHaveText('⚠️');
   await page.getByTestId('pack-import-input').setInputFiles({ name: 'malo.zip', mimeType: 'application/zip', buffer: Buffer.from(zipSync({ 'pack.json': strToU8('{"id":"x"}') })) });
   // El contenido del error cambia: depende de malo.zip, no del error anterior.
-  await expect(page.getByTestId('pack-error')).not.toContainText('missing_pack_json');
-  await expect(page.getByTestId('pack-error')).toContainText('language.code');
+  await expect(packError).not.toHaveAttribute('data-errors', /missing_pack_json/);
+  await expect(packError).toHaveAttribute('data-errors', /language\.code/);
+  const codes = JSON.parse((await packError.getAttribute('data-errors')) ?? 'null') as unknown;
+  expect(Array.isArray(codes) && codes.includes('language.code')).toBe(true);
+  await expect(packError).toHaveText('⚠️');
   await expect(page.getByTestId('pack-installed-colombia-andina')).toHaveClass(/primary/);
   await goHome(page);
   await expect(page.getByRole('heading', { name: phrase(ES, 'welcome') })).toBeVisible();
@@ -465,5 +471,52 @@ test.describe('k. IndexedDB que falla', () => {
     await page.evaluate(() => ((window as unknown as { __idbFail?: boolean }).__idbFail = false));
     await page.getByTestId('dx-next').click();
     await expect(screen(page, 'confirmacion')).toBeVisible();
+  });
+});
+
+test.describe('l. actualización de un paquete instalado', () => {
+  // Sin SW: page.route no intercepta lo que atiende un service worker.
+  test.use({ serviceWorkers: 'block' });
+
+  test('l. si el catálogo trae otra versión, aparece 🔄 y reinstalar actualiza el paquete', async ({ page }) => {
+    await installFromCatalog(page, 'colombia-andina');
+    // Misma versión que la instalada: no se ofrece instalar de nuevo.
+    await expect(page.getByTestId('pack-install-colombia-andina')).toHaveCount(0);
+
+    const catalog = JSON.parse(readFileSync(join(APP_DIR, 'public', 'packs', 'catalog.json'), 'utf8')) as Array<{ id: string; version: string }>;
+    const entry = catalog.find((c) => c.id === 'colombia-andina');
+    if (!entry) throw new Error('colombia-andina no está en el catálogo');
+    const bumped = `${entry.version}-e2e`;
+    entry.version = bumped;
+    const packJson = JSON.parse(readFileSync(join(REPO_DIR, 'packs', 'colombia-andina', 'pack.json'), 'utf8')) as { version: string };
+    packJson.version = bumped;
+    const zip = Buffer.from(zipSync({ 'pack.json': strToU8(JSON.stringify(packJson)) }));
+    await page.route('**/packs/catalog.json', (route) => route.fulfill({ contentType: 'application/json', body: JSON.stringify(catalog) }));
+    await page.route('**/packs/colombia-andina.zip', (route) => route.fulfill({ contentType: 'application/zip', body: zip }));
+
+    // Volver a Paquetes con el catálogo nuevo (se lee al montar la pantalla).
+    await goHome(page);
+    await page.getByRole('button', { name: phrase(ES, 'packs') }).click();
+    const upd = page.getByTestId('pack-install-colombia-andina');
+    await expect(upd).toBeVisible();
+    await expect(upd).toContainText('🔄');
+    await expect(upd).toContainText(phrase(ES, 'install'));
+    await upd.click();
+    // Instalada la nueva versión, la entrada de actualización desaparece y el paquete sigue activo.
+    await expect(page.getByTestId('pack-install-colombia-andina')).toHaveCount(0);
+    await expect(page.getByTestId('pack-installed-colombia-andina')).toHaveClass(/primary/);
+    const stored = await page.evaluate(
+      () =>
+        new Promise<string>((resolve, reject) => {
+          const r = indexedDB.open('keyval-store');
+          r.onerror = () => reject(r.error);
+          r.onsuccess = () => {
+            const g = r.result.transaction('keyval').objectStore('keyval').get('pack:colombia-andina');
+            g.onsuccess = () => resolve((g.result as { version: string }).version);
+            g.onerror = () => reject(g.error);
+          };
+        }),
+    );
+    expect(stored).toBe(bumped);
   });
 });

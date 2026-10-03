@@ -31,7 +31,9 @@ export default function Paquetes() {
       const p = await install();
       await activate(p.id);
     } catch (e) {
-      setErrors(e instanceof PackError ? (e.errors.length ? e.errors : [e.code]) : [e instanceof Error ? e.message : String(e)]);
+      const list = e instanceof PackError ? (e.errors.length ? e.errors : [e.code]) : [e instanceof Error ? e.message : String(e)];
+      console.warn('pack', list);
+      setErrors(list);
     } finally {
       setBusy(false);
     }
@@ -46,7 +48,11 @@ export default function Paquetes() {
 
   const step = (d: number) => setArea((a) => Math.min(AREA_MAX_HA, Math.max(AREA_MIN_HA, a + d)));
   const fmt = (n: number) => n.toLocaleString(lang);
-  const available = catalog.filter((c) => !installed.some((p) => p.id === c.id));
+  // Del catálogo: lo no instalado y lo instalado con otra versión (actualización).
+  const available = catalog.flatMap((c) => {
+    const inst = installed.find((p) => p.id === c.id);
+    return !inst ? [{ c, update: false }] : inst.version !== c.version ? [{ c, update: true }] : [];
+  });
 
   return (
     <Screen id="paquetes" icon="📦" title={t('packs')}>
@@ -60,11 +66,11 @@ export default function Paquetes() {
           onClick={() => void (busy || run(() => Promise.resolve(p)))}
         />
       ))}
-      {available.map((c) => (
-        <div key={c.id} data-testid={`pack-catalog-${c.id}`}>
+      {available.map(({ c, update }) => (
+        <div key={c.id} data-testid={`pack-catalog-${c.id}`} data-update={update ? 'true' : undefined}>
           <BigButton
             testId={`pack-install-${c.id}`}
-            icon="⬇️"
+            icon={update ? '🔄' : '⬇️'}
             label={`${t('install')} ${c.language.name}`.trim()}
             variant="secondary"
             onClick={() => void (busy || run(() => installPackFromCatalog(c)))}
@@ -81,11 +87,9 @@ export default function Paquetes() {
       />
       <BigButton icon="📁" label={t('import_file')} variant="secondary" onClick={() => fileRef.current?.click()} />
       {errors && (
-        <div data-testid="pack-error" className="pack-error">
+        // Criterio 3: los códigos técnicos no se muestran; quedan en data-errors y en la consola.
+        <div data-testid="pack-error" className="pack-error" data-errors={JSON.stringify(errors)}>
           <div className="pack-error-icon">⚠️</div>
-          {errors.map((e) => (
-            <div key={e}>{e}</div>
-          ))}
         </div>
       )}
       {pack && (
