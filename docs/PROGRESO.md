@@ -20,7 +20,7 @@ Cada tarea: implementa un subagente, revisa otro (cumplimiento de spec y calidad
 - [x] Task 8 — SEE real con onnxruntime-web y modelo de prueba (prompt 9)
 - [x] Task 9 — Acerca de (prompt 10)
 - [x] Task 10 — Offline, `check:assets`, `verify` (prompt 11)
-- [ ] Task 11 — Pruebas e2e con Playwright (a–h)
+- [x] Task 11 — Pruebas e2e con Playwright (a–h)
 - [ ] Task 12 — Capacitor / Android (prompt 12)
 
 ## Cierre
