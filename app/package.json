@@ -13,7 +13,10 @@
     "preview": "vite preview",
     "test": "vitest run",
     "typecheck": "tsc -b",
-    "lint": "eslint . --max-warnings 0"
+    "lint": "eslint . --max-warnings 0",
+    "check:assets": "node scripts/check-assets.mjs",
+    "e2e": "node scripts/e2e-placeholder.mjs",
+    "verify": "npm run typecheck && npm run lint && npm run test && npm run build && npm run e2e"
   },
   "dependencies": {
     "fflate": "^0.8.3",

@@ -30,11 +30,18 @@ export default defineConfig({
         orientation: 'portrait',
         background_color: '#f6f1e7',
         theme_color: '#2f5d3a',
-        icons: [{ src: 'icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any maskable' }],
+        // Tamaño explícito y propósitos separados: Chrome avisa con sizes 'any' + 'any maskable'.
+        icons: [
+          { src: 'icon.svg', sizes: '512x512', type: 'image/svg+xml', purpose: 'any' },
+          { src: 'icon.svg', sizes: '512x512', type: 'image/svg+xml', purpose: 'maskable' },
+        ],
       },
       workbox: {
-        // Precarga completa para modo avión (se afina en el prompt 11).
-        globPatterns: ['**/*.{js,mjs,css,html,svg,png,json,wasm,onnx,zip,mp3}'],
+        // Precarga completa para modo avión: app, ort/*.wasm|mjs, models/** (model_card y .onnx),
+        // packs/catalog.json y packs/*.zip (el audio va dentro de los zips). Soltar el modelo real en
+        // public/models/arabica-v1/ y recompilar basta: el patrón ya lo cubre.
+        globPatterns: ['**/*.{js,mjs,css,html,svg,png,json,webmanifest,wasm,onnx,zip}'],
+        navigateFallback: 'index.html',
         maximumFileSizeToCacheInBytes: 30 * 1024 * 1024,
       },
     }),
