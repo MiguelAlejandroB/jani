@@ -8,7 +8,7 @@ export default function Inicio() {
   const { go } = useNav();
   const { startReview } = useFlow();
   return (
-    <Screen id="inicio" icon="☕" title={t('welcome')}>
+    <Screen id="inicio" icon="☕" title={t('welcome')} audio={['welcome']}>
       <BigButton
         icon="📷"
         testId="start-review"

@@ -56,7 +56,7 @@ export default function Diagnostico() {
   }
 
   return (
-    <Screen id="diagnostico" icon="🔍">
+    <Screen id="diagnostico" icon="🔍" audio={[outcome === 'consult' ? 'unsure' : outcome === 'healthy' ? 'all_healthy' : `dx_${session.dominant}`]}>
       <div className="thumbs">
         {photos.map((p) => (
           <div className="thumb" key={p.url}>

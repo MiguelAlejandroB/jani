@@ -32,7 +32,7 @@ export default function Riesgo() {
 
   const label = risk.level === 'CONSULT' ? t('consult') : t(`risk_${risk.level.toLowerCase()}`);
   return (
-    <Screen id="riesgo" icon="🚦">
+    <Screen id="riesgo" icon="🚦" audio={[risk.level === 'CONSULT' ? 'consult' : `risk_${risk.level.toLowerCase()}`]}>
       <div className="light" data-testid="risk-level" data-level={risk.level} />
       <p className="question">{label}</p>
       {risk.level !== 'CONSULT' && (

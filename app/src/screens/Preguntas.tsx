@@ -37,7 +37,7 @@ export default function Preguntas() {
   };
 
   return (
-    <Screen id="preguntas" icon={rain === null ? '🌧️' : '💧'} title={t(rain === null ? 'ask_rain' : 'ask_treatment')}>
+    <Screen id="preguntas" icon={rain === null ? '🌧️' : '💧'} title={t(rain === null ? 'ask_rain' : 'ask_treatment')} audio={[rain === null ? 'ask_rain' : 'ask_treatment']}>
       <div className="answer-row">
         <BigButton icon="👍" label={t('yes')} testId="answer-yes" onClick={() => answer(true)} />
         <BigButton icon="👎" label={t('no')} testId="answer-no" variant="secondary" onClick={() => answer(false)} />

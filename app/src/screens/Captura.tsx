@@ -76,7 +76,12 @@ export default function Captura() {
   };
 
   return (
-    <Screen id="captura" icon="📷" onIconClick={onIconClick}>
+    <Screen
+      id="captura"
+      icon="📷"
+      onIconClick={onIconClick}
+      audio={[retake ? 'retake' : photos.length >= TARGET_PHOTOS ? 'done_photos' : 'more_photos']}
+    >
       <div className="photo-count" data-testid="photo-count">
         {photos.length} / {TARGET_PHOTOS}
       </div>

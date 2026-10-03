@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { useNav, type ScreenId } from './nav';
+import { useScreenAudio } from './flow/useScreenAudio';
 
 // Botón grande con ícono; el texto, si lo hay, viene del paquete.
 export function BigButton(props: {
@@ -22,8 +23,9 @@ export function BigButton(props: {
 }
 
 // Marco común: volver / inicio, ícono de la pantalla, título y contenido.
-export function Screen(props: { id: ScreenId; icon: string; title?: string; children?: ReactNode; onIconClick?: () => void }) {
+export function Screen(props: { id: ScreenId; icon: string; title?: string; children?: ReactNode; onIconClick?: () => void; audio?: string[] }) {
   const { go, back } = useNav();
+  const repeat = useScreenAudio(props.audio ?? []);
   return (
     <main className="screen" data-screen={props.id}>
       {props.id !== 'inicio' && (
@@ -41,6 +43,7 @@ export function Screen(props: { id: ScreenId; icon: string; title?: string; chil
       </div>
       {props.title && <h1 className="screen-title">{props.title}</h1>}
       <div className="screen-body">{props.children}</div>
+      {props.audio && props.audio.length > 0 && <RepeatButton onClick={repeat} />}
     </main>
   );
 }
@@ -52,4 +55,9 @@ export function DemoBadge({ text }: { text: string }) {
       🧪 {text}
     </div>
   );
+}
+
+// Botón grande para repetir el audio de la pantalla.
+export function RepeatButton({ onClick }: { onClick: () => void }) {
+  return <BigButton icon="🔊" variant="secondary" testId="repeat-audio" onClick={onClick} />;
 }

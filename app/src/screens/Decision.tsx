@@ -37,7 +37,7 @@ export default function Decision() {
   };
 
   return (
-    <Screen id="decision" icon="⚖️">
+    <Screen id="decision" icon="⚖️" audio={[decision.phrase, 'you_decide']}>
       {decision.usedDemoData && <DemoBadge text={t('demo_data')} />}
       {rows.map((r) => (
         <div className="kpi" key={r.id}>
