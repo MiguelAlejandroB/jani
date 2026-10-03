@@ -4,11 +4,16 @@ import { usePack } from '../packs/PackContext';
 import { BigButton, Screen } from '../ui';
 
 export default function Inicio() {
-  const { t } = usePack();
+  const { t, pack } = usePack();
   const { go } = useNav();
   const { startReview } = useFlow();
   return (
     <Screen id="inicio" icon="☕" title={t('welcome')} audio={['welcome']}>
+      {pack && (
+        <p className="active-lang" data-testid="active-lang">
+          {pack.language.name}
+        </p>
+      )}
       <BigButton
         icon="📷"
         testId="start-review"

@@ -58,6 +58,8 @@ test('b. noor-africa-oriental y cambio en caliente del paquete activo', async ({
   await expect(page.getByTestId('pack-installed-noor-africa-oriental')).toHaveClass(/primary/);
   await goHome(page);
   await expect(page.getByRole('heading', { name: phrase(SW, 'welcome') })).toBeVisible();
+  // Inicio muestra el idioma del paquete activo (§10, fila 1).
+  await expect(page.getByTestId('active-lang')).toHaveText(SW.language.name);
   const sw2 = await fullRoute(page, SW, 2);
   expect(sw2.kpis).toEqual(sw.kpis);
 
@@ -67,6 +69,7 @@ test('b. noor-africa-oriental y cambio en caliente del paquete activo', async ({
   await expect(page.locator('html')).toHaveAttribute('lang', ES.language.code);
   await goHome(page);
   await expect(page.getByRole('heading', { name: phrase(ES, 'welcome') })).toBeVisible();
+  await expect(page.getByTestId('active-lang')).toHaveText(ES.language.name);
 });
 
 test('c. "no estoy segura": más de la mitad dudosas sugiere CONSULT', async ({ page }) => {
@@ -110,7 +113,7 @@ test('d. todas sanas: frase all_healthy, sin riesgo ni KPIs', async ({ page }) =
   await expect(page.getByTestId('case-item')).toContainText(phrase(ES, 'all_healthy'));
 });
 
-test('e. etiqueta de datos de demostración en Decisión', async ({ page }) => {
+test('e. etiqueta de datos de demostración en Riesgo y Decisión; elegir una opción no sugerida', async ({ page }) => {
   await setSimPlan(page, ['roya']);
   await installFromCatalog(page, 'colombia-andina');
   await goHome(page);
@@ -119,11 +122,30 @@ test('e. etiqueta de datos de demostración en Decisión', async ({ page }) => {
   await page.getByTestId('answer-yes').click();
   await expect(page.getByRole('heading', { name: phrase(ES, 'ask_treatment') })).toBeVisible();
   await page.getByTestId('answer-no').click();
+  // Riesgo: los meses lluviosos del paquete son de demostración.
+  await expect(screen(page, 'riesgo')).toBeVisible();
+  const riskBadge = screen(page, 'riesgo').getByTestId('demo-badge');
+  await expect(riskBadge).toBeVisible();
+  await expect(riskBadge).toContainText(phrase(ES, 'demo_data'));
   await page.getByTestId('risk-next').click();
   await expect(screen(page, 'decision')).toBeVisible();
   const badge = screen(page, 'decision').getByTestId('demo-badge');
   await expect(badge).toBeVisible();
   await expect(badge).toContainText(phrase(ES, 'demo_data'));
+
+  // La app sugiere; la persona elige otra opción y queda registrada esa (criterio 8).
+  const suggestion = (await page.getByTestId('decision-suggestion').getAttribute('data-suggestion')) ?? '';
+  expect(['WAIT', 'TREAT']).toContain(suggestion);
+  const other = suggestion === 'TREAT' ? 'WAIT' : 'TREAT';
+  await expect(page.getByTestId(`choice-${other}`)).not.toHaveAttribute('data-suggested', 'true');
+  await page.getByTestId(`choice-${other}`).click();
+  await expect(screen(page, 'confirmacion')).toBeVisible();
+  await goHome(page);
+  await page.getByRole('button', { name: phrase(ES, 'pending') }).click();
+  const item = page.getByTestId('case-item');
+  await expect(item).toHaveCount(1);
+  await expect(item).toContainText(phrase(ES, `opt_${other.toLowerCase()}`));
+  await expect(item).not.toContainText(phrase(ES, `opt_${suggestion.toLowerCase()}`));
 });
 
 test('f. importar .zip desde archivo (válido y corrupto)', async ({ page }) => {
@@ -283,6 +305,9 @@ test.describe('i. camino real ONNX (fixture de prueba)', () => {
     // Variante de la ficha de prueba sin regla de duda: el camino real debe devolver `ok` con la clase argmax.
     const card = JSON.parse(readFileSync(join(fixtures, 'model_card.test.json'), 'utf8')) as TestCard;
     card.unsure_rule = { min_confidence: 0, min_margin: 0 };
+    // Límites conocidos de la ficha (los escribe el notebook): Acerca de los muestra.
+    const LIMIT = 'limite-de-prueba-e2e';
+    (card as TestCard & { known_limits: string[] }).known_limits = [LIMIT];
     await page.route('**/models/arabica-v1/model_card.json', (route) => route.fulfill({ contentType: 'application/json', body: JSON.stringify(card) }));
     await page.route('**/models/arabica-v1/tiny_model.onnx', (route) =>
       route.fulfill({ contentType: 'application/octet-stream', body: readFileSync(join(fixtures, 'tiny_model.onnx')) }),
@@ -305,6 +330,7 @@ test.describe('i. camino real ONNX (fixture de prueba)', () => {
     // La ficha cargada es la del fixture.
     await page.getByRole('button', { name: 'ℹ️', exact: true }).click();
     await expect(page.getByTestId('about-model')).toContainText('tiny-test-fixture');
+    await expect(page.getByTestId('about-model')).toContainText(LIMIT);
     await goHome(page);
 
     await page.getByTestId('start-review').click();
@@ -584,4 +610,23 @@ test('m2. escalamiento con navigator.share: cancelar no marca enviado; compartir
   const text = await page.evaluate(() => (window as unknown as { __shared?: string[] }).__shared?.[0] ?? '');
   expect(text).toContain(phrase(ES, 'opt_consult'));
   await expect.poll(() => sentCount(page)).toBe(1);
+});
+
+test('n. un paquete importado que pasa la validación pero rompe una pantalla: ⚠️ y ⌂, sin dejar la app en blanco', async ({ page, pageErrors }) => {
+  // climate_normals y audio no los exige validatePack, pero Acerca de los lee.
+  const raw = JSON.parse(readFileSync(join(REPO_DIR, 'packs', 'colombia-andina', 'pack.json'), 'utf8')) as Record<string, unknown>;
+  delete raw.climate_normals;
+  delete raw.audio;
+  const zip = Buffer.from(zipSync({ 'pack.json': strToU8(JSON.stringify(raw)) }));
+  await page.getByTestId('pack-import-input').setInputFiles({ name: 'cojo.zip', mimeType: 'application/zip', buffer: zip });
+  await expect(page.getByTestId('pack-installed-colombia-andina')).toHaveClass(/primary/);
+  await goHome(page);
+  await page.getByRole('button', { name: 'ℹ️', exact: true }).click();
+  const err = page.getByTestId('screen-error');
+  await expect(err).toBeVisible();
+  await expect(err).toContainText('⚠️');
+  await page.getByTestId('error-home').click();
+  await expect(screen(page, 'inicio')).toBeVisible();
+  await expect(page.getByRole('heading', { name: phrase(ES, 'welcome') })).toBeVisible();
+  expect(pageErrors).toEqual([]);
 });

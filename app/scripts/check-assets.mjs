@@ -24,7 +24,9 @@ if (!existsSync(cardPath)) {
   ok(rel(cardPath));
   let card = null;
   try {
-    card = JSON.parse(readFileSync(cardPath, 'utf8'));
+    // Como la app: NaN / Infinity sueltos (json.dump de Python) se leen como null.
+    const text = readFileSync(cardPath, 'utf8').replace(/(?<=[:[,]\s*)(-?Infinity|NaN)(?=\s*[,\]}])/g, 'null');
+    card = JSON.parse(text);
   } catch {
     falta(`${rel(cardPath)} no es un JSON válido`);
   }
@@ -55,7 +57,13 @@ const packsDir = join(repoRoot, 'packs');
 for (const id of readdirSync(packsDir).sort()) {
   const packFile = join(packsDir, id, 'pack.json');
   if (!existsSync(packFile)) continue;
-  const pack = JSON.parse(readFileSync(packFile, 'utf8'));
+  let pack;
+  try {
+    pack = JSON.parse(readFileSync(packFile, 'utf8'));
+  } catch (e) {
+    falta(`packs/${id}/pack.json no es un JSON válido (${e instanceof Error ? e.message : String(e)})`);
+    continue;
+  }
   const keys = Object.keys(pack.phrases ?? {});
   const absent = keys.filter((k) => !existsSync(join(packsDir, id, 'audio', `${k}.mp3`)));
   console.log(`\n[${id}] ${keys.length - absent.length} de ${keys.length} audios`);

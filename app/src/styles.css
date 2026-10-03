@@ -28,6 +28,7 @@ body { margin: 0; min-height: 100dvh; background: var(--bg); }
 .screen-icon { font-size: 96px; text-align: center; line-height: 1.1; margin-top: 8px; }
 .screen-title { font-size: 1.6rem; text-align: center; margin: 0; }
 .question { font-size: 1.4rem; text-align: center; margin: 0; }
+.active-lang { font-size: 1.1rem; text-align: center; margin: 0; opacity: 0.75; }
 .screen-body { display: flex; flex-direction: column; gap: 14px; margin-top: auto; }
 .big-btn {
   display: flex; align-items: center; justify-content: center; gap: 14px;

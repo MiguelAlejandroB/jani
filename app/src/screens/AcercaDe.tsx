@@ -39,6 +39,12 @@ export default function AcercaDe() {
     modelRows.push(['recommended_file', card.recommended_file ?? '🧪']);
     for (const [k, v] of Object.entries(card.size_mb ?? {})) modelRows.push([`size_mb.${k}`, show(v)]);
     for (const [k, v] of Object.entries(card.metrics ?? {})) modelRows.push([k, show(v)]);
+    // Límites conocidos del modelo (la ficha del notebook usa `known_limits`).
+    for (const key of ['known_limits', 'limits'] as const) {
+      const lim = card[key];
+      if (Array.isArray(lim)) lim.forEach((v, i) => modelRows.push([`${key}.${i}`, show(v)]));
+      else if (lim !== undefined && lim !== null) modelRows.push([key, show(lim)]);
+    }
   }
 
   const sourceRows: Row[] = [];

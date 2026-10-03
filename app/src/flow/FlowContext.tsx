@@ -92,6 +92,14 @@ export function FlowProvider({ children }: { children: ReactNode }) {
     resetSim();
   }, []);
 
+  // Sesión nueva: riesgo, decisión y elección de una sesión anterior ya no valen.
+  const setNewSession = useCallback((s: Session) => {
+    setSession(s);
+    setRisk(null);
+    setDecision(null);
+    setChoice(null);
+  }, []);
+
   const addPhoto = useCallback((p: FlowPhoto) => setPhotos((prev) => [...prev, p]), []);
   const setAnswers = useCallback((h: boolean, tr: boolean) => {
     setHeavyRain(h);
@@ -123,9 +131,9 @@ export function FlowProvider({ children }: { children: ReactNode }) {
   const value = useMemo<FlowCtx>(
     () => ({
       card, cardError, reloadCard, photos, session, heavyRain, treated, risk, decision, choice, caseId, savedCase,
-      startReview, addPhoto, setSession, setAnswers, setRisk, setDecision, setChoice, saveCurrentCase, setSavedCase,
+      startReview, addPhoto, setSession: setNewSession, setAnswers, setRisk, setDecision, setChoice, saveCurrentCase, setSavedCase,
     }),
-    [card, cardError, reloadCard, photos, session, heavyRain, treated, risk, decision, choice, caseId, savedCase, startReview, addPhoto, setAnswers, saveCurrentCase],
+    [card, cardError, reloadCard, photos, session, heavyRain, treated, risk, decision, choice, caseId, savedCase, startReview, addPhoto, setNewSession, setAnswers, saveCurrentCase],
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

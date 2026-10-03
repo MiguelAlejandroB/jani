@@ -1,6 +1,7 @@
 import { useEffect, type ComponentType } from 'react';
 import { PackProvider, usePack } from './packs/PackContext';
 import { FlowProvider } from './flow/FlowContext';
+import { ErrorBoundary } from './ErrorBoundary';
 import { NavProvider, useNav, type ScreenId } from './nav';
 import Inicio from './screens/Inicio';
 import Captura from './screens/Captura';
@@ -34,8 +35,13 @@ function CurrentScreen() {
     if (mustInstall && screen !== 'paquetes') go('paquetes');
   }, [mustInstall, screen, go]);
   if (!ready) return null;
-  const Component = SCREEN_COMPONENTS[mustInstall ? 'paquetes' : screen];
-  return <Component />;
+  const id = mustInstall ? 'paquetes' : screen;
+  const Component = SCREEN_COMPONENTS[id];
+  return (
+    <ErrorBoundary key={id} onHome={() => go('inicio')}>
+      <Component />
+    </ErrorBoundary>
+  );
 }
 
 export default function App() {

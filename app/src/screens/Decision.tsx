@@ -20,14 +20,15 @@ export default function Decision() {
   useRedirectIf(!decision);
   if (!decision) return null;
   const unit = pack?.units.weight ?? '';
-  const range = (r: Range) => `${r[0]} – ${r[1]} ${unit}`;
+  const num = (n: number) => n.toLocaleString(pack?.language.code);
+  const range = (r: Range) => `${num(r[0])} – ${num(r[1])} ${unit}`;
   const k = decision.kpis;
 
   const rows: Array<{ id: string; icon: string; label: string; value: string }> = k
     ? [
         { id: 'loss', icon: '📉', label: t('kpi_loss'), value: range(k.expectedLossKg) },
-        { id: 'cost', icon: '💰', label: t('kpi_cost'), value: `${k.treatmentCostKg} ${unit}` },
-        { id: 'breakeven', icon: '⚖️', label: t('kpi_breakeven'), value: `${k.breakEvenKg} ${unit}` },
+        { id: 'cost', icon: '💰', label: t('kpi_cost'), value: `${num(k.treatmentCostKg)} ${unit}` },
+        { id: 'breakeven', icon: '⚖️', label: t('kpi_breakeven'), value: `${num(k.breakEvenKg)} ${unit}` },
         { id: 'net', icon: '📈', label: t('kpi_net'), value: range(k.netBenefitKg) },
       ]
     : [];
