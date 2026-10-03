@@ -13,7 +13,7 @@ Cada tarea: implementa un subagente, revisa otro (cumplimiento de spec y calidad
 - [x] Task 1 — Esquema, validación y carga de paquetes; `scripts/build-packs.mjs` (prompt 2A)
 - [x] Task 2 — Paquete activo y pantalla Paquetes, pregunta del área (prompt 2B)
 - [x] Task 3 — `resolve`, PREDICT (P1–P4), DECIDE (D1–D4) (prompts 3, 4, 5)
-- [ ] Task 4 — Sesión, calidad de foto, SEE simulado (prompt 6A, calidad del 9)
+- [x] Task 4 — Sesión, calidad de foto, SEE simulado (prompt 6A, calidad del 9)
 - [ ] Task 5 — Recorrido de punta a punta en pantallas, etiqueta demo (prompt 6B, 10)
 - [ ] Task 6 — VOICE (prompt 7)
 - [ ] Task 7 — Casos, Pendientes, SMS (prompt 8)
