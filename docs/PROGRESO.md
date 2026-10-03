@@ -17,7 +17,7 @@ Cada tarea: implementa un subagente, revisa otro (cumplimiento de spec y calidad
 - [x] Task 5 — Recorrido de punta a punta en pantallas, etiqueta demo (prompt 6B, 10)
 - [x] Task 6 — VOICE (prompt 7)
 - [x] Task 7 — Casos, Pendientes, SMS (prompt 8)
-- [ ] Task 8 — SEE real con onnxruntime-web y modelo de prueba (prompt 9)
+- [x] Task 8 — SEE real con onnxruntime-web y modelo de prueba (prompt 9)
 - [ ] Task 9 — Acerca de (prompt 10)
 - [ ] Task 10 — Offline, `check:assets`, `verify` (prompt 11)
 - [ ] Task 11 — Pruebas e2e con Playwright (a–h)
