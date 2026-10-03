@@ -15,7 +15,7 @@ Cada tarea: implementa un subagente, revisa otro (cumplimiento de spec y calidad
 - [x] Task 3 — `resolve`, PREDICT (P1–P4), DECIDE (D1–D4) (prompts 3, 4, 5)
 - [x] Task 4 — Sesión, calidad de foto, SEE simulado (prompt 6A, calidad del 9)
 - [x] Task 5 — Recorrido de punta a punta en pantallas, etiqueta demo (prompt 6B, 10)
-- [ ] Task 6 — VOICE (prompt 7)
+- [x] Task 6 — VOICE (prompt 7)
 - [ ] Task 7 — Casos, Pendientes, SMS (prompt 8)
 - [ ] Task 8 — SEE real con onnxruntime-web y modelo de prueba (prompt 9)
 - [ ] Task 9 — Acerca de (prompt 10)
