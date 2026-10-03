@@ -4,6 +4,9 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
+    "packs": "node ../scripts/build-packs.mjs",
+    "predev": "npm run packs",
+    "prebuild": "npm run packs",
     "postinstall": "node scripts/copy-ort.mjs",
     "dev": "vite",
     "build": "tsc -b && vite build",
