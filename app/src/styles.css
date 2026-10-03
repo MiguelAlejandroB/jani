@@ -38,3 +38,12 @@ body { margin: 0; min-height: 100dvh; background: var(--bg); }
 .big-btn.secondary { background: var(--secondary); color: var(--fg); }
 .big-btn-icon { font-size: 2.2rem; }
 .big-btn:active, .icon-btn:active { transform: scale(0.97); }
+.pack-row.active { outline: 4px solid var(--primary); }
+.pack-row { justify-content: space-between; }
+.pack-name { flex: 1; text-align: left; }
+.pack-error { text-align: center; font-size: 0.75rem; color: #8a1c1c; }
+.pack-error-icon { font-size: 2.2rem; }
+.area-picker { display: flex; align-items: center; justify-content: center; gap: 16px; }
+.area-value { font-size: 3rem; font-weight: 700; min-width: 3ch; text-align: center; }
+.area-picker .icon-btn { width: 80px; height: 80px; }
+.file-input { display: none; }

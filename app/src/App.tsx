@@ -1,4 +1,5 @@
-import type { ComponentType } from 'react';
+import { useEffect, type ComponentType } from 'react';
+import { PackProvider, usePack } from './packs/PackContext';
 import { NavProvider, useNav, type ScreenId } from './nav';
 import Inicio from './screens/Inicio';
 import Captura from './screens/Captura';
@@ -25,15 +26,23 @@ const SCREEN_COMPONENTS: Record<ScreenId, ComponentType> = {
 };
 
 function CurrentScreen() {
-  const { screen } = useNav();
-  const Component = SCREEN_COMPONENTS[screen];
+  const { screen, go } = useNav();
+  const { pack, ready } = usePack();
+  const mustInstall = ready && !pack;
+  useEffect(() => {
+    if (mustInstall && screen !== 'paquetes') go('paquetes');
+  }, [mustInstall, screen, go]);
+  if (!ready) return null;
+  const Component = SCREEN_COMPONENTS[mustInstall ? 'paquetes' : screen];
   return <Component />;
 }
 
 export default function App() {
   return (
-    <NavProvider>
-      <CurrentScreen />
-    </NavProvider>
+    <PackProvider>
+      <NavProvider>
+        <CurrentScreen />
+      </NavProvider>
+    </PackProvider>
   );
 }

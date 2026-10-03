@@ -7,9 +7,10 @@ export function BigButton(props: {
   label?: string;
   onClick: () => void;
   variant?: 'primary' | 'secondary';
+  testId?: string;
 }) {
   return (
-    <button className={`big-btn ${props.variant ?? 'primary'}`} onClick={props.onClick} aria-label={props.label || props.icon}>
+    <button className={`big-btn ${props.variant ?? 'primary'}`} onClick={props.onClick} data-testid={props.testId} aria-label={props.label || props.icon}>
       <span className="big-btn-icon" aria-hidden="true">
         {props.icon}
       </span>

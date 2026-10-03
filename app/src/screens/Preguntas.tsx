@@ -1,8 +1,9 @@
 import { useNav } from '../nav';
-import { t } from '../packs/active';
+import { usePack } from '../packs/PackContext';
 import { BigButton, Screen } from '../ui';
 
 export default function Preguntas() {
+  const { t } = usePack();
   const { go } = useNav();
   return (
     <Screen id="preguntas" icon="🌧️" title={t('ask_rain')}>
