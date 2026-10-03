@@ -19,11 +19,12 @@ function fakeAudio(opts: { rejectPlay?: boolean } = {}): AudioLike & { played: b
   return a;
 }
 
-function fakeSpeech(voices: Array<{ lang: string }>, log: string[] = []): SpeechLike {
+function fakeSpeech(voices: Array<{ lang: string }>, log: string[] = [], langs: string[] = []): SpeechLike {
   return {
     getVoices: () => voices,
     speak(u) {
       log.push(u.text);
+      langs.push(u.lang);
       queueMicrotask(() => u.onend?.());
     },
     cancel: vi.fn(),
@@ -106,36 +107,48 @@ describe('voice', () => {
     expect(log.length).toBeLessThan(3);
   });
 
-  it('sin voces listadas: espera voiceschanged y habla', async () => {
-    const log: string[] = [];
-    let voices: Array<{ lang: string }> = [];
-    let fire: () => void = () => undefined;
-    const sp: SpeechLike = {
-      ...fakeSpeech([], log),
-      getVoices: () => voices,
-      onVoicesChanged: (cb) => {
-        fire = cb;
-        return () => undefined;
-      },
-    };
-    const v = createVoice(deps({ speech: sp }));
-    const p = v.say('welcome');
-    voices = [{ lang: 'es-CO' }];
-    fire();
-    await p;
-    expect(log).toEqual(['texto welcome']);
+  it('sin voces listadas: espera voiceschanged y habla sin esperar el segundo completo', async () => {
+    vi.useFakeTimers();
+    try {
+      const log: string[] = [];
+      let voices: Array<{ lang: string }> = [];
+      let fire: () => void = () => undefined;
+      let subscribed = false;
+      const sp: SpeechLike = {
+        ...fakeSpeech([], log),
+        getVoices: () => voices,
+        onVoicesChanged: (cb) => {
+          subscribed = true;
+          fire = cb;
+          return () => undefined;
+        },
+      };
+      const v = createVoice(deps({ speech: sp }));
+      const p = v.say('welcome');
+      await vi.waitFor(() => expect(subscribed).toBe(true));
+      expect(log).toEqual([]);
+      voices = [{ lang: 'es-CO' }];
+      fire();
+      await vi.advanceTimersByTimeAsync(10);
+      await p;
+      expect(log).toEqual(['texto welcome']);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('sin voces tras la espera acotada: habla igual con el idioma del paquete', async () => {
     vi.useFakeTimers();
     try {
       const log: string[] = [];
-      const sp: SpeechLike = { ...fakeSpeech([], log), onVoicesChanged: () => () => undefined };
+      const langs: string[] = [];
+      const sp: SpeechLike = { ...fakeSpeech([], log, langs), onVoicesChanged: () => () => undefined };
       const v = createVoice(deps({ speech: sp }));
       const p = v.say('welcome');
       await vi.advanceTimersByTimeAsync(1000);
       await p;
       expect(log).toEqual(['texto welcome']);
+      expect(langs).toEqual(['es']);
     } finally {
       vi.useRealTimers();
     }
