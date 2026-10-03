@@ -48,15 +48,25 @@ Abrir Claude Code en esta carpeta y pedir, uno por uno, los prompts de la secci�
 
 La app no necesita esperar al modelo ni a los audios: trabaja con resultados simulados y texto hasta que lleguen.
 
-Comandos habituales, una vez creada:
+Comandos del proyecto (todos desde `app/`):
 
 ```bash
 cd app
-npm install
-npm run dev      # probar en el computador
-npm test         # pruebas de PREDICT y DECIDE
-npm run build    # versión para publicar
+npm install            # dependencias; copia los .wasm de onnxruntime-web a public/ort/
+npm run e2e:install    # una vez: Chromium para las pruebas e2e (queda dentro del proyecto)
+npm run dev            # probar en el computador (empaqueta packs/ antes)
+npm test               # pruebas unitarias (resolve, PREDICT P1–P4, DECIDE D1–D4, sesión, calidad, paquetes, voz, SMS, ONNX)
+npm run e2e            # pruebas de extremo a extremo con Playwright (incluye modo avión)
+npm run verify         # tipos + lint + unitarias + build + e2e: debe pasar completo
+npm run check:assets   # dice qué falta del modelo real y de los audios
+npm run packs          # solo reempaqueta packs/ en public/packs/*.zip + catalog.json
+npm run build          # versión para publicar (en app/dist)
+npm run android:sync   # build + copia al proyecto Android (Capacitor)
+npm run android:apk    # APK de depuración (requiere Android SDK y Java 21)
 ```
+
+Documentos de estado: `docs/PROGRESO.md`, `docs/DECISIONES.md`, `docs/QA_REPORT.md` y
+`docs/PENDIENTES_HUMANOS.md` (pasos exactos para el modelo, los audios, el APK y la publicación).
 
 ### Paso B — Entrenar el modelo (persona, en Colab)
 
@@ -105,7 +115,7 @@ from google.colab import files; files.download("audios.zip")
 
 Si prefieren voz humana en español (suena mejor), graben cada frase y guárdenla con el nombre de su clave, por ejemplo `dx_roya.mp3`. Las claves están en `pack.json`, sección `phrases`.
 
-Después de agregar audios o cambiar un `pack.json`, hay que volver a empaquetar: `node scripts/build-packs.mjs` (lo crea Claude Code en el prompt 2).
+Después de agregar audios o cambiar un `pack.json`, hay que volver a empaquetar: `npm run build` desde `app/` (empaqueta solo), o `npm run packs`. Suban `version` en el `pack.json` para que los teléfonos que ya tienen el paquete vean el botón 🔄 de actualizar.
 
 ### Paso D — Llenar los datos reales (persona)
 

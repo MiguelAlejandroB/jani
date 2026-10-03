@@ -27,3 +27,23 @@ Cada una: qué se decidió, por qué y qué cuesta si está mal.
 10. **KPIs redondeados a 2 decimales** para quitar ruido de coma flotante; la clasificación usa los valores sin redondear.
 11. **`training/build_climate.py` no se crea**: aparece en la estructura (§11) pero ningún prompt lo pide y necesita red (NASA POWER).
     `climate_normals` no lo usa ningún módulo del MVP.
+12. **Simulación: `low_confidence` y `low_margin` se devuelven directamente como dudosas.** Con las probabilidades
+    previstas en el plan (0,45/0,40), `low_margin` caía siempre en `low_confidence` con la ficha de ejemplo. Si está mal:
+    el modo simulado no ejercita la regla de margen con la ficha real; el modo real sí la aplica siempre.
+13. **El modo avión con el modelo ONNX real no se prueba en e2e.** `page.route` no intercepta lo que sirve el service worker
+    y el modelo de prueba no puede ir a `public/models`. La inferencia real se prueba en navegador con conexión (e2e `i`) y
+    el modo avión con SEE simulado (e2e `h`). Si está mal: queda la prueba manual en el teléfono (`PENDIENTES_HUMANOS.md` §4).
+14. **Capacitor 7** (no 8): la CLI 8 exige Node 22 y esta máquina tiene Node 20.19. Core, CLI y Android alineados en 7.x.
+15. **Acerca de muestra rutas técnicas como etiquetas** (`risk_rules.validated_by`, `audio.status`…). Son claves de los
+    datos, no frases; es una pantalla técnica para el jurado. Si está mal: agregar claves de frase al paquete.
+16. **Errores al importar un paquete:** se muestra solo ⚠️; el detalle técnico va en `data-errors` y en la consola,
+    para no mostrar texto generado en ejecución (criterio 3).
+17. **Fallo de inferencia ≠ foto mala:** si el modelo falla, la foto cuenta como dudosa (lleva a "No estoy segura" si son
+    mayoría) en lugar de pedir repetirla en bucle. Si la imagen no se puede leer, sí se pide repetirla.
+18. **La ficha del modelo se valida al cargarla y tolera `NaN`** (el notebook puede escribirlo en métricas). Ficha
+    inválida → ⚠️ con botón de reintentar, nunca valores por defecto inventados.
+19. **Actualizar un paquete instalado:** el catálogo muestra 🔄 cuando su `version` difiere de la instalada.
+20. **SMS sin teléfono:** si el paquete no trae teléfono y no hay menú de compartir (WebView de Android), se abre
+    `sms:?body=…` para que la persona elija el contacto. El caso se marca enviado solo si el envío se inició bien.
+21. **Revisión de calidad promovida:** se exigió probar `resolve` con un valor real no nulo y fuente `TODO` (criterio 5),
+    aunque el revisor lo marcó como menor.

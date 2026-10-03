@@ -24,23 +24,13 @@ Cada tarea: implementa un subagente, revisa otro (cumplimiento de spec y calidad
 - [x] Task 12 — Capacitor / Android (prompt 12)
 
 ## Cierre
-- [ ] Revisión final de QA contra los 11 criterios
-- [ ] `docs/QA_REPORT.md`, `docs/PENDIENTES_HUMANOS.md`, README actualizado
-- [ ] `npm run verify` completo en verde
+- [x] Revisión final de QA contra los 11 criterios (y corrección de sus hallazgos B1–B5, M1–M7)
+- [x] `docs/QA_REPORT.md`, `docs/PENDIENTES_HUMANOS.md`, README actualizado
+- [x] `npm run verify` completo en verde (112 unitarias, 18 e2e)
 
 ## Bloqueos
 (ninguno por ahora)
 
-## Estado al cortarse la sesión (límite de uso)
-- Tareas 1–12 implementadas, revisadas y en commit. Último commit revisado: `b487acd`.
-  `npm run verify` estaba en verde en `c3620cd` (91 unitarias, e2e 9/9).
-- La revisión final de QA (11 criterios) encontró arreglos pendientes antes de fusionar.
-  Lista exacta: `.superpowers/sdd/PLAN_MVP/final-fixes.md` (B1–B5 importantes, M1–M7 menores).
-  Se lanzó un subagente para arreglarlos. Puede haber dejado commits nuevos o cambios sin commit:
-  revisar `git log b487acd..HEAD` y `git status`, y `.superpowers/sdd/PLAN_MVP/final-fixes-report.md` si existe.
-- Resultado de la auditoría QA (resumen): criterios 2, 4, 5, 6, 7, 8, 9, 10 y 11 VERIFICADOS;
-  1 VERIFICADO con SEE simulado (ONNX real offline NO VERIFICADO); 3 FALLA acotada (panel de errores de Paquetes muestra códigos técnicos → B4).
-
-## Para retomar
-1. Revisar o terminar `final-fixes.md` y correr `cd app && npm run verify`.
-2. Escribir `docs/QA_REPORT.md`, `docs/PENDIENTES_HUMANOS.md` (pasos del APK en `.superpowers/sdd/PLAN_MVP/task-12-report.md`) y actualizar `README.md`.
+## Estado final
+Todo lo de esta lista está hecho y en la rama `build/mvp` (sin push ni merge). Lo que queda para personas está en
+`docs/PENDIENTES_HUMANOS.md`; lo no verificado, en `docs/QA_REPORT.md` §6.
