@@ -15,16 +15,27 @@ function configure(): void {
   }
 }
 
+/** Alto y ancho de entrada (shape NCHW, ya validada al cargar la ficha). */
+export function inputSize(card: ModelCard): [h: number, w: number] {
+  const [, , h, w] = card.input.shape;
+  if (h === undefined || w === undefined) throw new Error('input_shape');
+  return [h, w];
+}
+
 /** RGBA (tamaño = shape[2]×shape[3]) -> Float32Array NCHW normalizado con mean/std del card. */
 export function preprocess(rgba: Uint8ClampedArray, card: ModelCard): Float32Array {
-  const h = card.input.shape[2] ?? 224;
-  const w = card.input.shape[3] ?? 224;
+  const [h, w] = inputSize(card);
   const plane = h * w;
+  const [m0, m1, m2] = card.input.mean;
+  const [s0, s1, s2] = card.input.std;
+  if (m0 === undefined || m1 === undefined || m2 === undefined || s0 === undefined || s1 === undefined || s2 === undefined) throw new Error('input_norm');
+  const mean = [m0, m1, m2] as const;
+  const std = [s0, s1, s2] as const;
   const out = new Float32Array(3 * plane);
   for (let i = 0; i < plane; i++) {
     for (let c = 0; c < 3; c++) {
       const v = (rgba[i * 4 + c] ?? 0) / 255;
-      out[c * plane + i] = (v - (card.input.mean[c] ?? 0)) / (card.input.std[c] ?? 1);
+      out[c * plane + i] = (v - mean[c as 0 | 1 | 2]) / std[c as 0 | 1 | 2];
     }
   }
   return out;
@@ -50,5 +61,7 @@ export async function runModel(rgba: Uint8ClampedArray, card: ModelCard, modelUr
   const out = await session.run({ [card.input.name]: input });
   const logits = out[card.output.name];
   if (!logits) throw new Error('output_missing');
-  return Array.from(logits.data as Float32Array);
+  const values = Array.from(logits.data as Float32Array);
+  if (values.length !== card.classes.length) throw new Error('logits_length');
+  return values;
 }

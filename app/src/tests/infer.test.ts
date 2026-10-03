@@ -79,3 +79,10 @@ describe('softmax con temperatura + regla de duda sobre los logits del fixture',
     expect(applyUnsureRule(probs, card, card.classes).status).toBe(expected === 'ok' ? 'ok' : 'unsure');
   });
 });
+
+describe('runModel: salida del modelo vs. clases de la ficha', () => {
+  it('lanza si la cantidad de logits no coincide con card.classes', async () => {
+    const short = { ...card, classes: card.classes.slice(0, 4) };
+    await expect(runModel(uniform(224, PX), short, MODEL)).rejects.toThrow('logits_length');
+  });
+});

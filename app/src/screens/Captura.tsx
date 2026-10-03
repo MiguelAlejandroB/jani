@@ -1,5 +1,5 @@
-import { useRef, useState, type ChangeEvent } from 'react';
-import { CLASS_IDS } from '../engine/types';
+import { useEffect, useRef, useState, type ChangeEvent } from 'react';
+import { CLASS_IDS, type SeeResult } from '../engine/types';
 import { getSimPlan, see, type SimOutcome } from '../engine/see';
 import { buildSession } from '../engine/session';
 import { useFlow } from '../flow/FlowContext';
@@ -11,6 +11,9 @@ const MAX_PHOTOS = 10;
 const TARGET_PHOTOS = 5;
 const TAPS_FOR_MENU = 5;
 const SIM_KEY = 'jani.sim';
+const INFER_ERROR_MS = 4000;
+/** Si la inferencia falla, la foto cuenta como dudosa (no se pide repetirla): con muchas, la sesión va a CONSULT. */
+const INFER_FAILED: SeeResult = { status: 'unsure', reason: 'low_confidence' };
 const SIM_OUTCOMES: readonly SimOutcome[] = [...CLASS_IDS, 'low_confidence', 'low_margin', 'bad_photo'];
 
 function appendSim(outcome: SimOutcome): void {
@@ -25,13 +28,20 @@ function appendSim(outcome: SimOutcome): void {
 export default function Captura() {
   const { t } = usePack();
   const { go } = useNav();
-  const { card, photos, addPhoto, setSession } = useFlow();
+  const { card, cardError, reloadCard, photos, addPhoto, setSession } = useFlow();
   const inputRef = useRef<HTMLInputElement>(null);
   const taps = useRef(0);
   const [busy, setBusy] = useState(false);
   const [retake, setRetake] = useState(false);
+  const [inferError, setInferError] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [, setPlanTick] = useState(0);
+
+  useEffect(() => {
+    if (!inferError) return;
+    const id = setTimeout(() => setInferError(false), INFER_ERROR_MS);
+    return () => clearTimeout(id);
+  }, [inferError]);
 
   const simulated = card !== null && card.recommended_file === null;
   const onIconClick = () => {
@@ -54,8 +64,16 @@ export default function Captura() {
       for (const file of files) {
         if (count >= MAX_PHOTOS) break;
         const bitmap = await createImageBitmap(file);
-        const result = await see(bitmap, card);
-        bitmap.close();
+        let result: SeeResult;
+        try {
+          result = await see(bitmap, card);
+        } catch (err) {
+          console.warn('see', err);
+          result = INFER_FAILED;
+          setInferError(true);
+        } finally {
+          bitmap.close();
+        }
         if (result.status === 'unsure' && result.reason === 'bad_photo') {
           setRetake(true);
           continue;
@@ -64,6 +82,7 @@ export default function Captura() {
         count++;
       }
     } catch {
+      // La imagen no se pudo leer: pedir otra foto.
       setRetake(true);
     } finally {
       setBusy(false);
@@ -86,6 +105,18 @@ export default function Captura() {
         {photos.length} / {TARGET_PHOTOS}
       </div>
       {retake && <p className="retake">{t('retake')}</p>}
+      {inferError && (
+        <div className="pack-error" data-testid="infer-error" aria-hidden="true">
+          <div className="pack-error-icon">⚠️</div>
+        </div>
+      )}
+      {cardError && (
+        <div className="pack-error" data-testid="card-error">
+          <div className="pack-error-icon">⚠️</div>
+          <p className="question">{t('unsure')}</p>
+          <BigButton icon="🔄" testId="card-retry" variant="secondary" onClick={reloadCard} />
+        </div>
+      )}
       <div className="thumbs">
         {photos.map((p) => (
           <div className="thumb" key={p.url}>

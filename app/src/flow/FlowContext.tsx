@@ -9,6 +9,9 @@ export type FlowPhoto = { url: string; result: SeeResult };
 
 type FlowCtx = {
   card: ModelCard | null;
+  /** La ficha no se pudo cargar o no es válida: la captura muestra ⚠️ y permite reintentar. */
+  cardError: boolean;
+  reloadCard: () => void;
   photos: FlowPhoto[];
   session: Session | null;
   heavyRain: boolean | null;
@@ -35,6 +38,8 @@ const Ctx = createContext<FlowCtx | null>(null);
 export function FlowProvider({ children }: { children: ReactNode }) {
   const { pack } = usePack();
   const [card, setCard] = useState<ModelCard | null>(null);
+  const [cardError, setCardError] = useState(false);
+  const [cardAttempt, setCardAttempt] = useState(0);
   const [photos, setPhotos] = useState<FlowPhoto[]>([]);
   const [session, setSession] = useState<Session | null>(null);
   const [heavyRain, setHeavyRain] = useState<boolean | null>(null);
@@ -49,11 +54,25 @@ export function FlowProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let alive = true;
     loadModelCard()
-      .then((c) => alive && setCard(c))
-      .catch(() => undefined);
+      .then((c) => {
+        if (!alive) return;
+        setCard(c);
+        setCardError(false);
+      })
+      .catch((e: unknown) => {
+        if (!alive) return;
+        console.warn('model_card', e);
+        setCard(null);
+        setCardError(true);
+      });
     return () => {
       alive = false;
     };
+  }, [cardAttempt]);
+
+  const reloadCard = useCallback(() => {
+    setCardError(false);
+    setCardAttempt((n) => n + 1);
   }, []);
 
   const startReview = useCallback(() => {
@@ -103,10 +122,10 @@ export function FlowProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<FlowCtx>(
     () => ({
-      card, photos, session, heavyRain, treated, risk, decision, choice, caseId, savedCase,
+      card, cardError, reloadCard, photos, session, heavyRain, treated, risk, decision, choice, caseId, savedCase,
       startReview, addPhoto, setSession, setAnswers, setRisk, setDecision, setChoice, saveCurrentCase, setSavedCase,
     }),
-    [card, photos, session, heavyRain, treated, risk, decision, choice, caseId, savedCase, startReview, addPhoto, setAnswers, saveCurrentCase],
+    [card, cardError, reloadCard, photos, session, heavyRain, treated, risk, decision, choice, caseId, savedCase, startReview, addPhoto, setAnswers, saveCurrentCase],
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

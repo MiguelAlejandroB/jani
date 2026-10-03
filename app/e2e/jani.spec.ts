@@ -8,6 +8,7 @@ import {
   fullRoute,
   goHome,
   noiseChannelMeans,
+  noisePng,
   installFromCatalog,
   phrase,
   readPack,
@@ -335,5 +336,55 @@ test.describe('i. camino real ONNX (fixture de prueba)', () => {
     expect(urls.filter((u) => !u.startsWith('data:') && new URL(u).origin !== origin)).toEqual([]);
     expect(failed).toEqual([]);
     expect(consoleErrors.filter((e) => e.includes('not_implemented'))).toEqual([]);
+  });
+});
+
+test.describe('j. ficha del modelo inválida o inferencia que falla', () => {
+  // Sin SW: page.route no intercepta lo que atiende un service worker.
+  test.use({ serviceWorkers: 'block' });
+  const CARD_RAW = readFileSync(join(APP_DIR, 'public', 'models', 'arabica-v1', 'model_card.json'), 'utf8');
+
+  test('j1. ficha con NaN en temperature: ⚠️ + reintento; al reintentar con NaN solo en métricas, la cámara se habilita', async ({ page }) => {
+    let body = CARD_RAW.replace(/"temperature":\s*[0-9.]+/, '"temperature": NaN');
+    expect(body).not.toBe(CARD_RAW);
+    await page.route('**/models/arabica-v1/model_card.json', (route) => route.fulfill({ contentType: 'application/json', body }));
+    await setSimPlan(page, ['roya']);
+    await page.reload();
+    await installFromCatalog(page, 'colombia-andina');
+    await goHome(page);
+    await page.getByTestId('start-review').click();
+    const err = page.getByTestId('card-error');
+    await expect(err).toBeVisible();
+    await expect(err).toContainText('⚠️');
+    await expect(err).toContainText(phrase(ES, 'unsure'));
+    await expect(page.getByTestId('photo-btn')).toBeDisabled();
+
+    // json.dump de Python puede escribir NaN en métricas: se tolera.
+    body = CARD_RAW.replace(/"metrics":\s*\{\}/, '"metrics": {"f1": NaN, "loss": Infinity}');
+    expect(body).not.toBe(CARD_RAW);
+    await page.getByTestId('card-retry').click();
+    await expect(page.getByTestId('card-error')).toHaveCount(0);
+    await expect(page.getByTestId('photo-btn')).toBeEnabled();
+    await page.getByTestId('photo-input').setInputFiles({ name: 'hoja.png', mimeType: 'image/png', buffer: noisePng(1) });
+    await expect(page.getByTestId('photo-count')).toHaveText('1 / 5');
+  });
+
+  test('j2. si la inferencia falla, la foto cuenta como dudosa (sin pedir repetirla) y la sesión va a CONSULT', async ({ page }) => {
+    const card = JSON.parse(CARD_RAW) as Record<string, unknown>;
+    card.recommended_file = 'roto.onnx';
+    await page.route('**/models/arabica-v1/model_card.json', (route) => route.fulfill({ contentType: 'application/json', body: JSON.stringify(card) }));
+    await page.route('**/models/arabica-v1/roto.onnx', (route) => route.fulfill({ contentType: 'application/octet-stream', body: Buffer.from('esto no es un modelo') }));
+    await page.reload();
+    await installFromCatalog(page, 'colombia-andina');
+    await goHome(page);
+    await page.getByTestId('start-review').click();
+    await expect(page.getByTestId('photo-btn')).toBeEnabled();
+    await page.getByTestId('photo-input').setInputFiles({ name: 'hoja.png', mimeType: 'image/png', buffer: noisePng(1) });
+    await expect(page.getByTestId('photo-count')).toHaveText('1 / 5');
+    await expect(page.getByTestId('infer-error')).toBeVisible();
+    await expect(page.getByText(phrase(ES, 'retake'))).toHaveCount(0);
+    await page.getByTestId('photos-done').click();
+    await expect(page.getByTestId('dx-outcome')).toHaveAttribute('data-outcome', 'consult');
+    await expect(screen(page, 'diagnostico').locator('.thumb-badge', { hasText: '❓' })).toHaveCount(1);
   });
 });
