@@ -17,15 +17,27 @@ export default function Confirmacion() {
     if (!savedCase || !pack) return;
     const text = buildCaseSummary(savedCase, pack);
     const phone = pack.backup_contact.phone;
-    if (phone) {
-      await markSent(savedCase.id);
+    const sent = async () => {
+      try {
+        await markSent(savedCase.id);
+      } catch (e) {
+        console.warn('markSent', e);
+      }
       setSavedCase({ ...savedCase, sent: true });
-      location.href = smsHref(phone, text);
-    } else if (typeof navigator.share === 'function') {
-      await navigator.share({ text }).catch(() => undefined);
-      await markSent(savedCase.id);
-      setSavedCase({ ...savedCase, sent: true });
+    };
+    if (!phone && typeof navigator.share === 'function') {
+      try {
+        await navigator.share({ text });
+      } catch {
+        // Cancelado o rechazado: no se marca como enviado.
+        return;
+      }
+      await sent();
+      return;
     }
+    // Con número, o sin número ni `navigator.share` (WebView): sms: abre la app de mensajes (solo texto).
+    await sent();
+    location.href = smsHref(phone, text);
   };
 
   return (

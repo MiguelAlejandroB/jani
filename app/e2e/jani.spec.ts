@@ -520,3 +520,68 @@ test.describe('l. actualización de un paquete instalado', () => {
     expect(stored).toBe(bumped);
   });
 });
+
+/** Inicio -> caso dudoso -> elige CONSULT -> Confirmación con el botón de envío. */
+async function consultCase(page: Page): Promise<void> {
+  await takePhotos(page, 2);
+  await expect(page.getByTestId('dx-outcome')).toHaveAttribute('data-outcome', 'consult');
+  await page.getByTestId('dx-next').click();
+  await page.getByTestId('choice-CONSULT').click();
+  await expect(screen(page, 'confirmacion')).toBeVisible();
+  await expect(page.getByTestId('send-case')).toBeVisible();
+}
+
+async function sentCount(page: Page): Promise<number> {
+  await goHome(page);
+  await page.getByRole('button', { name: phrase(ES, 'pending') }).click();
+  await expect(page.getByTestId('case-item').first()).toBeVisible();
+  const n = await page.getByTestId('case-item').filter({ hasText: '📨' }).count();
+  await goHome(page);
+  return n;
+}
+
+test('m1. escalamiento sin teléfono ni navigator.share: el botón usa sms:?body= y marca el caso como enviado', async ({ page }) => {
+  await page.addInitScript(() => {
+    // Como en un WebView de Capacitor: sin Web Share.
+    delete (Navigator.prototype as { share?: unknown }).share;
+    delete (navigator as { share?: unknown }).share;
+  });
+  await setSimPlan(page, ['low_confidence']);
+  await page.reload();
+  expect(await page.evaluate(() => typeof navigator.share)).toBe('undefined');
+  await installFromCatalog(page, 'colombia-andina');
+  await goHome(page);
+  await consultCase(page);
+  await page.getByTestId('send-case').click();
+  await expect.poll(() => sentCount(page)).toBe(1);
+});
+
+test('m2. escalamiento con navigator.share: cancelar no marca enviado; compartir sí', async ({ page }) => {
+  await page.addInitScript(() => {
+    const w = window as unknown as { __shareOk?: boolean; __shared?: string[] };
+    w.__shared = [];
+    Object.defineProperty(Navigator.prototype, 'share', {
+      configurable: true,
+      value: (data: { text?: string }) => {
+        if (!w.__shareOk) return Promise.reject(new DOMException('cancelado', 'AbortError'));
+        w.__shared?.push(data.text ?? '');
+        return Promise.resolve();
+      },
+    });
+  });
+  await setSimPlan(page, ['low_confidence']);
+  await page.reload();
+  await installFromCatalog(page, 'colombia-andina');
+  await goHome(page);
+  await consultCase(page);
+  await page.getByTestId('send-case').click();
+  expect(await sentCount(page)).toBe(0);
+
+  await page.evaluate(() => ((window as unknown as { __shareOk?: boolean }).__shareOk = true));
+  await consultCase(page);
+  await page.getByTestId('send-case').click();
+  await expect.poll(() => page.evaluate(() => (window as unknown as { __shared?: string[] }).__shared?.length ?? 0)).toBe(1);
+  const text = await page.evaluate(() => (window as unknown as { __shared?: string[] }).__shared?.[0] ?? '');
+  expect(text).toContain(phrase(ES, 'opt_consult'));
+  await expect.poll(() => sentCount(page)).toBe(1);
+});

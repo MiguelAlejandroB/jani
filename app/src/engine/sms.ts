@@ -18,6 +18,7 @@ export function buildCaseSummary(c: Case, pack: Pack): string {
   return lines.filter((l) => l !== '').join('\n');
 }
 
-export function smsHref(phone: string, body: string): string {
-  return `sms:${phone}?body=${encodeURIComponent(body)}`;
+/** Enlace sms:. Sin número (`null` o vacío) abre la app de mensajes y la persona elige el destinatario. */
+export function smsHref(phone: string | null | undefined, body: string): string {
+  return `sms:${phone ?? ''}?body=${encodeURIComponent(body)}`;
 }

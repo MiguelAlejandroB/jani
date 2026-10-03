@@ -39,4 +39,8 @@ describe('smsHref', () => {
   it('codifica el cuerpo', () => {
     expect(smsHref('+573001112233', 'a b\nc&d')).toBe('sms:+573001112233?body=a%20b%0Ac%26d');
   });
+  it('sin número: sms:?body= (la persona elige a quién enviarlo)', () => {
+    expect(smsHref(null, 'a b')).toBe('sms:?body=a%20b');
+    expect(smsHref('', 'a b')).toBe('sms:?body=a%20b');
+  });
 });
