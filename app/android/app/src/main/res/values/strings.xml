@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Jani</string>
+    <string name="title_activity_main">Jani</string>
+    <string name="package_name">org.jani.app</string>
+    <string name="custom_url_scheme">org.jani.app</string>
+</resources>

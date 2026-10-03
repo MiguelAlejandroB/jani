@@ -17,9 +17,12 @@
     "check:assets": "node scripts/check-assets.mjs",
     "e2e": "node scripts/e2e.mjs",
     "verify": "npm run typecheck && npm run lint && npm run test && npm run build && npm run e2e",
+    "android:sync": "npm run build && npx cap sync android",
+    "android:apk": "cd android && gradlew.bat assembleDebug",
     "e2e:install": "node scripts/e2e.mjs install"
   },
   "dependencies": {
+    "@capacitor/core": "^8.5.2",
     "fflate": "^0.8.3",
     "idb-keyval": "^6.3.0",
     "onnxruntime-web": "^1.30.0",
@@ -27,6 +30,8 @@
     "react-dom": "^19.3.0"
   },
   "devDependencies": {
+    "@capacitor/android": "^8.5.2",
+    "@capacitor/cli": "^7.6.9",
     "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.63.0",
     "@types/node": "^26.6.4",
