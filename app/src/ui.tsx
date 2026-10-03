@@ -57,6 +57,15 @@ export function DemoBadge({ text }: { text: string }) {
   );
 }
 
+// Aviso de que el caso no se pudo guardar (solo ícono); la persona puede volver a tocar el botón.
+export function SaveError() {
+  return (
+    <div className="pack-error" data-testid="save-error">
+      <div className="pack-error-icon">⚠️</div>
+    </div>
+  );
+}
+
 // Botón grande para repetir el audio de la pantalla.
 export function RepeatButton({ onClick }: { onClick: () => void }) {
   return <BigButton icon="🔊" variant="secondary" testId="repeat-audio" onClick={onClick} />;

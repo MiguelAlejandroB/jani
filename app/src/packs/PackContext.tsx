@@ -23,10 +23,18 @@ export function PackProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false);
 
   const refresh = useCallback(async () => {
-    const [list, id, area] = await Promise.all([listInstalledPacks(), getActivePackId(), getAreaHa()]);
-    setInstalled(list);
-    setActiveId(id);
-    setAreaState(area);
+    try {
+      const [list, id, area] = await Promise.all([listInstalledPacks(), getActivePackId(), getAreaHa()]);
+      setInstalled(list);
+      setActiveId(id);
+      setAreaState(area);
+    } catch (e) {
+      // IndexedDB no disponible: estado vacío para que la app quede usable (pantalla Paquetes).
+      console.warn('packs', e);
+      setInstalled([]);
+      setActiveId(undefined);
+      setAreaState(undefined);
+    }
     setReady(true);
   }, []);
 

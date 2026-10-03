@@ -388,3 +388,82 @@ test.describe('j. ficha del modelo inválida o inferencia que falla', () => {
     await expect(screen(page, 'diagnostico').locator('.thumb-badge', { hasText: '❓' })).toHaveCount(1);
   });
 });
+
+test.describe('k. IndexedDB que falla', () => {
+  test('k1. IndexedDB no abre: la app no queda en blanco, muestra Paquetes y el error al instalar', async ({ page }) => {
+    await page.addInitScript(() => {
+      IDBFactory.prototype.open = function () {
+        const req = {} as { error?: DOMException; onerror?: () => void };
+        setTimeout(() => {
+          req.error = new DOMException('bloqueado', 'UnknownError');
+          req.onerror?.();
+        });
+        return req as unknown as IDBOpenDBRequest;
+      };
+    });
+    await page.reload();
+    await expect(screen(page, 'paquetes')).toBeVisible();
+    await expect(page.getByTestId('pack-install-colombia-andina')).toBeVisible();
+    await page.getByTestId('pack-install-colombia-andina').click();
+    await expect(page.getByTestId('pack-error')).toBeVisible();
+    await expect(screen(page, 'paquetes')).toBeVisible();
+  });
+
+  test('k2. si guardar el caso falla: ⚠️, la elección no se pierde y se puede reintentar', async ({ page }) => {
+    // Las transacciones fallan mientras window.__idbFail sea verdadero.
+    await page.addInitScript(() => {
+      const orig = IDBDatabase.prototype.transaction;
+      IDBDatabase.prototype.transaction = function (this: IDBDatabase, ...args: Parameters<IDBDatabase['transaction']>) {
+        if ((window as unknown as { __idbFail?: boolean }).__idbFail) throw new DOMException('lleno', 'QuotaExceededError');
+        return orig.apply(this, args);
+      };
+    });
+    await setSimPlan(page, ['roya']);
+    await page.reload();
+    await installFromCatalog(page, 'colombia-andina');
+    await saveDefaultArea(page);
+    await goHome(page);
+    await takePhotos(page, 5);
+    await page.getByTestId('dx-next').click();
+    await page.getByTestId('answer-yes').click();
+    await expect(page.getByRole('heading', { name: phrase(ES, 'ask_treatment') })).toBeVisible();
+    await page.getByTestId('answer-no').click();
+    await page.getByTestId('risk-next').click();
+    await expect(screen(page, 'decision')).toBeVisible();
+
+    await page.evaluate(() => ((window as unknown as { __idbFail?: boolean }).__idbFail = true));
+    await page.getByTestId('choice-CONSULT').click();
+    await expect(page.getByTestId('save-error')).toBeVisible();
+    await expect(screen(page, 'decision')).toBeVisible();
+
+    await page.evaluate(() => ((window as unknown as { __idbFail?: boolean }).__idbFail = false));
+    await page.getByTestId('choice-CONSULT').click();
+    await expect(screen(page, 'confirmacion')).toBeVisible();
+    await goHome(page);
+    await page.getByRole('button', { name: phrase(ES, 'pending') }).click();
+    await expect(page.getByTestId('case-item')).toHaveCount(1);
+    await expect(page.getByTestId('case-item')).toContainText(phrase(ES, 'opt_consult'));
+  });
+
+  test('k3. si guardar un caso sano falla: ⚠️ en Diagnóstico y reintento', async ({ page }) => {
+    await page.addInitScript(() => {
+      const orig = IDBDatabase.prototype.transaction;
+      IDBDatabase.prototype.transaction = function (this: IDBDatabase, ...args: Parameters<IDBDatabase['transaction']>) {
+        if ((window as unknown as { __idbFail?: boolean }).__idbFail) throw new DOMException('lleno', 'QuotaExceededError');
+        return orig.apply(this, args);
+      };
+    });
+    await setSimPlan(page, ['sana']);
+    await page.reload();
+    await installFromCatalog(page, 'colombia-andina');
+    await goHome(page);
+    await takePhotos(page, 2);
+    await page.evaluate(() => ((window as unknown as { __idbFail?: boolean }).__idbFail = true));
+    await page.getByTestId('dx-next').click();
+    await expect(page.getByTestId('save-error')).toBeVisible();
+    await expect(screen(page, 'diagnostico')).toBeVisible();
+    await page.evaluate(() => ((window as unknown as { __idbFail?: boolean }).__idbFail = false));
+    await page.getByTestId('dx-next').click();
+    await expect(screen(page, 'confirmacion')).toBeVisible();
+  });
+});

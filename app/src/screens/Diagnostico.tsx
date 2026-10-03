@@ -1,11 +1,11 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { sessionOutcome } from '../engine/session';
 import type { DecideResult, SeeResult } from '../engine/types';
 import { useFlow } from '../flow/FlowContext';
 import { useRedirectIf } from '../flow/useRedirect';
 import { useNav } from '../nav';
 import { usePack } from '../packs/PackContext';
-import { BigButton, Screen } from '../ui';
+import { BigButton, SaveError, Screen } from '../ui';
 
 const CONSULT_DECISION: DecideResult = { suggestion: 'CONSULT', phrase: 'consult', usedDemoData: false };
 
@@ -18,6 +18,7 @@ export default function Diagnostico() {
   const { t } = usePack();
   const { go } = useNav();
   const { session, photos, setRisk, setDecision, saveCurrentCase } = useFlow();
+  const [saveError, setSaveError] = useState(false);
   useRedirectIf(session === null);
   if (!session) return null;
 
@@ -45,7 +46,13 @@ export default function Diagnostico() {
         icon="✅"
         testId="dx-next"
         onClick={() => {
-          void saveCurrentCase().then(() => go('confirmacion'));
+          setSaveError(false);
+          saveCurrentCase()
+            .then(() => go('confirmacion'))
+            .catch((e: unknown) => {
+              console.warn('save', e);
+              setSaveError(true);
+            });
         }}
       />
     );
@@ -67,6 +74,7 @@ export default function Diagnostico() {
       <p className="question" data-testid="dx-outcome" data-outcome={outcome}>
         {text}
       </p>
+      {saveError && <SaveError />}
       {button}
     </Screen>
   );

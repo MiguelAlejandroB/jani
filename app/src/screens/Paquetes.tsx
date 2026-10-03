@@ -57,7 +57,7 @@ export default function Paquetes() {
           icon={p.id === pack?.id ? '✅' : '📦'}
           label={p.language.name}
           variant={p.id === pack?.id ? 'primary' : 'secondary'}
-          onClick={() => void activate(p.id)}
+          onClick={() => void (busy || run(() => Promise.resolve(p)))}
         />
       ))}
       {available.map((c) => (
