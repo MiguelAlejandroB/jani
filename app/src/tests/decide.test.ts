@@ -55,4 +55,10 @@ describe('decide', () => {
     const r = decide({ dominant: 'roya', risk: 'HIGH', areaHa: 2 }, p);
     expect(r).toMatchObject({ suggestion: 'WAIT', phrase: 'wait_ok', kpis: { confidence: 'high' } });
   });
+
+  it.each([0, -1, Number.NaN])('areaHa %s -> CONSULT sin kpis', (areaHa) => {
+    const r = decide({ dominant: 'roya', risk: 'HIGH', areaHa }, pack);
+    expect(r.suggestion).toBe('CONSULT');
+    expect(r.kpis).toBeUndefined();
+  });
 });

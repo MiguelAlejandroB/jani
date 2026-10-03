@@ -60,4 +60,32 @@ describe('resolve', () => {
   it('ruta inexistente -> found false', () => {
     expect(resolve(loadPack('colombia-andina'), 'no.existe.0')).toEqual({ found: false });
   });
+
+  describe('gobierno de la fuente con valor real no nulo', () => {
+    const price = (source: unknown) => {
+      const p = loadPack('colombia-andina');
+      setPath(p, 'economics.price_per_kg', { value: 17000, source });
+      return p;
+    };
+
+    it('source TODO + demo presente -> demo', () => {
+      expect(resolve(price('TODO: citar'), 'economics.price_per_kg')).toEqual({ found: true, value: 20000, usedDemo: true });
+    });
+
+    it('source válida -> real', () => {
+      expect(resolve(price('FNC 2025'), 'economics.price_per_kg')).toEqual({ found: true, value: 17000, usedDemo: false });
+    });
+
+    it('el ancestro más cercano manda sobre uno lejano', () => {
+      const p = loadPack('colombia-andina');
+      setPath(p, 'economics.source', 'FNC 2025');
+      setPath(p, 'economics.loss_share_by_risk.roya.high', [0.2, 0.4]);
+      setPath(p, 'economics.loss_share_by_risk.roya.source', 'TODO');
+      expect(resolve(p, 'economics.loss_share_by_risk.roya.high')).toMatchObject({ usedDemo: true, value: [0.15, 0.35] });
+    });
+
+    it.each([[''], [null]])('source %j es inválida', (src) => {
+      expect(resolve(price(src), 'economics.price_per_kg')).toEqual({ found: true, value: 20000, usedDemo: true });
+    });
+  });
 });

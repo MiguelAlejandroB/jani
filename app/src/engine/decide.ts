@@ -2,7 +2,7 @@ import type { Pack } from '../packs/schema';
 import { resolve } from './resolve';
 import type { DecideInput, DecideResult, Range } from './types';
 
-const round2 = (x: number): number => Math.round(x * 100) / 100;
+const round2 = (x: number): number => Math.round(x * 100) / 100 + 0; // + 0 normaliza -0
 const isNum = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v);
 const isRange = (v: unknown): v is Range => Array.isArray(v) && v.length === 2 && isNum(v[0]) && isNum(v[1]);
 const isObj = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v);
@@ -18,6 +18,8 @@ export function decide(input: DecideInput, pack: Pack): DecideResult {
   };
   const consult: DecideResult = { suggestion: 'CONSULT', phrase: 'consult', usedDemoData: false };
   const fail = (): DecideResult => ({ ...consult, usedDemoData });
+
+  if (!isNum(input.areaHa) || input.areaHa <= 0) return fail();
 
   const yieldKg = get('economics.typical_yield_kg_per_ha');
   const price = get('economics.price_per_kg');
