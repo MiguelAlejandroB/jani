@@ -1,4 +1,5 @@
-import { applyUnsureRule } from './modelCard';
+import { runModel } from './infer';
+import { applyUnsureRule, softmax } from './modelCard';
 import type { ModelCard } from './modelCard';
 import { assessQuality, imageToRgba, QUALITY_SIZE } from './quality';
 import type { ClassId, SeeResult } from './types';
@@ -48,7 +49,14 @@ export async function see(image: ImageBitmap, card: ModelCard, opts?: { size?: n
   const size = opts?.size ?? QUALITY_SIZE;
   const rgba = imageToRgba(image, size);
   if (assessQuality(rgba, size, size) === 'bad_photo') return { status: 'unsure', reason: 'bad_photo' };
-  if (card.recommended_file !== null) throw new Error('not_implemented');
+  if (card.recommended_file !== null) {
+    // Modo real: la imagen se estira a la entrada del modelo y se infiere con ONNX.
+    const inH = card.input.shape[2] ?? QUALITY_SIZE;
+    const inW = card.input.shape[3] ?? QUALITY_SIZE;
+    const input = inH === size && inW === size ? rgba : imageToRgba(image, inW);
+    const logits = await runModel(input, card, new URL(`./models/arabica-v1/${card.recommended_file}`, document.baseURI).href);
+    return applyUnsureRule(softmax(logits, card.temperature), card, card.classes);
+  }
 
   const outcome = nextSimOutcome();
   const probs = simulatedProbs(outcome, card.classes);

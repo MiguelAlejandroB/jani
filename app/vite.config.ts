@@ -1,12 +1,23 @@
 /// <reference types="vitest/config" />
 import { defineConfig } from 'vite';
+import type { Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
+
+// ort-web referencia su .wasm con new URL(..., import.meta.url); Vite lo emitiría otra vez en assets/.
+// La app lo sirve desde public/ort (wasmPaths), así que se descarta la copia duplicada (14 MB).
+const dropDuplicateOrtWasm: Plugin = {
+  name: 'drop-duplicate-ort-wasm',
+  generateBundle(_opts, bundle) {
+    for (const name of Object.keys(bundle)) if (/assets\/ort-wasm.*\.wasm$/.test(name)) delete bundle[name];
+  },
+};
 
 export default defineConfig({
   base: './',
   plugins: [
     react(),
+    dropDuplicateOrtWasm,
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['icon.svg'],
