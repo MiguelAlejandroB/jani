@@ -32,8 +32,7 @@ export default function Decision() {
 
   const choose = (c: Choice) => {
     setChoice(c);
-    saveCurrentCase({ choice: c });
-    go('confirmacion');
+    void saveCurrentCase({ choice: c }).then(() => go('confirmacion'));
   };
 
   return (

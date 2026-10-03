@@ -45,8 +45,7 @@ export default function Diagnostico() {
         icon="✅"
         testId="dx-next"
         onClick={() => {
-          saveCurrentCase();
-          go('confirmacion');
+          void saveCurrentCase().then(() => go('confirmacion'));
         }}
       />
     );
