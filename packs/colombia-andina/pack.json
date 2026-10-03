@@ -1,0 +1,344 @@
+{
+  "id": "colombia-andina",
+  "version": "0.2.0",
+  "language": {
+    "code": "es",
+    "name": "Español",
+    "needs_native_review": false
+  },
+  "crop": {
+    "species": "arabica",
+    "model": "arabica-v1"
+  },
+  "units": {
+    "weight": "kg",
+    "currency": "COP",
+    "product": "café pergamino seco"
+  },
+  "backup_contact": {
+    "role": "extensionista",
+    "phone": null
+  },
+  "classes": {
+    "sana": {
+      "label": "Hoja sana",
+      "phrase": "dx_sana"
+    },
+    "roya": {
+      "label": "Roya",
+      "phrase": "dx_roya"
+    },
+    "minador": {
+      "label": "Minador de la hoja",
+      "phrase": "dx_minador"
+    },
+    "phoma": {
+      "label": "Phoma",
+      "phrase": "dx_phoma"
+    },
+    "cercospora": {
+      "label": "Mancha de hierro",
+      "phrase": "dx_cercospora"
+    }
+  },
+  "calendar": {
+    "rainy_months": [],
+    "harvest_months": [],
+    "source": "TODO"
+  },
+  "climate_normals": {
+    "source": "TODO: NASA POWER, promedio mensual histórico (training/build_climate.py)",
+    "monthly_rain_mm": [],
+    "monthly_temp_c": []
+  },
+  "risk_rules": {
+    "validated_by": "TODO: ingeniero agrícola del equipo",
+    "note": "Puntos de partida ilustrativos. Deben validarse antes de la demo.",
+    "points": {
+      "affected_share_over_30pct": 2,
+      "rainy_month": 1,
+      "user_reports_heavy_rain": 1,
+      "no_treatment_last_60_days": 1
+    },
+    "thresholds": {
+      "medium": 2,
+      "high": 4
+    }
+  },
+  "economics": {
+    "typical_yield_kg_per_ha": {
+      "value": null,
+      "source": "TODO"
+    },
+    "price_per_kg": {
+      "value": null,
+      "date": "TODO",
+      "source": "TODO"
+    },
+    "loss_share_by_risk": {
+      "roya": {
+        "low": [
+          null,
+          null
+        ],
+        "medium": [
+          null,
+          null
+        ],
+        "high": [
+          null,
+          null
+        ],
+        "source": "TODO"
+      },
+      "minador": {
+        "low": [
+          null,
+          null
+        ],
+        "medium": [
+          null,
+          null
+        ],
+        "high": [
+          null,
+          null
+        ],
+        "source": "TODO"
+      },
+      "phoma": {
+        "low": [
+          null,
+          null
+        ],
+        "medium": [
+          null,
+          null
+        ],
+        "high": [
+          null,
+          null
+        ],
+        "source": "TODO"
+      },
+      "cercospora": {
+        "low": [
+          null,
+          null
+        ],
+        "medium": [
+          null,
+          null
+        ],
+        "high": [
+          null,
+          null
+        ],
+        "source": "TODO"
+      }
+    },
+    "treatments": {
+      "roya": [
+        {
+          "id": "t1",
+          "label": "TODO",
+          "cost_per_ha": null,
+          "residual_risk": "medium",
+          "source": "TODO"
+        }
+      ],
+      "minador": [
+        {
+          "id": "t1",
+          "label": "TODO",
+          "cost_per_ha": null,
+          "residual_risk": "medium",
+          "source": "TODO"
+        }
+      ],
+      "phoma": [
+        {
+          "id": "t1",
+          "label": "TODO",
+          "cost_per_ha": null,
+          "residual_risk": "medium",
+          "source": "TODO"
+        }
+      ],
+      "cercospora": [
+        {
+          "id": "t1",
+          "label": "TODO",
+          "cost_per_ha": null,
+          "residual_risk": "medium",
+          "source": "TODO"
+        }
+      ]
+    }
+  },
+  "phrases": {
+    "welcome": "Toma una foto de una hoja de café.",
+    "retake": "La foto no se ve bien. Por favor, tómala de nuevo.",
+    "dx_sana": "La hoja se ve sana.",
+    "dx_roya": "Veo señales compatibles con roya.",
+    "dx_minador": "Veo señales compatibles con minador de la hoja.",
+    "dx_phoma": "Veo señales compatibles con phoma.",
+    "dx_cercospora": "Veo señales compatibles con mancha de hierro.",
+    "unsure": "No estoy segura. Consulta a una persona.",
+    "ask_rain": "¿Llovió mucho esta semana?",
+    "ask_treatment": "¿Aplicaste algún tratamiento en los últimos dos meses?",
+    "yes": "Sí",
+    "no": "No",
+    "risk_low": "El riesgo es bajo.",
+    "risk_medium": "El riesgo es medio.",
+    "risk_high": "El riesgo es alto.",
+    "act_cheaper": "Tratar ahora cuesta menos que esperar.",
+    "wait_ok": "Por ahora puedes esperar. Revisa de nuevo el próximo fin de semana.",
+    "consult": "Consulta al extensionista o a tu cooperativa.",
+    "you_decide": "La decisión es tuya.",
+    "opt_wait": "Esperar",
+    "opt_treat": "Tratar",
+    "opt_consult": "Consultar",
+    "send_case": "Enviar el caso por mensaje",
+    "saved": "Guardé tu decisión.",
+    "demo_data": "Datos de demostración",
+    "all_healthy": "Tus hojas se ven sanas. Revisa de nuevo el próximo fin de semana.",
+    "more_photos": "Toma otra hoja.",
+    "done_photos": "Listo, ya tengo las fotos.",
+    "treatment_generic": "Tratamiento recomendado por tu extensionista",
+    "kpi_loss": "Lo que podrías perder si no actúas",
+    "kpi_cost": "Lo que cuesta tratar",
+    "kpi_breakeven": "Kilos que debes salvar para que tratar valga la pena",
+    "kpi_net": "Lo que ganas si tratas",
+    "ask_area": "¿Cuántas hectáreas de café tienes?",
+    "pending": "Casos pendientes",
+    "packs": "Paquetes",
+    "install": "Instalar",
+    "import_file": "Importar archivo"
+  },
+  "demo_values": {
+    "synthetic": true,
+    "note": "VALORES DE DEMOSTRACIÓN, no son datos reales. Reemplazar en 'calendar' y 'economics' con datos citables.",
+    "calendar": {
+      "rainy_months": [
+        4,
+        5,
+        10,
+        11
+      ],
+      "harvest_months": [
+        4,
+        5,
+        6,
+        10,
+        11,
+        12
+      ]
+    },
+    "economics": {
+      "typical_yield_kg_per_ha": 1000,
+      "price_per_kg": 20000,
+      "currency": "COP",
+      "loss_share_by_risk": {
+        "roya": {
+          "low": [
+            0.0,
+            0.05
+          ],
+          "medium": [
+            0.05,
+            0.15
+          ],
+          "high": [
+            0.15,
+            0.35
+          ]
+        },
+        "minador": {
+          "low": [
+            0.0,
+            0.05
+          ],
+          "medium": [
+            0.05,
+            0.15
+          ],
+          "high": [
+            0.15,
+            0.35
+          ]
+        },
+        "phoma": {
+          "low": [
+            0.0,
+            0.05
+          ],
+          "medium": [
+            0.05,
+            0.15
+          ],
+          "high": [
+            0.15,
+            0.35
+          ]
+        },
+        "cercospora": {
+          "low": [
+            0.0,
+            0.05
+          ],
+          "medium": [
+            0.05,
+            0.15
+          ],
+          "high": [
+            0.15,
+            0.35
+          ]
+        }
+      },
+      "treatments": {
+        "roya": [
+          {
+            "id": "t1",
+            "label_phrase": "treatment_generic",
+            "cost_per_ha": 400000,
+            "residual_risk": "low"
+          }
+        ],
+        "minador": [
+          {
+            "id": "t1",
+            "label_phrase": "treatment_generic",
+            "cost_per_ha": 400000,
+            "residual_risk": "low"
+          }
+        ],
+        "phoma": [
+          {
+            "id": "t1",
+            "label_phrase": "treatment_generic",
+            "cost_per_ha": 400000,
+            "residual_risk": "low"
+          }
+        ],
+        "cercospora": [
+          {
+            "id": "t1",
+            "label_phrase": "treatment_generic",
+            "cost_per_ha": 400000,
+            "residual_risk": "low"
+          }
+        ]
+      }
+    }
+  },
+  "audio": {
+    "dir": "audio",
+    "format": "mp3",
+    "status": "PENDIENTE: generar con training/make_audio.py o grabar"
+  },
+  "tts": {
+    "model": "facebook/mms-tts-spa"
+  }
+}

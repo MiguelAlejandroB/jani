@@ -1,0 +1,10 @@
+node_modules/
+.venv/
+.playwright-mcp/
+.superpowers/
+app/dist/
+app/dev-dist/
+app/test-results/
+app/playwright-report/
+app/android/app/build/
+*.tsbuildinfo

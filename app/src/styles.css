@@ -1,0 +1,40 @@
+:root {
+  --bg: #f6f1e7;
+  --fg: #1f2a1f;
+  --primary: #2f5d3a;
+  --primary-fg: #ffffff;
+  --secondary: #e4dccb;
+  --radius: 20px;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  color: var(--fg);
+  background: var(--bg);
+}
+* { box-sizing: border-box; }
+body { margin: 0; min-height: 100dvh; background: var(--bg); }
+.screen {
+  max-width: 520px;
+  margin: 0 auto;
+  min-height: 100dvh;
+  padding: 16px 16px calc(24px + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.topbar { display: flex; justify-content: space-between; }
+.icon-btn {
+  width: 64px; height: 64px; border: 0; border-radius: 50%;
+  background: var(--secondary); color: var(--fg); font-size: 28px; cursor: pointer;
+}
+.screen-icon { font-size: 96px; text-align: center; line-height: 1.1; margin-top: 8px; }
+.screen-title { font-size: 1.6rem; text-align: center; margin: 0; }
+.question { font-size: 1.4rem; text-align: center; margin: 0; }
+.screen-body { display: flex; flex-direction: column; gap: 14px; margin-top: auto; }
+.big-btn {
+  display: flex; align-items: center; justify-content: center; gap: 14px;
+  min-height: 88px; padding: 12px 20px; border: 0; border-radius: var(--radius);
+  font-size: 1.4rem; font-weight: 600; cursor: pointer;
+}
+.big-btn.primary { background: var(--primary); color: var(--primary-fg); }
+.big-btn.secondary { background: var(--secondary); color: var(--fg); }
+.big-btn-icon { font-size: 2.2rem; }
+.big-btn:active, .icon-btn:active { transform: scale(0.97); }

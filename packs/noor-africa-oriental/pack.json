@@ -1,0 +1,343 @@
+{
+  "id": "noor-africa-oriental",
+  "version": "0.2.0",
+  "language": {
+    "code": "sw",
+    "name": "Kiswahili",
+    "needs_native_review": true
+  },
+  "crop": {
+    "species": "arabica",
+    "model": "arabica-v1"
+  },
+  "units": {
+    "weight": "kg",
+    "currency": "USD",
+    "product": "kahawa ya maganda (pergamino)"
+  },
+  "backup_contact": {
+    "role": "afisa ugani / ushirika",
+    "phone": null
+  },
+  "classes": {
+    "sana": {
+      "label": "Jani lenye afya",
+      "phrase": "dx_sana"
+    },
+    "roya": {
+      "label": "Kutu ya majani",
+      "phrase": "dx_roya"
+    },
+    "minador": {
+      "label": "Mchimba majani",
+      "phrase": "dx_minador"
+    },
+    "phoma": {
+      "label": "Phoma",
+      "phrase": "dx_phoma"
+    },
+    "cercospora": {
+      "label": "Madoa ya cercospora",
+      "phrase": "dx_cercospora"
+    }
+  },
+  "calendar": {
+    "rainy_months": [],
+    "harvest_months": [],
+    "source": "TODO"
+  },
+  "climate_normals": {
+    "source": "TODO: NASA POWER, promedio mensual histórico (training/build_climate.py)",
+    "monthly_rain_mm": [],
+    "monthly_temp_c": []
+  },
+  "risk_rules": {
+    "validated_by": "TODO: ingeniero agrícola del equipo",
+    "note": "Puntos de partida ilustrativos. Deben validarse antes de la demo.",
+    "points": {
+      "affected_share_over_30pct": 2,
+      "rainy_month": 1,
+      "user_reports_heavy_rain": 1,
+      "no_treatment_last_60_days": 1
+    },
+    "thresholds": {
+      "medium": 2,
+      "high": 4
+    }
+  },
+  "economics": {
+    "typical_yield_kg_per_ha": {
+      "value": null,
+      "source": "TODO"
+    },
+    "price_per_kg": {
+      "value": null,
+      "date": "TODO",
+      "source": "TODO"
+    },
+    "loss_share_by_risk": {
+      "roya": {
+        "low": [
+          null,
+          null
+        ],
+        "medium": [
+          null,
+          null
+        ],
+        "high": [
+          null,
+          null
+        ],
+        "source": "TODO"
+      },
+      "minador": {
+        "low": [
+          null,
+          null
+        ],
+        "medium": [
+          null,
+          null
+        ],
+        "high": [
+          null,
+          null
+        ],
+        "source": "TODO"
+      },
+      "phoma": {
+        "low": [
+          null,
+          null
+        ],
+        "medium": [
+          null,
+          null
+        ],
+        "high": [
+          null,
+          null
+        ],
+        "source": "TODO"
+      },
+      "cercospora": {
+        "low": [
+          null,
+          null
+        ],
+        "medium": [
+          null,
+          null
+        ],
+        "high": [
+          null,
+          null
+        ],
+        "source": "TODO"
+      }
+    },
+    "treatments": {
+      "roya": [
+        {
+          "id": "t1",
+          "label": "TODO",
+          "cost_per_ha": null,
+          "residual_risk": "medium",
+          "source": "TODO"
+        }
+      ],
+      "minador": [
+        {
+          "id": "t1",
+          "label": "TODO",
+          "cost_per_ha": null,
+          "residual_risk": "medium",
+          "source": "TODO"
+        }
+      ],
+      "phoma": [
+        {
+          "id": "t1",
+          "label": "TODO",
+          "cost_per_ha": null,
+          "residual_risk": "medium",
+          "source": "TODO"
+        }
+      ],
+      "cercospora": [
+        {
+          "id": "t1",
+          "label": "TODO",
+          "cost_per_ha": null,
+          "residual_risk": "medium",
+          "source": "TODO"
+        }
+      ]
+    }
+  },
+  "phrases": {
+    "welcome": "Piga picha ya jani la kahawa.",
+    "retake": "Picha haionekani vizuri. Tafadhali piga picha tena.",
+    "dx_sana": "Jani linaonekana lenye afya.",
+    "dx_roya": "Naona dalili zinazofanana na kutu ya majani ya kahawa.",
+    "dx_minador": "Naona dalili zinazofanana na mdudu mchimba majani.",
+    "dx_phoma": "Naona dalili zinazofanana na ugonjwa wa phoma.",
+    "dx_cercospora": "Naona dalili zinazofanana na madoa ya cercospora.",
+    "unsure": "Sina uhakika. Tafadhali muulize mtaalamu.",
+    "ask_rain": "Je, mvua imenyesha sana wiki hii?",
+    "ask_treatment": "Je, umetumia dawa katika miezi miwili iliyopita?",
+    "yes": "Ndiyo",
+    "no": "Hapana",
+    "risk_low": "Hatari ni ndogo.",
+    "risk_medium": "Hatari ni ya wastani.",
+    "risk_high": "Hatari ni kubwa.",
+    "act_cheaper": "Kutibu sasa kuna gharama ndogo kuliko kusubiri.",
+    "wait_ok": "Kwa sasa unaweza kusubiri. Kagua tena wikendi ijayo.",
+    "consult": "Wasiliana na afisa ugani au chama chako cha ushirika.",
+    "you_decide": "Uamuzi ni wako.",
+    "opt_wait": "Subiri",
+    "opt_treat": "Tibu",
+    "opt_consult": "Uliza mtaalamu",
+    "send_case": "Tuma taarifa kwa ujumbe",
+    "saved": "Nimehifadhi uamuzi wako.",
+    "demo_data": "Data ya majaribio",
+    "all_healthy": "Majani yako yanaonekana yenye afya. Kagua tena wikendi ijayo.",
+    "more_photos": "Piga picha ya jani lingine.",
+    "done_photos": "Sawa, nimepata picha.",
+    "treatment_generic": "Tiba inayopendekezwa na afisa ugani wako",
+    "kpi_loss": "Unachoweza kupoteza usipochukua hatua",
+    "kpi_cost": "Gharama ya kutibu",
+    "kpi_breakeven": "Kilo unazohitaji kuokoa ili kutibu kuwe na faida",
+    "kpi_net": "Unachopata ukitibu",
+    "ask_area": "Una hekta ngapi za kahawa?",
+    "pending": "Kesi zinazosubiri",
+    "packs": "Vifurushi",
+    "install": "Sakinisha",
+    "import_file": "Ingiza faili"
+  },
+  "demo_values": {
+    "synthetic": true,
+    "note": "VALORES DE DEMOSTRACIÓN, no son datos reales. Reemplazar en 'calendar' y 'economics' con datos citables.",
+    "calendar": {
+      "rainy_months": [
+        3,
+        4,
+        5,
+        10,
+        11,
+        12
+      ],
+      "harvest_months": [
+        10,
+        11,
+        12
+      ]
+    },
+    "economics": {
+      "typical_yield_kg_per_ha": 600,
+      "price_per_kg": 3.0,
+      "currency": "USD",
+      "loss_share_by_risk": {
+        "roya": {
+          "low": [
+            0.0,
+            0.05
+          ],
+          "medium": [
+            0.05,
+            0.15
+          ],
+          "high": [
+            0.15,
+            0.35
+          ]
+        },
+        "minador": {
+          "low": [
+            0.0,
+            0.05
+          ],
+          "medium": [
+            0.05,
+            0.15
+          ],
+          "high": [
+            0.15,
+            0.35
+          ]
+        },
+        "phoma": {
+          "low": [
+            0.0,
+            0.05
+          ],
+          "medium": [
+            0.05,
+            0.15
+          ],
+          "high": [
+            0.15,
+            0.35
+          ]
+        },
+        "cercospora": {
+          "low": [
+            0.0,
+            0.05
+          ],
+          "medium": [
+            0.05,
+            0.15
+          ],
+          "high": [
+            0.15,
+            0.35
+          ]
+        }
+      },
+      "treatments": {
+        "roya": [
+          {
+            "id": "t1",
+            "label_phrase": "treatment_generic",
+            "cost_per_ha": 60,
+            "residual_risk": "low"
+          }
+        ],
+        "minador": [
+          {
+            "id": "t1",
+            "label_phrase": "treatment_generic",
+            "cost_per_ha": 60,
+            "residual_risk": "low"
+          }
+        ],
+        "phoma": [
+          {
+            "id": "t1",
+            "label_phrase": "treatment_generic",
+            "cost_per_ha": 60,
+            "residual_risk": "low"
+          }
+        ],
+        "cercospora": [
+          {
+            "id": "t1",
+            "label_phrase": "treatment_generic",
+            "cost_per_ha": 60,
+            "residual_risk": "low"
+          }
+        ]
+      }
+    }
+  },
+  "audio": {
+    "dir": "audio",
+    "format": "mp3",
+    "status": "PENDIENTE: generar con training/make_audio.py o grabar"
+  },
+  "tts": {
+    "model": "facebook/mms-tts-swh"
+  }
+}
