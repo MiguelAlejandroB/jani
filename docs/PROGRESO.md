@@ -21,7 +21,7 @@ Cada tarea: implementa un subagente, revisa otro (cumplimiento de spec y calidad
 - [x] Task 9 — Acerca de (prompt 10)
 - [x] Task 10 — Offline, `check:assets`, `verify` (prompt 11)
 - [x] Task 11 — Pruebas e2e con Playwright (a–h)
-- [ ] Task 12 — Capacitor / Android (prompt 12)
+- [x] Task 12 — Capacitor / Android (prompt 12)
 
 ## Cierre
 - [ ] Revisión final de QA contra los 11 criterios
