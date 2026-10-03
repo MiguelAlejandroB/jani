@@ -10,6 +10,10 @@ function browserSpeech(): SpeechLike | undefined {
       getVoices: () => speechSynthesis.getVoices(),
       speak: (u) => speechSynthesis.speak(u as unknown as SpeechSynthesisUtterance),
       cancel: () => speechSynthesis.cancel(),
+      onVoicesChanged: (cb) => {
+        speechSynthesis.addEventListener('voiceschanged', cb);
+        return () => speechSynthesis.removeEventListener('voiceschanged', cb);
+      },
     };
   } catch {
     return undefined;

@@ -14,6 +14,8 @@ export type SpeechLike = {
   getVoices: () => Array<{ lang: string }>;
   speak: (u: UtteranceLike) => void;
   cancel: () => void;
+  /** Suscribe a 'voiceschanged'; devuelve la función para desuscribirse. */
+  onVoicesChanged?: (cb: () => void) => () => void;
 };
 
 export type VoiceDeps = {
@@ -34,6 +36,8 @@ export type Voice = {
 };
 
 const SPEECH_TIMEOUT_MS = 20000;
+const VOICES_WAIT_MS = 1000;
+const AUDIO_TIMEOUT_MS = 30000;
 
 export function createVoice(d: VoiceDeps): Voice {
   let gen = 0;
@@ -44,9 +48,11 @@ export function createVoice(d: VoiceDeps): Voice {
       let url: string | null = null;
       let audio: AudioLike | null = null;
       let done = false;
+      let timer: ReturnType<typeof setTimeout> | undefined;
       const finish = (ok: boolean) => {
         if (done) return;
         done = true;
+        clearTimeout(timer);
         cancelCurrent = null;
         try {
           if (audio) {
@@ -73,41 +79,78 @@ export function createVoice(d: VoiceDeps): Voice {
           finish(true);
         };
         if (my !== gen) return finish(true);
+        timer = setTimeout(() => cancelCurrent?.(), AUDIO_TIMEOUT_MS);
         audio.play().catch(() => finish(false));
       } catch {
         finish(false);
       }
     });
 
-  const speak = (text: string, my: number): Promise<void> =>
+  // Espera acotada a que el navegador cargue las voces (Chrome/Android: la primera lista suele venir vacía).
+  const waitVoices = (sp: SpeechLike, my: number): Promise<void> =>
     new Promise((resolve) => {
-      const sp = d.speech;
+      let unsub: (() => void) | undefined;
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      const done = () => {
+        clearTimeout(timer);
+        try {
+          unsub?.();
+        } catch {
+          // nada
+        }
+        if (cancelCurrent === done) cancelCurrent = null;
+        resolve();
+      };
       try {
-        if (!sp || !text || my !== gen) return resolve();
-        const prefix = d.lang.toLowerCase();
-        if (!sp.getVoices().some((v) => v.lang.toLowerCase().startsWith(prefix))) return resolve();
-        const finish = () => {
-          clearTimeout(timer);
-          cancelCurrent = null;
-          resolve();
-        };
-        const timer = setTimeout(finish, SPEECH_TIMEOUT_MS);
-        const u = d.makeUtterance(text, d.lang);
-        u.onend = finish;
-        u.onerror = finish;
-        cancelCurrent = () => {
+        if (sp.getVoices().length > 0 || !sp.onVoicesChanged || my !== gen) return resolve();
+        unsub = sp.onVoicesChanged(done);
+        timer = setTimeout(done, VOICES_WAIT_MS);
+        cancelCurrent = done;
+      } catch {
+        resolve();
+      }
+    });
+
+  const speak = async (text: string, my: number): Promise<void> => {
+    const sp = d.speech;
+    try {
+      if (!sp || !text || my !== gen) return;
+      await waitVoices(sp, my);
+      if (my !== gen) return;
+      const prefix = d.lang.toLowerCase();
+      const voices = sp.getVoices();
+      // Sin voces listadas se intenta igual con el idioma del paquete; con voces y ninguna del idioma, silencio.
+      if (voices.length > 0 && !voices.some((v) => v.lang.toLowerCase().startsWith(prefix))) return;
+      await new Promise<void>((resolve) => {
+        const cancel = () => {
           try {
             sp.cancel();
           } catch {
             // nada
           }
+        };
+        const finish = () => {
+          clearTimeout(timer);
+          cancelCurrent = null;
+          resolve();
+        };
+        const timer = setTimeout(() => {
+          cancel();
+          finish();
+        }, SPEECH_TIMEOUT_MS);
+        const u = d.makeUtterance(text, d.lang);
+        u.onend = finish;
+        u.onerror = finish;
+        cancelCurrent = () => {
+          cancel();
           finish();
         };
         sp.speak(u);
-      } catch {
-        resolve();
-      }
-    });
+      });
+    } catch {
+      // nunca lanza
+    }
+  };
 
   const sayWith = async (key: string, my: number): Promise<void> => {
     try {
