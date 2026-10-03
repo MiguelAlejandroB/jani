@@ -7,6 +7,7 @@ import {
   expect,
   fullRoute,
   goHome,
+  noiseChannelMeans,
   installFromCatalog,
   phrase,
   readPack,
@@ -46,7 +47,7 @@ test('b. noor-africa-oriental y cambio en caliente del paquete activo', async ({
   await expect(page.getByTestId('pack-installed-noor-africa-oriental')).toBeVisible();
   await goHome(page);
   await expect(page.getByRole('heading', { name: phrase(ES, 'welcome') })).toBeVisible();
-  const es = await fullRoute(page, ES);
+  const es = await fullRoute(page, ES, 1);
   expect(es.kpis, 'los KPIs dependen del paquete activo').not.toEqual(sw.kpis);
 
   // Volver a noor desde Paquetes: idioma y texto de Inicio cambian sin recargar.
@@ -56,7 +57,7 @@ test('b. noor-africa-oriental y cambio en caliente del paquete activo', async ({
   await expect(page.getByTestId('pack-installed-noor-africa-oriental')).toHaveClass(/primary/);
   await goHome(page);
   await expect(page.getByRole('heading', { name: phrase(SW, 'welcome') })).toBeVisible();
-  const sw2 = await fullRoute(page, SW);
+  const sw2 = await fullRoute(page, SW, 2);
   expect(sw2.kpis).toEqual(sw.kpis);
 
   // Y de nuevo a colombia-andina.
@@ -140,9 +141,11 @@ test('f. importar .zip desde archivo (válido y corrupto)', async ({ page }) => 
 
   // Zip sin pack.json y zip con pack.json inválido: error, el paquete activo no cambia.
   await page.getByTestId('pack-import-input').setInputFiles({ name: 'vacio.zip', mimeType: 'application/zip', buffer: Buffer.from(zipSync({ 'otro.txt': strToU8('x') })) });
-  await expect(page.getByTestId('pack-error')).toBeVisible();
+  await expect(page.getByTestId('pack-error')).toContainText('missing_pack_json');
   await page.getByTestId('pack-import-input').setInputFiles({ name: 'malo.zip', mimeType: 'application/zip', buffer: Buffer.from(zipSync({ 'pack.json': strToU8('{"id":"x"}') })) });
-  await expect(page.getByTestId('pack-error')).toBeVisible();
+  // El contenido del error cambia: depende de malo.zip, no del error anterior.
+  await expect(page.getByTestId('pack-error')).not.toContainText('missing_pack_json');
+  await expect(page.getByTestId('pack-error')).toContainText('language.code');
   await expect(page.getByTestId('pack-installed-colombia-andina')).toHaveClass(/primary/);
   await goHome(page);
   await expect(page.getByRole('heading', { name: phrase(ES, 'welcome') })).toBeVisible();
@@ -232,15 +235,48 @@ test('h. OFFLINE: recorrido completo en modo avión sin ninguna petición de red
   expect(requests.some((r) => r.url().endsWith('/packs/colombia-andina.zip'))).toBe(true);
 });
 
+type TestCard = {
+  classes: string[];
+  input: { mean: number[]; std: number[] };
+  temperature: number;
+  unsure_rule: { min_confidence: number; min_margin: number };
+};
+
+// Pesos de app/tests/fixtures/make_tiny_model.py: logits = W · media_por_canal(entrada normalizada) + B.
+const TINY_W = [
+  [1, 0, 0],
+  [0, 1, 0],
+  [0, 0, 1],
+  [1, 1, 1],
+  [-1, 0, 1],
+];
+const TINY_B = [0, 0.5, -0.5, 0.25, 0];
+
+/** Clase argmax del modelo diminuto para una imagen con esas medias por canal (0..255). */
+function expectedTinyClass(means: [number, number, number], card: TestCard): string {
+  // La normalización es lineal: la media de la entrada normalizada es la normalización de la media.
+  const x = means.map((m, c) => (m / 255 - (card.input.mean[c] ?? 0)) / (card.input.std[c] ?? 1));
+  const logits = TINY_W.map((w, k) => w.reduce((acc, wi, c) => acc + wi * (x[c] ?? 0), TINY_B[k] ?? 0));
+  const order = logits.map((l, k) => [l, k] as const).sort((a, b) => b[0] - a[0]);
+  const [first, second] = order;
+  if (!first || !second) throw new Error('logits vacíos');
+  // Margen holgado para que el redondeo del canvas no cambie la clase.
+  expect(first[0] - second[0], `margen entre logits ${logits.join(', ')}`).toBeGreaterThan(0.1);
+  const cls = card.classes[first[1]];
+  if (!cls) throw new Error('clase fuera de rango');
+  return cls;
+}
+
 test.describe('i. camino real ONNX (fixture de prueba)', () => {
   // Sin SW: page.route no intercepta lo que atiende un service worker.
   test.use({ serviceWorkers: 'block' });
 
   test('i. inferencia real en navegador con tiny_model.onnx y ort/ local', async ({ page, baseURL }) => {
     const fixtures = join(APP_DIR, 'tests', 'fixtures');
-    await page.route('**/models/arabica-v1/model_card.json', (route) =>
-      route.fulfill({ contentType: 'application/json', body: readFileSync(join(fixtures, 'model_card.test.json')) }),
-    );
+    // Variante de la ficha de prueba sin regla de duda: el camino real debe devolver `ok` con la clase argmax.
+    const card = JSON.parse(readFileSync(join(fixtures, 'model_card.test.json'), 'utf8')) as TestCard;
+    card.unsure_rule = { min_confidence: 0, min_margin: 0 };
+    await page.route('**/models/arabica-v1/model_card.json', (route) => route.fulfill({ contentType: 'application/json', body: JSON.stringify(card) }));
     await page.route('**/models/arabica-v1/tiny_model.onnx', (route) =>
       route.fulfill({ contentType: 'application/octet-stream', body: readFileSync(join(fixtures, 'tiny_model.onnx')) }),
     );
@@ -254,6 +290,8 @@ test.describe('i. camino real ONNX (fixture de prueba)', () => {
       if (m.type() === 'error') consoleErrors.push(m.text());
     });
 
+    // Si por error se usara el modo simulado, daría `sana` (healthy) y no la clase esperada del modelo real.
+    await setSimPlan(page, ['sana']);
     await page.reload();
     await installFromCatalog(page, 'colombia-andina');
     await goHome(page);
@@ -269,11 +307,25 @@ test.describe('i. camino real ONNX (fixture de prueba)', () => {
     await expect(page.getByTestId('sim-menu')).toHaveCount(0);
     await goHome(page);
 
-    await takePhotos(page, 3, 100);
-    const outcome = await page.getByTestId('dx-outcome').getAttribute('data-outcome');
-    expect(['consult', 'healthy', 'continue']).toContain(outcome);
-    await expect(page.getByTestId('dx-outcome')).not.toHaveText('');
-    console.log(`[i] resultado del camino real: ${outcome}`);
+    // Resultado esperado calculado en node con los pesos conocidos del modelo y las medias de cada foto.
+    const SEED_BASE = 100;
+    const N = 3;
+    const expected = [];
+    for (let i = 1; i <= N; i++) expected.push(expectedTinyClass(noiseChannelMeans(SEED_BASE + i), card));
+    const affected = expected.filter((c) => c !== 'sana');
+    const counts = new Map<string, number>();
+    for (const c of affected) counts.set(c, (counts.get(c) ?? 0) + 1);
+    const dominant = card.classes.filter((c) => c !== 'sana').reduce<string | null>((best, c) => ((counts.get(c) ?? 0) > (best ? (counts.get(best) ?? 0) : 0) ? c : best), null);
+    const expectedOutcome = dominant === null ? 'healthy' : 'continue';
+    const expectedText = phrase(ES, dominant === null ? 'all_healthy' : `dx_${dominant}`);
+    console.log(`[i] clases esperadas por foto: ${expected.join(', ')} -> ${expectedOutcome} (${dominant ?? 'sana'})`);
+
+    await takePhotos(page, N, SEED_BASE);
+    await expect(page.getByTestId('dx-outcome')).toHaveAttribute('data-outcome', expectedOutcome);
+    await expect(page.getByTestId('dx-outcome')).toHaveText(expectedText);
+    // Ninguna foto quedó como dudosa (❓): todas pasaron por la inferencia real con resultado `ok`.
+    await expect(screen(page, 'diagnostico').locator('.thumb-badge')).toHaveCount(N);
+    await expect(screen(page, 'diagnostico').locator('.thumb-badge', { hasText: '❓' })).toHaveCount(0);
 
     const ortUrls = urls.filter((u) => /\/ort\/ort-wasm[^/]*\.(wasm|mjs)$/.test(u));
     console.log(`[i] ort cargado desde: ${ortUrls.map((u) => u.replace(origin, '')).join(', ')}`);

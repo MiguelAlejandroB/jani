@@ -64,8 +64,8 @@ function chunk(type: string, data: Buffer): Buffer {
   return Buffer.concat([len, td, crc]);
 }
 
-/** PNG RGB 224×224 con ruido determinista (brillo medio ~130, Laplaciano con varianza muy alta). */
-export function noisePng(seed: number, size = 224): Buffer {
+/** Píxeles RGB (sin filtro) del ruido determinista de la semilla dada. */
+export function noisePixels(seed: number, size = 224): Uint8Array {
   let s = (seed * 2654435761) >>> 0 || 1;
   const rand = () => {
     s ^= s << 13;
@@ -74,16 +74,33 @@ export function noisePng(seed: number, size = 224): Buffer {
     s >>>= 0;
     return s / 0x100000000;
   };
+  const px = new Uint8Array(size * size * 3);
+  for (let i = 0; i < size * size; i++) {
+    const v = 60 + Math.floor(rand() * 140);
+    px[i * 3] = Math.max(0, v - 20);
+    px[i * 3 + 1] = Math.min(255, v + 20);
+    px[i * 3 + 2] = Math.max(0, v - 30);
+  }
+  return px;
+}
+
+/** Media por canal (R, G, B) en 0..255 de la foto de ruido de la semilla dada. */
+export function noiseChannelMeans(seed: number, size = 224): [number, number, number] {
+  const px = noisePixels(seed, size);
+  const sum = [0, 0, 0];
+  for (let i = 0; i < px.length; i++) sum[i % 3] = (sum[i % 3] ?? 0) + (px[i] ?? 0);
+  const n = size * size;
+  return [(sum[0] ?? 0) / n, (sum[1] ?? 0) / n, (sum[2] ?? 0) / n];
+}
+
+/** PNG RGB 224×224 con ruido determinista (brillo medio ~130, Laplaciano con varianza muy alta). */
+export function noisePng(seed: number, size = 224): Buffer {
+  const px = noisePixels(seed, size);
   const raw = Buffer.alloc(size * (size * 3 + 1));
-  let o = 0;
   for (let y = 0; y < size; y++) {
-    raw[o++] = 0; // filtro "None"
-    for (let x = 0; x < size; x++) {
-      const v = 60 + Math.floor(rand() * 140);
-      raw[o++] = Math.max(0, v - 20);
-      raw[o++] = Math.min(255, v + 20);
-      raw[o++] = Math.max(0, v - 30);
-    }
+    const o = y * (size * 3 + 1);
+    raw[o] = 0; // filtro "None"
+    raw.set(px.subarray(y * size * 3, (y + 1) * size * 3), o + 1);
   }
   const ihdr = Buffer.alloc(13);
   ihdr.writeUInt32BE(size, 0);
@@ -141,13 +158,13 @@ export const KPI_IDS = ['loss', 'cost', 'breakeven', 'net'] as const;
 /**
  * Recorrido completo con sim `roya` desde Inicio: fotos -> diagnóstico -> preguntas (sí, no) -> riesgo ->
  * decisión (KPIs visibles) -> elige la sugerencia -> confirmación -> Pendientes con un caso más.
+ * `casesBefore`: casos que la prueba ya guardó; se espera a verlos (espera positiva, sin pausas fijas).
  */
-export async function fullRoute(page: Page, pack: PackJson): Promise<RouteResult> {
+export async function fullRoute(page: Page, pack: PackJson, casesBefore = 0): Promise<RouteResult> {
   await expect(page.getByRole('heading', { name: phrase(pack, 'welcome') })).toBeVisible();
   await page.getByRole('button', { name: phrase(pack, 'pending') }).click();
   await expect(screen(page, 'pendientes')).toBeVisible();
-  await page.waitForTimeout(300); // la lista se lee de IndexedDB
-  const before = await page.getByTestId('case-item').count();
+  await expect(page.getByTestId('case-item')).toHaveCount(casesBefore);
   await goHome(page);
 
   await takePhotos(page, 5);
@@ -187,7 +204,7 @@ export async function fullRoute(page: Page, pack: PackJson): Promise<RouteResult
   await expect(page.getByRole('heading', { name: phrase(pack, 'saved') })).toBeVisible();
   await goHome(page);
   await page.getByRole('button', { name: phrase(pack, 'pending') }).click();
-  await expect(page.getByTestId('case-item')).toHaveCount(before + 1);
+  await expect(page.getByTestId('case-item')).toHaveCount(casesBefore + 1);
   await expect(page.getByTestId('case-item').filter({ hasText: phrase(pack, `opt_${suggestion.toLowerCase()}`) }).first()).toBeVisible();
   await goHome(page);
   return { level, suggestion, kpis };
