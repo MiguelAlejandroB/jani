@@ -1,15 +1,70 @@
+import type { Choice, Range } from '../engine/types';
+import { useFlow } from '../flow/FlowContext';
+import { useRedirectIf } from '../flow/useRedirect';
 import { useNav } from '../nav';
 import { usePack } from '../packs/PackContext';
-import { BigButton, Screen } from '../ui';
+import { BigButton, DemoBadge, Screen } from '../ui';
+
+const OPTIONS: ReadonlyArray<{ choice: Choice; icon: string; key: string }> = [
+  { choice: 'WAIT', icon: '⏳', key: 'opt_wait' },
+  { choice: 'TREAT', icon: '💧', key: 'opt_treat' },
+  { choice: 'CONSULT', icon: '🧑‍🌾', key: 'opt_consult' },
+];
 
 export default function Decision() {
-  const { t } = usePack();
+  const { t, pack } = usePack();
   const { go } = useNav();
+  const { decision, setChoice, saveCurrentCase } = useFlow();
+  useRedirectIf(!decision);
+  if (!decision) return null;
+  const unit = pack?.units.weight ?? '';
+  const range = (r: Range) => `${r[0]} – ${r[1]} ${unit}`;
+  const k = decision.kpis;
+
+  const rows: Array<{ id: string; icon: string; label: string; value: string }> = k
+    ? [
+        { id: 'loss', icon: '📉', label: t('kpi_loss'), value: range(k.expectedLossKg) },
+        { id: 'cost', icon: '💰', label: t('kpi_cost'), value: `${k.treatmentCostKg} ${unit}` },
+        { id: 'breakeven', icon: '⚖️', label: t('kpi_breakeven'), value: `${k.breakEvenKg} ${unit}` },
+        { id: 'net', icon: '📈', label: t('kpi_net'), value: range(k.netBenefitKg) },
+      ]
+    : [];
+
+  const choose = (c: Choice) => {
+    setChoice(c);
+    saveCurrentCase({ choice: c });
+    go('confirmacion');
+  };
+
   return (
-    <Screen id="decision" icon="⚖️" title={t('you_decide')}>
-      <BigButton icon="⏳" label={t('opt_wait')} onClick={() => go('confirmacion')} />
-      <BigButton icon="💧" label={t('opt_treat')} onClick={() => go('confirmacion')} />
-      <BigButton icon="🧑‍🌾" label={t('opt_consult')} onClick={() => go('confirmacion')} />
+    <Screen id="decision" icon="⚖️">
+      {decision.usedDemoData && <DemoBadge text={t('demo_data')} />}
+      {rows.map((r) => (
+        <div className="kpi" key={r.id}>
+          <span className="kpi-icon" aria-hidden="true">
+            {r.icon}
+          </span>
+          <span className="kpi-label">{r.label}</span>
+          <span className="kpi-value" data-testid={`kpi-${r.id}`}>
+            {r.value}
+          </span>
+        </div>
+      ))}
+      <p className="question" data-testid="decision-suggestion" data-suggestion={decision.suggestion}>
+        {t(decision.phrase)}
+      </p>
+      <p className="question">{t('you_decide')}</p>
+      {OPTIONS.map((o) => (
+        <BigButton
+          key={o.choice}
+          icon={o.icon}
+          label={t(o.key)}
+          testId={`choice-${o.choice}`}
+          variant={decision.suggestion === o.choice ? 'primary' : 'secondary'}
+          suggested={decision.suggestion === o.choice}
+          onClick={() => choose(o.choice)}
+        />
+      ))}
     </Screen>
   );
 }

@@ -1,5 +1,6 @@
 import { useEffect, type ComponentType } from 'react';
 import { PackProvider, usePack } from './packs/PackContext';
+import { FlowProvider } from './flow/FlowContext';
 import { NavProvider, useNav, type ScreenId } from './nav';
 import Inicio from './screens/Inicio';
 import Captura from './screens/Captura';
@@ -41,7 +42,9 @@ export default function App() {
   return (
     <PackProvider>
       <NavProvider>
-        <CurrentScreen />
+        <FlowProvider>
+          <CurrentScreen />
+        </FlowProvider>
       </NavProvider>
     </PackProvider>
   );
