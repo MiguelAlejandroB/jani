@@ -22,7 +22,7 @@
     "e2e:install": "node scripts/e2e.mjs install"
   },
   "dependencies": {
-    "@capacitor/core": "^8.5.2",
+    "@capacitor/core": "^7.6.9",
     "fflate": "^0.8.3",
     "idb-keyval": "^6.3.0",
     "onnxruntime-web": "^1.30.0",
@@ -30,7 +30,7 @@
     "react-dom": "^19.3.0"
   },
   "devDependencies": {
-    "@capacitor/android": "^8.5.2",
+    "@capacitor/android": "^7.6.9",
     "@capacitor/cli": "^7.6.9",
     "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.63.0",
