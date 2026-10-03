@@ -30,3 +30,17 @@ Cada tarea: implementa un subagente, revisa otro (cumplimiento de spec y calidad
 
 ## Bloqueos
 (ninguno por ahora)
+
+## Estado al cortarse la sesión (límite de uso)
+- Tareas 1–12 implementadas, revisadas y en commit. Último commit revisado: `b487acd`.
+  `npm run verify` estaba en verde en `c3620cd` (91 unitarias, e2e 9/9).
+- La revisión final de QA (11 criterios) encontró arreglos pendientes antes de fusionar.
+  Lista exacta: `.superpowers/sdd/PLAN_MVP/final-fixes.md` (B1–B5 importantes, M1–M7 menores).
+  Se lanzó un subagente para arreglarlos. Puede haber dejado commits nuevos o cambios sin commit:
+  revisar `git log b487acd..HEAD` y `git status`, y `.superpowers/sdd/PLAN_MVP/final-fixes-report.md` si existe.
+- Resultado de la auditoría QA (resumen): criterios 2, 4, 5, 6, 7, 8, 9, 10 y 11 VERIFICADOS;
+  1 VERIFICADO con SEE simulado (ONNX real offline NO VERIFICADO); 3 FALLA acotada (panel de errores de Paquetes muestra códigos técnicos → B4).
+
+## Para retomar
+1. Revisar o terminar `final-fixes.md` y correr `cd app && npm run verify`.
+2. Escribir `docs/QA_REPORT.md`, `docs/PENDIENTES_HUMANOS.md` (pasos del APK en `.superpowers/sdd/PLAN_MVP/task-12-report.md`) y actualizar `README.md`.
