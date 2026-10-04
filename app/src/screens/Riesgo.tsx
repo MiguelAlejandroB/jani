@@ -6,7 +6,7 @@ import { useNav } from '../nav';
 import { usePack } from '../packs/PackContext';
 import { AREA_DEFAULT_HA } from '../store/settings';
 import { BigButton, CherryGauge, DemoBadge, Dots, RangeBar, Screen } from '../ui';
-import { flagPhrases, kg, riskLevel, tenths, type ViewLevel } from './rdView';
+import { flagPhrases, kg, rdLevel, tenths, type ViewLevel } from './rdView';
 
 const FACTOR_ICONS: Record<string, string> = {
   affected_share_over_30pct: '🍂',
@@ -73,7 +73,7 @@ export default function Riesgo() {
   }
 
   const ell = res.risk.ell;
-  const level = riskLevel(ell.p_sobre_umbral, res.riskBands, res.risk.banderas);
+  const level = rdLevel(res);
   const label = t(levelKey(level));
   const unit = pack.units.weight;
   const num = (n: number) => n.toLocaleString(pack.language.code);

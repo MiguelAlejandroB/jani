@@ -1,4 +1,4 @@
-import { buildCaseSummary, smsHref } from '../engine/sms';
+import { buildCaseSummary, canSendCase, smsHref } from '../engine/sms';
 import { useFlow } from '../flow/FlowContext';
 import { useNav } from '../nav';
 import { usePack } from '../packs/PackContext';
@@ -10,8 +10,7 @@ export default function Confirmacion() {
   const { go } = useNav();
   const { savedCase, setSavedCase } = useFlow();
 
-  const high = savedCase?.risk?.level === 'HIGH';
-  const canSend = !!savedCase && !!pack && (savedCase.choice === 'CONSULT' || high);
+  const canSend = !!savedCase && !!pack && canSendCase(savedCase);
 
   const send = async () => {
     if (!savedCase || !pack) return;

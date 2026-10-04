@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Alternative, DecisionOut } from '../engine/rd/types';
-import { altChoice, altViews, catalogIndex, flagPhrases, kg, riskLevel, tenths, whyPhrase } from '../screens/rdView';
+import { rdLevel, altChoice, altViews, catalogIndex, flagPhrases, kg, riskLevel, tenths, whyPhrase } from '../screens/rdView';
 import { loadPack } from './helpers';
 
 const alt = (id: string, ce: number | null, extra: Partial<Alternative> = {}): Alternative => ({
@@ -124,5 +124,15 @@ describe('rdView: alternativas', () => {
     expect(altChoice('nada')).toBe('WAIT');
     expect(altChoice('remeasure')).toBe('WAIT');
     expect(altChoice('cobre')).toBe('TREAT');
+  });
+});
+
+describe('rdLevel', () => {
+  const r = (p: number, banderas: string[] = [], riskBands: [number, number] | null = [0.33, 0.66]) => ({ risk: { ell: { p_sobre_umbral: p }, banderas }, ...(riskBands ? { riskBands } : {}) });
+  it('es el mismo nivel que riskLevel con las bandas del resultado', () => {
+    expect(rdLevel(r(0.1))).toBe('LOW');
+    expect(rdLevel(r(0.7))).toBe('HIGH');
+    expect(rdLevel(r(0.5, ['detector_no_corregible']))).toBe('CONSULT');
+    expect(rdLevel(r(0.5, [], null))).toBe('CONSULT');
   });
 });

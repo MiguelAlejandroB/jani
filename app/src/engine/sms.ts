@@ -13,9 +13,17 @@ export function outcomeKey(c: Case): string {
 /** Resumen solo de texto: frases del paquete, fecha ISO y valores del caso. Sin fotos. */
 export function buildCaseSummary(c: Case, pack: Pack): string {
   const lines: string[] = [c.date.slice(0, 10), pack.phrases[outcomeKey(c)] ?? ''];
-  if (c.risk && c.risk.level !== 'CONSULT') lines.push(pack.phrases[`risk_${c.risk.level.toLowerCase()}`] ?? '');
+  const level = c.rd?.level ?? c.risk?.level;
+  if (level && level !== 'CONSULT') lines.push(pack.phrases[`risk_${level.toLowerCase()}`] ?? '');
   if (c.choice) lines.push(pack.phrases[`opt_${c.choice.toLowerCase()}`] ?? '');
   return lines.filter((l) => l !== '').join('\n');
+}
+
+/** ¿Se puede enviar el caso? Con el resumen del manual manda su nivel; sin él, la regla antigua. Elegir CONSULT siempre habilita. */
+export function canSendCase(c: Case): boolean {
+  if (c.choice === 'CONSULT') return true;
+  const level = c.rd?.level ?? c.risk?.level;
+  return level === 'HIGH' || (c.rd?.level !== undefined && level === 'CONSULT');
 }
 
 /** Enlace sms:. Sin número (`null` o vacío) abre la app de mensajes y la persona elige el destinatario. */

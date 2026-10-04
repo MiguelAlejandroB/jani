@@ -15,6 +15,11 @@ export function riskLevel(pOver: number, bands: readonly [number, number] | unde
   return 'HIGH';
 }
 
+/** Nivel del resultado de RIESGO del manual: el mismo que muestra Riesgo y que se guarda en el caso. */
+export function rdLevel(res: { risk: { ell: { p_sobre_umbral: number }; banderas: readonly string[] }; riskBands?: readonly [number, number] | undefined }): ViewLevel {
+  return riskLevel(res.risk.ell.p_sobre_umbral, res.riskBands, res.risk.banderas);
+}
+
 /** Fracción de la cosecha -> kg enteros. */
 export const kg = (fraction: number, y0Kg: number): number => Math.round(fraction * y0Kg);
 

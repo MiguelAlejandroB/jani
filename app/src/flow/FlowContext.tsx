@@ -8,6 +8,7 @@ import type { Case, Choice, DecideResult, PredictResult, RdSummary, SeeResult, S
 import { computeRd } from '../engine/rd/client';
 import { buildInputs, type RdResult } from '../engine/rd/run';
 import { AREA_DEFAULT_HA, getLocation } from '../store/settings';
+import { rdLevel } from '../screens/rdView';
 
 export type FlowPhoto = { url: string; result: SeeResult };
 /** Estado del cálculo de RIESGO + DECISIÓN (corre en un Web Worker). 'unavailable': faltan datos en el paquete. */
@@ -19,6 +20,7 @@ function summarize(r: RdResult): RdSummary {
     usedDemoData: r.usedDemoData,
     ell: r.risk.ell,
     banderas: r.risk.banderas,
+    level: rdLevel(r),
     clima: r.climate.name,
     recomendacion: r.decision?.recomendacion ?? null,
     alternativas: (r.decision?.alternativas ?? []).map((a) => ({ id: a.id, ce: a.margen?.ce ?? null, viable_hoy: a.viable_hoy, razon_no_viable: a.razon_no_viable })),

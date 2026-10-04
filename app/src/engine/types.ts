@@ -26,6 +26,8 @@ export type RdSummary = {
   banderas: string[];
   /** Nombre del punto de clima usado (no se guardan coordenadas). */
   clima?: string;
+  /** Nivel de riesgo del manual (bandas del paquete de parámetros); ausente en casos guardados antes de existir. */
+  level?: 'LOW' | 'MEDIUM' | 'HIGH' | 'CONSULT';
   recomendacion: string | null;
   alternativas: { id: string; ce: number | null; viable_hoy: boolean; razon_no_viable: string | null }[];
 };
