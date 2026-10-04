@@ -29,4 +29,4 @@ export type RdSummary = {
   recomendacion: string | null;
   alternativas: { id: string; ce: number | null; viable_hoy: boolean; razon_no_viable: string | null }[];
 };
-export type Case = { id: string; date: string; packId: string; session: Session; risk?: PredictResult; decision?: DecideResult; choice?: Choice; rd?: RdSummary; sent: boolean };
+export type Case = { id: string; date: string; packId: string; session: Session; risk?: PredictResult; decision?: DecideResult; choice?: Choice; /** Alternativa elegida en la pantalla de decisión (id del catálogo, `nada` o `remeasure`). */ alternative?: string; rd?: RdSummary; sent: boolean };

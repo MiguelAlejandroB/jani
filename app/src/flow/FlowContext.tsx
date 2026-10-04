@@ -52,7 +52,7 @@ type FlowCtx = {
   setDecision: (d: DecideResult) => void;
   setChoice: (c: Choice) => void;
   /** Guarda el caso en IndexedDB (sin fotos: solo la sesión). Resuelve cuando ya quedó escrito. */
-  saveCurrentCase: (override?: { choice?: Choice }) => Promise<void>;
+  saveCurrentCase: (override?: { choice?: Choice; alternative?: string }) => Promise<void>;
   setSavedCase: (c: Case) => void;
 };
 
@@ -180,12 +180,14 @@ export function FlowProvider({ children }: { children: ReactNode }) {
     setTreated(tr);
   }, []);
   const saveCurrentCase = useCallback(
-    async (override?: { choice?: Choice }) => {
+    async (override?: { choice?: Choice; alternative?: string }) => {
       if (!session || !pack) return;
       const id = idRef.current ?? caseId ?? crypto.randomUUID();
       idRef.current = id;
       setCaseId(id);
       const ch = override?.choice ?? choice ?? undefined;
+      // Elegir otra opción sin alternativa (p. ej. consultar) borra la anterior; volver a guardar sin override la conserva.
+      const alt = override?.choice ? override.alternative : savedCase?.alternative;
       const c: Case = {
         id,
         date: savedCase?.date ?? new Date().toISOString(),
@@ -194,6 +196,7 @@ export function FlowProvider({ children }: { children: ReactNode }) {
         ...(risk ? { risk } : {}),
         ...(decision ? { decision } : {}),
         ...(ch ? { choice: ch } : {}),
+        ...(alt ? { alternative: alt } : {}),
         ...(rd.status === 'ready' && rd.result ? { rd: summarize(rd.result) } : {}),
         sent: savedCase?.sent ?? false,
       };
