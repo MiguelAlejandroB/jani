@@ -1,0 +1,50 @@
+{
+ "fecha": "2026-10-03",
+ "estimado_con_datos": [
+  "clima semanal normal por región (NASA POWER)",
+  "Λ (segmentación vs. máscaras de expertos BRACOL)"
+ ],
+ "prior": [
+  "τ_s y γ_w de todas las enfermedades",
+  "g (daño), κ, Ŷ0 (sin cosechas por lote)",
+  "ancho conforme (sin lotes con cosecha conocida)",
+  "θ por categoría (sin elicitación)"
+ ],
+ "hallazgos": [
+  "Supuesto A4 (cadena solo ascendente) violado en datos de campo: la incidencia baja en 45% de los intervalos de 14 días (renovación foliar). τ0 y γ_w de roya se mantienen en prior; el ajuste queda como indicio. Recomendación al matemático: añadir una tasa de renovación foliar al modelo.",
+  "Regla de parada §7 activa: modo informativo (sin recomendación automática).",
+  "USDA Hawái: productos convencionales (Priaxor) bajan la incidencia entre aspersiones; cobres la mantienen; biológicos la dejan subir. Coincide con el orden de los priors del catálogo (sistémico > cobre > biológico). Sin parcela sin tratar: solo cotas relativas.",
+  "Niveles bloqueados por Λ[s,s] <= 0,5: [3]"
+ ],
+ "roya_dinamica": {
+  "validacion_fuera_de_muestra": {
+   "mae_markov": 13.543545,
+   "mae_persistencia": 12.440735,
+   "mae_regresion_lineal": 11.521995,
+   "n_train": 306,
+   "n_test": 136,
+   "fechas_train": 77,
+   "fechas_test": 34
+  },
+  "supera_lineas_base": false,
+  "fraccion_de_bajadas_14d": 0.452489,
+  "ajuste_solo_datos": {
+   "tau0_semanas": 779.41665,
+   "gamma_w": [
+    1.203546,
+    1.790556,
+    0.849408
+   ]
+  },
+  "fuente": "Lasso et al. 2020, Mendeley wpy54dw6t7 (CC BY 4.0)"
+ },
+ "usda_pendiente_logit_incidencia_por_semana": {
+  "Badge": 7.5e-05,
+  "DoubleNickel": -0.018205,
+  "Kocide": 0.12178,
+  "PriaxorA": -0.236708,
+  "PriaxorB": -0.153719,
+  "ProBlad": 0.152748,
+  "Serenade": 0.107946
+ }
+}

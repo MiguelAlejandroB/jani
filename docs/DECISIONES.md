@@ -54,3 +54,13 @@ Cada una: qué se decidió, por qué y qué cuesta si está mal.
 23. **Notebook: cuantización int8 por canal, evaluada sin optimizaciones de grafo.** Medido localmente: onnxruntime-web
     coincide con onnxruntime de Python *sin* optimizar (diferencia < 0,5 en logits) y difiere hasta 5,6 *con* optimizaciones.
     Por eso el notebook mide la precisión del ONNX de la misma forma que correrá en el teléfono.
+24. **Umbrales de captura recalibrados con fotos reales** (reporte del usuario: "todas piden repetir"). Medido con 140
+    fotos de campo (Uganda y Perú) y 150 que no son hojas (Food-101): nitidez mínima 60 → 20 (acepta 86 % en vez de 64 %
+    y rechaza 97 % de las desenfocadas); fracción mínima de hoja del segmentador 0,25 → 0,10 (acepta 89 % en vez de 48 %
+    y sigue rechazando 97 % de las no-hojas por el color). Regresión: `app/src/tests/campo.test.ts`.
+25. **Modelos de RIESGO y DECISIÓN según el manual**, en modo informativo por la regla de parada §7 y por los parámetros
+    *prior*. Detalle, supuestos añadidos (A5': clima como anomalía; 1.000 partículas; unidad en kilos) y hallazgos
+    (el supuesto A4 se viola en los datos de campo) en `docs/MODELOS_RIESGO_DECISION.md`.
+26. **Catálogo de acciones de demostración** (poda, sistémico, cobre, biológico, minador) con eficacias Beta de criterio
+    experto, ordenadas como sugiere el dataset del USDA. El catálogo real queda en `economics.catalog` con fuente `TODO`
+    para que lo firme extensión técnica, sin tocar código.

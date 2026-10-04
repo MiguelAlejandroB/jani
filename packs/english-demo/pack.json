@@ -1,6 +1,6 @@
 {
   "id": "english-demo",
-  "version": "0.1.0",
+  "version": "0.4.0",
   "language": {
     "code": "en",
     "name": "English",
@@ -47,9 +47,547 @@
     "source": "TODO"
   },
   "climate_normals": {
-    "source": "TODO: NASA POWER, promedio mensual histórico (training/build_climate.py)",
-    "monthly_rain_mm": [],
-    "monthly_temp_c": []
+    "source": "NASA POWER diario (comunidad AG), T2M_MAX/RH2M/PRECTOTCORR, 2001–2024; punto -0.42, 36.95 (Nyeri (Kenia))",
+    "features": [
+      "tmax",
+      "hr",
+      "lluvia"
+    ],
+    "weekly_mean": [
+      [
+        23.421,
+        72.001,
+        1.977
+      ],
+      [
+        23.568,
+        71.487,
+        1.863
+      ],
+      [
+        23.932,
+        70.947,
+        1.996
+      ],
+      [
+        24.598,
+        68.236,
+        1.183
+      ],
+      [
+        25.186,
+        65.452,
+        1.004
+      ],
+      [
+        25.402,
+        65.552,
+        1.588
+      ],
+      [
+        25.442,
+        67.692,
+        2.037
+      ],
+      [
+        25.575,
+        66.056,
+        1.142
+      ],
+      [
+        25.658,
+        66.914,
+        2.697
+      ],
+      [
+        25.902,
+        66.244,
+        1.926
+      ],
+      [
+        25.553,
+        68.768,
+        2.685
+      ],
+      [
+        24.967,
+        72.748,
+        4.539
+      ],
+      [
+        24.144,
+        76.28,
+        4.282
+      ],
+      [
+        23.664,
+        78.079,
+        5.921
+      ],
+      [
+        23.346,
+        79.13,
+        6.354
+      ],
+      [
+        22.734,
+        81.551,
+        10.135
+      ],
+      [
+        22.071,
+        83.276,
+        10.491
+      ],
+      [
+        21.641,
+        84.096,
+        9.369
+      ],
+      [
+        21.695,
+        83.471,
+        5.278
+      ],
+      [
+        22.086,
+        81.93,
+        3.834
+      ],
+      [
+        21.922,
+        80.997,
+        2.836
+      ],
+      [
+        21.725,
+        81.068,
+        2.561
+      ],
+      [
+        21.582,
+        80.868,
+        2.585
+      ],
+      [
+        21.428,
+        80.871,
+        2.341
+      ],
+      [
+        20.856,
+        81.516,
+        1.936
+      ],
+      [
+        21.218,
+        79.998,
+        1.651
+      ],
+      [
+        21.35,
+        78.679,
+        1.452
+      ],
+      [
+        21.199,
+        78.24,
+        1.53
+      ],
+      [
+        21.264,
+        79.294,
+        1.994
+      ],
+      [
+        21.065,
+        80.013,
+        2.594
+      ],
+      [
+        20.993,
+        79.9,
+        2.706
+      ],
+      [
+        21.192,
+        79.209,
+        2.529
+      ],
+      [
+        21.86,
+        77.938,
+        2.179
+      ],
+      [
+        22.25,
+        75.809,
+        2.458
+      ],
+      [
+        22.242,
+        75.92,
+        2.064
+      ],
+      [
+        22.322,
+        76.25,
+        3.119
+      ],
+      [
+        23.015,
+        74.025,
+        2.409
+      ],
+      [
+        23.409,
+        72.86,
+        1.777
+      ],
+      [
+        23.69,
+        71.765,
+        2.038
+      ],
+      [
+        23.617,
+        73.283,
+        2.528
+      ],
+      [
+        23.562,
+        73.167,
+        3.788
+      ],
+      [
+        22.962,
+        76.722,
+        4.855
+      ],
+      [
+        22.602,
+        78.741,
+        5.027
+      ],
+      [
+        22.343,
+        80.166,
+        5.994
+      ],
+      [
+        22.043,
+        81.824,
+        6.735
+      ],
+      [
+        21.909,
+        82.691,
+        6.311
+      ],
+      [
+        22.069,
+        82.092,
+        5.742
+      ],
+      [
+        22.041,
+        82.264,
+        5.21
+      ],
+      [
+        22.197,
+        81.408,
+        3.404
+      ],
+      [
+        22.38,
+        79.178,
+        3.355
+      ],
+      [
+        22.96,
+        76.617,
+        2.25
+      ],
+      [
+        22.785,
+        77.098,
+        2.397
+      ]
+    ],
+    "weekly_z": [
+      [
+        0.2898,
+        -0.5596,
+        -0.372
+      ],
+      [
+        0.3653,
+        -0.623,
+        -0.4003
+      ],
+      [
+        0.553,
+        -0.6894,
+        -0.3675
+      ],
+      [
+        0.8958,
+        -1.0232,
+        -0.5694
+      ],
+      [
+        1.1987,
+        -1.366,
+        -0.6139
+      ],
+      [
+        1.3098,
+        -1.3538,
+        -0.4688
+      ],
+      [
+        1.3307,
+        -1.0902,
+        -0.3572
+      ],
+      [
+        1.3991,
+        -1.2917,
+        -0.5797
+      ],
+      [
+        1.4416,
+        -1.1861,
+        -0.1931
+      ],
+      [
+        1.5676,
+        -1.2685,
+        -0.3847
+      ],
+      [
+        1.3875,
+        -0.9578,
+        -0.1961
+      ],
+      [
+        1.0857,
+        -0.4677,
+        0.2647
+      ],
+      [
+        0.6623,
+        -0.0328,
+        0.2008
+      ],
+      [
+        0.4151,
+        0.1888,
+        0.6082
+      ],
+      [
+        0.2512,
+        0.3182,
+        0.7158
+      ],
+      [
+        -0.0638,
+        0.6163,
+        1.6554
+      ],
+      [
+        -0.4054,
+        0.8287,
+        1.7439
+      ],
+      [
+        -0.6267,
+        0.9297,
+        1.4649
+      ],
+      [
+        -0.5989,
+        0.8527,
+        0.4483
+      ],
+      [
+        -0.398,
+        0.6631,
+        0.0894
+      ],
+      [
+        -0.4822,
+        0.5482,
+        -0.1586
+      ],
+      [
+        -0.5838,
+        0.5568,
+        -0.2268
+      ],
+      [
+        -0.6573,
+        0.5322,
+        -0.221
+      ],
+      [
+        -0.7364,
+        0.5326,
+        -0.2817
+      ],
+      [
+        -1.0313,
+        0.612,
+        -0.3822
+      ],
+      [
+        -0.8446,
+        0.4251,
+        -0.453
+      ],
+      [
+        -0.777,
+        0.2627,
+        -0.5027
+      ],
+      [
+        -0.8546,
+        0.2086,
+        -0.4831
+      ],
+      [
+        -0.8209,
+        0.3384,
+        -0.3679
+      ],
+      [
+        -0.9237,
+        0.4269,
+        -0.2187
+      ],
+      [
+        -0.9608,
+        0.413,
+        -0.191
+      ],
+      [
+        -0.8582,
+        0.3279,
+        -0.235
+      ],
+      [
+        -0.5141,
+        0.1715,
+        -0.3219
+      ],
+      [
+        -0.3131,
+        -0.0907,
+        -0.2526
+      ],
+      [
+        -0.3176,
+        -0.077,
+        -0.3504
+      ],
+      [
+        -0.2761,
+        -0.0364,
+        -0.0883
+      ],
+      [
+        0.0806,
+        -0.3104,
+        -0.2647
+      ],
+      [
+        0.2834,
+        -0.4539,
+        -0.4217
+      ],
+      [
+        0.4282,
+        -0.5888,
+        -0.3569
+      ],
+      [
+        0.3905,
+        -0.4018,
+        -0.2351
+      ],
+      [
+        0.3621,
+        -0.4161,
+        0.078
+      ],
+      [
+        0.0533,
+        0.0217,
+        0.3432
+      ],
+      [
+        -0.1321,
+        0.2704,
+        0.3858
+      ],
+      [
+        -0.2654,
+        0.4458,
+        0.6262
+      ],
+      [
+        -0.4197,
+        0.65,
+        0.8104
+      ],
+      [
+        -0.4891,
+        0.7567,
+        0.7051
+      ],
+      [
+        -0.4068,
+        0.6829,
+        0.5636
+      ],
+      [
+        -0.4212,
+        0.7042,
+        0.4314
+      ],
+      [
+        -0.3408,
+        0.5987,
+        -0.0174
+      ],
+      [
+        -0.2463,
+        0.3241,
+        -0.0297
+      ],
+      [
+        0.0524,
+        0.0088,
+        -0.3042
+      ],
+      [
+        -0.0379,
+        0.0681,
+        -0.2677
+      ]
+    ],
+    "site_mean": [
+      22.858,
+      76.546,
+      3.474
+    ],
+    "site_sd_weekly": [
+      1.942,
+      8.121,
+      4.024
+    ],
+    "note": "weekly_z = anomalía de cada semana respecto a lo normal del lugar (lo que usa el modelo de RIESGO)."
   },
   "risk_rules": {
     "validated_by": "TODO: ingeniero agrícola del equipo",
@@ -174,6 +712,36 @@
           "source": "TODO"
         }
       ]
+    },
+    "assumptions": {
+      "daily_wage": {
+        "value": null,
+        "source": "TODO"
+      },
+      "monthly_interest": {
+        "value": null,
+        "source": "TODO"
+      },
+      "months_to_harvest": {
+        "value": null,
+        "source": "TODO"
+      },
+      "wait_weeks": {
+        "value": null,
+        "source": "TODO"
+      },
+      "wait_loss_growth": {
+        "value": null,
+        "source": "TODO"
+      },
+      "price_uncertainty": {
+        "value": null,
+        "source": "TODO"
+      }
+    },
+    "catalog": {
+      "items": null,
+      "source": "TODO: catálogo firmado por extensión técnica (productos, dosis, carencias, eficacias)"
     }
   },
   "phrases": {
@@ -214,7 +782,58 @@
     "pending": "Saved cases",
     "packs": "Packs",
     "install": "Install",
-    "import_file": "Import file"
+    "import_file": "Import file",
+    "alt_wait": "Do nothing for now",
+    "alt_cultural": "Prune and remove the sick leaves",
+    "alt_fungicide": "Apply the treatment",
+    "alt_loss": "Expected loss",
+    "alt_cost": "What it costs",
+    "alt_net": "What you gain compared with doing nothing",
+    "hidden_costs": "Hidden costs",
+    "hidden_labor": "Days of work",
+    "hidden_money": "Cost of borrowing the money",
+    "hidden_cert": "May affect your certification",
+    "prob_negative": "Chance of losing money",
+    "assumptions": "My assumptions",
+    "as_wage": "Daily wage",
+    "as_rate": "Interest per month",
+    "as_price": "Price per kilo",
+    "save": "Save",
+    "loss_now": "If you do nothing",
+    "loss_wait": "If you wait 3 weeks",
+    "frame_leaf": "Put one leaf inside the frame",
+    "zigzag": "Walk in a zigzag across the plot and photograph one leaf from each plant",
+    "plant": "Plant",
+    "take_photo": "Take the photo",
+    "profile": "My plot",
+    "prof_variety": "Variety",
+    "prof_age": "Age of the coffee (years)",
+    "prof_altitude": "Altitude (metres)",
+    "prof_shade": "Are there shade trees?",
+    "prof_load": "How is this year's crop?",
+    "load_high": "Heavy",
+    "load_low": "Light",
+    "followup": "What happened next?",
+    "fu_did": "What did you do?",
+    "fu_outcome": "How is the coffee now?",
+    "fu_better": "Better",
+    "fu_same": "The same",
+    "fu_worse": "Worse",
+    "no_leaf": "I can't see a leaf. Move the camera closer to one leaf.",
+    "severity": "Part of the leaf with damage",
+    "alt_copper": "Apply copper",
+    "alt_bio": "Apply biological control",
+    "alt_miner": "Control the leaf miner",
+    "alt_remeasure": "Check again in 3 weeks",
+    "flag_prior": "Estimate based on expert judgement, not yet on data from your farm",
+    "flag_sample": "Few leaves: take more photos for a firm estimate",
+    "flag_detector": "The camera cannot tell this level of damage apart well: ask a technician",
+    "flag_climate": "The weather is unusual: the range is wider",
+    "info_mode": "This helps you decide; it does not replace the technician",
+    "why_liquidity": "Not enough money today",
+    "why_cert": "Not compatible with your certification",
+    "why_deadline": "Not enough time before harvest",
+    "why_labor": "Not enough workers this week"
   },
   "demo_values": {
     "synthetic": true,
@@ -329,7 +948,220 @@
             "residual_risk": "low"
           }
         ]
+      },
+      "assumptions": {
+        "daily_wage": 3,
+        "monthly_interest": 0.025,
+        "months_to_harvest": 5,
+        "wait_weeks": 3,
+        "wait_loss_growth": [
+          0.15,
+          0.4
+        ],
+        "price_uncertainty": 0.1
+      },
+      "catalog": {
+        "items": [
+          {
+            "id": "poda_selectiva",
+            "frase": "alt_cultural",
+            "icono": "✂️",
+            "aplica_a": [
+              "roya",
+              "minador",
+              "phoma",
+              "cercospora"
+            ],
+            "nivel_min": 1,
+            "ventana_fenologica": null,
+            "semanas_min_a_cosecha": 0,
+            "efecto": {
+              "d_a": {
+                "dist": "beta",
+                "a": 3,
+                "b": 7
+              },
+              "kappa": {
+                "dist": "beta",
+                "a": 1,
+                "b": 9
+              },
+              "duracion_semanas": 6
+            },
+            "costos": {
+              "directo_por_ha": 0,
+              "jornales_por_ha": 6,
+              "cert_penalizacion": 0.0,
+              "calidad_delta": 0.0
+            },
+            "restricciones": {
+              "incompatible_con_certificaciones": [],
+              "periodo_de_carencia_semanas": 0
+            },
+            "evidencia": "criterio_experto",
+            "fuente": "TODO: validar con extensión"
+          },
+          {
+            "id": "fungicida_sistemico",
+            "frase": "alt_fungicide",
+            "icono": "💧",
+            "aplica_a": [
+              "roya",
+              "phoma",
+              "cercospora"
+            ],
+            "nivel_min": 1,
+            "ventana_fenologica": null,
+            "semanas_min_a_cosecha": 4,
+            "efecto": {
+              "d_a": {
+                "dist": "beta",
+                "a": 1,
+                "b": 99
+              },
+              "kappa": {
+                "dist": "beta",
+                "a": 8,
+                "b": 2
+              },
+              "duracion_semanas": 6
+            },
+            "costos": {
+              "directo_por_ha": 59.99999999999999,
+              "jornales_por_ha": 2,
+              "cert_penalizacion": 0.02,
+              "calidad_delta": 0.0
+            },
+            "restricciones": {
+              "incompatible_con_certificaciones": [
+                "organico"
+              ],
+              "periodo_de_carencia_semanas": 4
+            },
+            "evidencia": "criterio_experto",
+            "fuente": "TODO: producto, dosis y carencia según extensión"
+          },
+          {
+            "id": "cobre",
+            "frase": "alt_copper",
+            "icono": "🟦",
+            "aplica_a": [
+              "roya",
+              "phoma",
+              "cercospora"
+            ],
+            "nivel_min": 1,
+            "ventana_fenologica": null,
+            "semanas_min_a_cosecha": 2,
+            "efecto": {
+              "d_a": {
+                "dist": "beta",
+                "a": 1,
+                "b": 99
+              },
+              "kappa": {
+                "dist": "beta",
+                "a": 5,
+                "b": 5
+              },
+              "duracion_semanas": 5
+            },
+            "costos": {
+              "directo_por_ha": 37.5,
+              "jornales_por_ha": 2,
+              "cert_penalizacion": 0.0,
+              "calidad_delta": 0.0
+            },
+            "restricciones": {
+              "incompatible_con_certificaciones": [],
+              "periodo_de_carencia_semanas": 2
+            },
+            "evidencia": "criterio_experto",
+            "fuente": "TODO"
+          },
+          {
+            "id": "biologico",
+            "frase": "alt_bio",
+            "icono": "🌿",
+            "aplica_a": [
+              "roya"
+            ],
+            "nivel_min": 1,
+            "ventana_fenologica": null,
+            "semanas_min_a_cosecha": 0,
+            "efecto": {
+              "d_a": {
+                "dist": "beta",
+                "a": 1,
+                "b": 99
+              },
+              "kappa": {
+                "dist": "beta",
+                "a": 3,
+                "b": 7
+              },
+              "duracion_semanas": 4
+            },
+            "costos": {
+              "directo_por_ha": 29.999999999999996,
+              "jornales_por_ha": 2,
+              "cert_penalizacion": 0.0,
+              "calidad_delta": 0.0
+            },
+            "restricciones": {
+              "incompatible_con_certificaciones": [],
+              "periodo_de_carencia_semanas": 0
+            },
+            "evidencia": "criterio_experto",
+            "fuente": "TODO"
+          },
+          {
+            "id": "control_minador",
+            "frase": "alt_miner",
+            "icono": "🐛",
+            "aplica_a": [
+              "minador"
+            ],
+            "nivel_min": 2,
+            "ventana_fenologica": null,
+            "semanas_min_a_cosecha": 3,
+            "efecto": {
+              "d_a": {
+                "dist": "beta",
+                "a": 1,
+                "b": 99
+              },
+              "kappa": {
+                "dist": "beta",
+                "a": 5,
+                "b": 5
+              },
+              "duracion_semanas": 6
+            },
+            "costos": {
+              "directo_por_ha": 44.99999999999999,
+              "jornales_por_ha": 2,
+              "cert_penalizacion": 0.02,
+              "calidad_delta": 0.0
+            },
+            "restricciones": {
+              "incompatible_con_certificaciones": [
+                "organico"
+              ],
+              "periodo_de_carencia_semanas": 3
+            },
+            "evidencia": "criterio_experto",
+            "fuente": "TODO"
+          }
+        ]
       }
+    },
+    "productor": {
+      "certificaciones": [],
+      "caja": 225,
+      "credito": 150,
+      "jornales_disponibles_semana": 12,
+      "aversion": "intermedio"
     }
   },
   "audio": {
@@ -339,5 +1171,42 @@
   },
   "tts": {
     "model": "facebook/mms-tts-eng"
+  },
+  "lot_profile": {
+    "varieties": [
+      "SL28",
+      "SL34",
+      "Ruiru 11",
+      "Batian",
+      "K7"
+    ],
+    "altitude_ranges_m": [
+      [
+        0,
+        1400
+      ],
+      [
+        1400,
+        1900
+      ],
+      [
+        1900,
+        2600
+      ]
+    ],
+    "age_ranges_years": [
+      [
+        0,
+        3
+      ],
+      [
+        3,
+        8
+      ],
+      [
+        8,
+        50
+      ]
+    ]
   }
 }

@@ -9,7 +9,7 @@ import { BigButton, Screen } from '../ui';
 export default function Preguntas() {
   const { t, pack } = usePack();
   const { go } = useNav();
-  const { session, setAnswers, setRisk } = useFlow();
+  const { session, setAnswers, setRisk, startRd } = useFlow();
   const [rain, setRain] = useState<boolean | null>(null);
   useRedirectIf(session === null || session.dominant === null || pack === null);
   if (!session || session.dominant === null || !pack) return null;
@@ -21,6 +21,7 @@ export default function Preguntas() {
       return;
     }
     setAnswers(rain, value);
+    startRd(rain); // RIESGO + DECISIÓN del manual, en segundo plano; las pantallas lo muestran cuando está listo
     setRisk(
       predict(
         {

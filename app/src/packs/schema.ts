@@ -28,6 +28,8 @@ export type Pack = {
   phrases: Record<string, string>;
   audio: { dir: string; format: string; status: string; files?: Record<string, string> };
   tts: JsonObject;
+  /** Opciones del perfil del lote (rangos y variedades locales). Opcional: sin él no se muestra el perfil. */
+  lot_profile?: { varieties: string[]; altitude_ranges_m: [number, number][]; age_ranges_years: [number, number][] };
 };
 
 export const REQUIRED_PHRASE_KEYS: readonly string[] = [
@@ -36,6 +38,15 @@ export const REQUIRED_PHRASE_KEYS: readonly string[] = [
   'wait_ok', 'consult', 'you_decide', 'opt_wait', 'opt_treat', 'opt_consult', 'send_case', 'saved',
   'demo_data', 'all_healthy', 'more_photos', 'done_photos', 'treatment_generic', 'kpi_loss', 'kpi_cost',
   'kpi_breakeven', 'kpi_net', 'ask_area', 'pending', 'packs', 'install', 'import_file',
+  // v0.3: alternativas y costos ocultos, riesgo, captura guiada, perfil del lote, seguimiento y segmentación.
+  'alt_wait', 'alt_cultural', 'alt_fungicide', 'alt_loss', 'alt_cost', 'alt_net', 'hidden_costs', 'hidden_labor',
+  'hidden_money', 'hidden_cert', 'prob_negative', 'assumptions', 'as_wage', 'as_rate', 'as_price', 'save',
+  'loss_now', 'loss_wait', 'frame_leaf', 'zigzag', 'plant', 'take_photo', 'profile', 'prof_variety', 'prof_age',
+  'prof_altitude', 'prof_shade', 'prof_load', 'load_high', 'load_low', 'followup', 'fu_did', 'fu_outcome',
+  'fu_better', 'fu_same', 'fu_worse', 'no_leaf', 'severity',
+  // v0.4: modelos de RIESGO y DECISIÓN (acciones del catálogo, banderas de validez, razones de inviabilidad).
+  'alt_copper', 'alt_bio', 'alt_miner', 'alt_remeasure', 'flag_prior', 'flag_sample', 'flag_detector', 'flag_climate',
+  'info_mode', 'why_liquidity', 'why_cert', 'why_deadline', 'why_labor',
 ];
 
 const POINT_KEYS = [

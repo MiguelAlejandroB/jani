@@ -18,4 +18,13 @@ export type DecideResult = {
   phrase: 'act_cheaper' | 'wait_ok' | 'consult';
 };
 export type Choice = 'WAIT' | 'TREAT' | 'CONSULT';
-export type Case = { id: string; date: string; packId: string; session: Session; risk?: PredictResult; decision?: DecideResult; choice?: Choice; sent: boolean };
+/** Resumen guardado de los modelos de RIESGO y DECISIÓN (sin partículas: liviano para IndexedDB y el SMS). */
+export type RdSummary = {
+  paramsVersion: string;
+  usedDemoData: boolean;
+  ell: { p10: number; p50: number; p90: number; cvar10: number; p_sobre_umbral: number };
+  banderas: string[];
+  recomendacion: string | null;
+  alternativas: { id: string; ce: number | null; viable_hoy: boolean; razon_no_viable: string | null }[];
+};
+export type Case = { id: string; date: string; packId: string; session: Session; risk?: PredictResult; decision?: DecideResult; choice?: Choice; rd?: RdSummary; sent: boolean };
