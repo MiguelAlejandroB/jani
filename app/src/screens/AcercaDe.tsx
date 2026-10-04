@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { DemoBadge, Screen } from '../ui';
+import { DemoBadge, Eyebrow, Screen } from '../ui';
 import { useFlow } from '../flow/FlowContext';
 import { usePack } from '../packs/PackContext';
 
@@ -78,8 +78,8 @@ export default function AcercaDe() {
   }
 
   return (
-    <Screen id="acerca" icon="ℹ️" title={t('about')} onIconClick={onIconClick} top>
-      <div className="about-card" data-testid="about-summary">
+    <Screen id="acerca" icon="info" eyebrow={t('app_name')} title={t('about')} onIconClick={onIconClick}>
+      <section className="card lg about-card" data-testid="about-summary">
         <p>{t('info_mode')}</p>
         <p>{t('privacy')}</p>
         {pack && (
@@ -87,19 +87,25 @@ export default function AcercaDe() {
             {t('sec_language')}: <strong>{pack.language.name}</strong>
           </p>
         )}
-      </div>
+      </section>
       {demo && <DemoBadge text={t('demo_data')} />}
       {details && (
         <>
-          <section data-testid="about-model" style={{ display: 'grid', gap: 8 }}>
-            {modelRows.map(([k, v]) => (
-              <RowView key={k} k={k} v={v} />
-            ))}
+          <section className="section" data-testid="about-model">
+            <Eyebrow>{t('sec_model')}</Eyebrow>
+            <div className="rows">
+              {modelRows.map(([k, v]) => (
+                <RowView key={k} k={k} v={v} />
+              ))}
+            </div>
           </section>
-          <section data-testid="about-sources" style={{ display: 'grid', gap: 8 }}>
-            {sourceRows.map(([k, v], i) => (
-              <RowView key={`${k}-${i}`} k={k} v={v} />
-            ))}
+          <section className="section" data-testid="about-sources">
+            <Eyebrow>{t('sec_sources')}</Eyebrow>
+            <div className="rows">
+              {sourceRows.map(([k, v], i) => (
+                <RowView key={`${k}-${i}`} k={k} v={v} />
+              ))}
+            </div>
             {demo && <DemoBadge text={demo.note} />}
           </section>
         </>

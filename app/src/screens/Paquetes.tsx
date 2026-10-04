@@ -4,7 +4,8 @@ import { usePack } from '../packs/PackContext';
 import type { Pack } from '../packs/schema';
 import { climateFor, requestLocation, type ClimateChoice } from '../engine/rd/location';
 import { AREA_DEFAULT_HA, AREA_MAX_HA, AREA_MIN_HA, AREA_STEP_HA, getLocation, setLocation } from '../store/settings';
-import { BigButton, Screen } from '../ui';
+import { Icon } from '../icons';
+import { BigButton, Eyebrow, Screen } from '../ui';
 
 export default function Paquetes() {
   const { pack, t, installed, activate, areaHa, setAreaHa } = usePack();
@@ -56,58 +57,67 @@ export default function Paquetes() {
   });
 
   return (
-    <Screen id="paquetes" icon="📦" title={t('packs')}>
-      {installed.map((p) => (
-        <BigButton
-          key={p.id}
-          testId={`pack-installed-${p.id}`}
-          icon={p.id === pack?.id ? '✅' : '📦'}
-          label={p.language.name}
-          variant={p.id === pack?.id ? 'primary' : 'secondary'}
-          onClick={() => void (busy || run(() => Promise.resolve(p)))}
+    <Screen id="paquetes" icon="box" eyebrow={t('app_name')} title={t('packs')}>
+      <section className="section">
+        {pack && <Eyebrow>{t('sec_language')}</Eyebrow>}
+        {installed.map((p) => (
+          <div className="pack-row" key={p.id}>
+            <BigButton
+              testId={`pack-installed-${p.id}`}
+              icon={p.id === pack?.id ? 'check' : 'globe'}
+              label={p.language.name}
+              variant={p.id === pack?.id ? 'primary' : 'secondary'}
+              onClick={() => void (busy || run(() => Promise.resolve(p)))}
+            />
+          </div>
+        ))}
+        {available.map(({ c, update }) => (
+          <div key={c.id} className="pack-row" data-testid={`pack-catalog-${c.id}`} data-update={update ? 'true' : undefined}>
+            <BigButton
+              testId={`pack-install-${c.id}`}
+              icon={update ? 'repeat' : 'download'}
+              label={`${t('install')} ${c.language.name}`.trim()}
+              variant="secondary"
+              onClick={() => void (busy || run(() => installPackFromCatalog(c)))}
+            />
+          </div>
+        ))}
+        <input
+          ref={fileRef}
+          className="file-input"
+          type="file"
+          accept=".zip,application/zip"
+          data-testid="pack-import-input"
+          onChange={(e) => void onFile(e)}
         />
-      ))}
-      {available.map(({ c, update }) => (
-        <div key={c.id} data-testid={`pack-catalog-${c.id}`} data-update={update ? 'true' : undefined}>
-          <BigButton
-            testId={`pack-install-${c.id}`}
-            icon={update ? '🔄' : '⬇️'}
-            label={`${t('install')} ${c.language.name}`.trim()}
-            variant="secondary"
-            onClick={() => void (busy || run(() => installPackFromCatalog(c)))}
-          />
-        </div>
-      ))}
-      <input
-        ref={fileRef}
-        className="file-input"
-        type="file"
-        accept=".zip,application/zip"
-        data-testid="pack-import-input"
-        onChange={(e) => void onFile(e)}
-      />
-      <BigButton icon="📁" label={t('import_file')} variant="secondary" onClick={() => fileRef.current?.click()} />
-      {errors && (
-        // Criterio 3: los códigos técnicos no se muestran; quedan en data-errors y en la consola.
-        <div data-testid="pack-error" className="pack-error" data-errors={JSON.stringify(errors)}>
-          <div className="pack-error-icon">⚠️</div>
-        </div>
-      )}
+        <BigButton icon="folder" label={t('import_file')} variant="ghost" onClick={() => fileRef.current?.click()} />
+        {errors && (
+          // Criterio 3: los códigos técnicos no se muestran; quedan en data-errors y en la consola.
+          <div data-testid="pack-error" className="pack-error" data-errors={JSON.stringify(errors)}>
+            <div className="pack-error-icon">⚠️</div>
+          </div>
+        )}
+      </section>
       {pack && (
         <>
-          <p className="question">{t('ask_area')}</p>
-          <div className="area-picker">
-            <button className="icon-btn" data-testid="area-minus" aria-label="−" onClick={() => step(-AREA_STEP_HA)}>
-              −
-            </button>
-            <span className="area-value" data-testid="area-value">
-              {fmt(area)}
-            </span>
-            <button className="icon-btn" data-testid="area-plus" aria-label="+" onClick={() => step(AREA_STEP_HA)}>
-              +
-            </button>
-          </div>
-          <BigButton testId="area-save" icon="✅" onClick={() => void setAreaHa(area)} />
+          <section className="section">
+            <Eyebrow>{t('sec_farm')}</Eyebrow>
+            <div className="card">
+              <p className="area-q">{t('ask_area')}</p>
+              <div className="area-picker">
+                <button className="round-btn" data-testid="area-minus" aria-label="−" onClick={() => step(-AREA_STEP_HA)}>
+                  <Icon name="minus" size={28} />
+                </button>
+                <span className="area-value" data-testid="area-value">
+                  {fmt(area)}
+                </span>
+                <button className="round-btn" data-testid="area-plus" aria-label="+" onClick={() => step(AREA_STEP_HA)}>
+                  <Icon name="plus" size={28} />
+                </button>
+              </div>
+              <BigButton testId="area-save" icon="check" label={t('save')} onClick={() => void setAreaHa(area)} />
+            </div>
+          </section>
           <LocationClimate />
         </>
       )}
@@ -150,15 +160,25 @@ function LocationClimate() {
 
   if (!normals?.points?.length) return null;
   return (
-    <div className="location-climate">
-      <BigButton icon={state === 'busy' ? '⏳' : '📍'} label={t('use_location')} variant="secondary" testId="use-location" onClick={() => void ask()} />
-      {state === 'error' && <div className="pack-error-icon" data-testid="location-error">⚠️</div>}
-      {choice && (
-        <p className="location-point" data-testid="climate-point" data-source={choice.source}>
-          🌦️ {t('climate_from')} {choice.name}
-          {choice.km !== null ? ` (${choice.km.toLocaleString(pack?.language.code)} km)` : ''}
-        </p>
-      )}
-    </div>
+    <section className="section">
+      <Eyebrow>{t('sec_place')}</Eyebrow>
+      <div className="card location-climate">
+        <BigButton icon={state === 'busy' ? 'clock' : 'pin'} label={t('use_location')} variant="secondary" testId="use-location" onClick={() => void ask()} />
+        {state === 'error' && (
+          <div className="pack-error-icon" data-testid="location-error">
+            ⚠️
+          </div>
+        )}
+        {choice && (
+          <p className="location-point" data-testid="climate-point" data-source={choice.source}>
+            <Icon name={choice.source === 'gps' ? 'pin' : 'sun'} size={18} />
+            <span>
+              {t('climate_from')} {choice.name}
+              {choice.km !== null ? ` (${choice.km.toLocaleString(pack?.language.code)} km)` : ''}
+            </span>
+          </p>
+        )}
+      </div>
+    </section>
   );
 }
