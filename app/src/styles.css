@@ -1,30 +1,73 @@
+/* Fraunces local (OFL, ver public/fonts/README.md): títulos y cifras. El cuerpo usa la fuente del sistema. */
+@font-face {
+  font-family: 'Fraunces';
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url('/fonts/fraunces-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Fraunces';
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url('/fonts/fraunces-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
 :root {
-  /* Paleta del cafetal: hoja, envés, cereza madura, pintona y verde. */
-  --leaf: #1F4D2B;
-  --leaf-soft: #DCE8D6;
-  --ink: #13221A;
-  --muted: rgb(19 34 26 / 0.6);
-  --underleaf: #EEF3EA;
-  --paper: #FFFFFF;
-  --cherry: #B8322A;
-  --pinton: #E0A321;
-  --pinton-soft: #FBEFD2;
-  --green-cherry: #6E9B3A;
-  --roast: #6B3E26;
-  --line: rgb(19 34 26 / 0.12);
-  --shadow: 0 1px 2px rgb(19 34 26 / 0.08), 0 4px 16px rgb(19 34 26 / 0.06);
-  --radius: 18px;
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  /* Tokens del diseño (oklch de la referencia convertidos a sRGB). */
+  --espresso: #3A2A1C; /* oklch(0.3 0.034 62.2) */
+  --clay: #C17A54; /* oklch(0.646 0.103 48.4) */
+  --leaf: #4F6B4A; /* oklch(0.496 0.061 140.8) */
+  --sun: #8A9A5B; /* oklch(0.658 0.088 120.5) */
+  --cream: #F5EFE6; /* oklch(0.954 0.014 78.3) */
+  --mist: #7C7164; /* oklch(0.555 0.024 71.9) */
+  --card: #FFFDFA; /* oklch(0.995 0.004 85) */
+  --border: #D9D0C3; /* oklch(0.86 0.02 76) */
+  /* Variantes para contraste AA (texto pequeño sobre crema o sobre los tintes al 10-15 %). */
+  --clay-deep: #A8613C; /* fondo del botón principal: blanco encima 4.7:1 */
+  --clay-ink: #8C4E2E; /* texto clay sobre clay/15: 4.9:1 */
+  --leaf-ink: #3F5A3B; /* texto leaf sobre leaf/15: 5.5:1 */
+  --mist-ink: #6B6155; /* texto mist sobre crema: 5.3:1 */
+  /* Transparencias de espresso (las de la referencia: /5, /10, /15...). */
+  --e5: rgb(58 42 28 / 0.05);
+  --e10: rgb(58 42 28 / 0.1);
+  --e15: rgb(58 42 28 / 0.15);
+  --e70: rgb(58 42 28 / 0.75);
+  /* La cereza de riesgo: verde, pintona y roja, afinadas con clay y leaf; CONSULT en mist. */
+  --cherry-green: #6E8B4E;
+  --cherry-pinton: #D59A3A;
+  --cherry-red: #A8432F;
+  --consult: var(--mist);
+  --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  /* Nombres anteriores, apuntando a los tokens nuevos. */
+  --leaf-soft: rgb(79 107 74 / 0.12);
+  --ink: var(--espresso);
+  --muted: var(--mist-ink);
+  --underleaf: var(--cream);
+  --paper: var(--card);
+  --cherry: var(--cherry-red);
+  --pinton: var(--cherry-pinton);
+  --pinton-soft: #F6E9CF;
+  --green-cherry: var(--cherry-green);
+  --roast: var(--clay-ink);
+  --line: var(--e10);
+  --shadow: 0 1px 2px rgb(58 42 28 / 0.06), 0 4px 16px rgb(58 42 28 / 0.05);
+  --radius: 16px;
+  font-family: var(--font-body);
   font-size: 16px;
-  line-height: 1.35;
-  color: var(--ink);
-  background: var(--underleaf);
+  line-height: 1.4;
+  color: var(--espresso);
+  background: var(--cream);
   -webkit-tap-highlight-color: transparent;
 }
 * { box-sizing: border-box; }
-body { margin: 0; min-height: 100dvh; background: var(--underleaf); overflow-x: hidden; }
+body { margin: 0; min-height: 100dvh; background: var(--cream); overflow-x: hidden; -webkit-font-smoothing: antialiased; }
 button { font: inherit; color: inherit; }
-:focus-visible { outline: 3px solid var(--pinton); outline-offset: 2px; }
+:focus-visible { outline: 3px solid var(--clay); outline-offset: 2px; }
 
 .screen {
   max-width: 480px;

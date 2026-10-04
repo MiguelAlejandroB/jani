@@ -28,8 +28,8 @@ export default defineConfig({
         start_url: '.',
         display: 'standalone',
         orientation: 'portrait',
-        background_color: '#EEF3EA',
-        theme_color: '#1F4D2B',
+        background_color: '#F5EFE6',
+        theme_color: '#F5EFE6',
         // Tamaño explícito y propósitos separados: Chrome avisa con sizes 'any' + 'any maskable'.
         icons: [
           { src: 'icon.svg', sizes: '512x512', type: 'image/svg+xml', purpose: 'any' },
@@ -37,10 +37,11 @@ export default defineConfig({
         ],
       },
       workbox: {
-        // Precarga completa para modo avión: app, ort/*.wasm|mjs, models/** (model_card y .onnx),
+        // Precarga completa para modo avión: app, fuentes (fonts/*.woff2), imagen de Inicio (.webp), ort/*.wasm|mjs,
+        // models/** (model_card y .onnx),
         // packs/catalog.json y packs/*.zip (el audio va dentro de los zips). Soltar el modelo real en
         // public/models/arabica-v1/ y recompilar basta: el patrón ya lo cubre.
-        globPatterns: ['**/*.{js,mjs,css,html,svg,png,json,webmanifest,wasm,onnx,zip}'],
+        globPatterns: ['**/*.{js,mjs,css,html,svg,png,webp,woff2,json,webmanifest,wasm,onnx,zip}'],
         // Lo que el notebook deja junto al modelo (zip de entrega, matrices de confusión, ejemplos) no lo usa la app.
         globIgnores: ['**/node_modules/**', 'models/**/*.zip', 'models/**/*.png'],
         navigateFallback: 'index.html',
