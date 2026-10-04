@@ -6,7 +6,7 @@ import { usePack } from '../packs/PackContext';
 import { listCases } from '../store/cases';
 import { Screen } from '../ui';
 
-const RISK_COLOR = { LOW: '#2e9e4f', MEDIUM: '#e0a800', HIGH: '#d32f2f' } as const;
+const RISK_COLOR = { LOW: 'var(--green-cherry)', MEDIUM: 'var(--pinton)', HIGH: 'var(--cherry)' } as const;
 
 function outcomeIcon(c: Case): string {
   const o = sessionOutcome(c.session);

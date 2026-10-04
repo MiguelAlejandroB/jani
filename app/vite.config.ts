@@ -28,8 +28,8 @@ export default defineConfig({
         start_url: '.',
         display: 'standalone',
         orientation: 'portrait',
-        background_color: '#f6f1e7',
-        theme_color: '#2f5d3a',
+        background_color: '#EEF3EA',
+        theme_color: '#1F4D2B',
         // Tamaño explícito y propósitos separados: Chrome avisa con sizes 'any' + 'any maskable'.
         icons: [
           { src: 'icon.svg', sizes: '512x512', type: 'image/svg+xml', purpose: 'any' },
