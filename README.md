@@ -74,11 +74,12 @@ Documentos de estado: `docs/PROGRESO.md`, `docs/DECISIONES.md`, `docs/QA_REPORT.
 2. `Archivo → Subir notebook` y elegir `training/jani_train.ipynb`. **Se sube el archivo; no hay que copiar y pegar nada.**
 3. `Entorno de ejecución → Cambiar tipo de entorno → GPU T4 → Guardar`.
 4. `Entorno de ejecución → Ejecutar todo`. No hay que cambiar nada en la configuración.
-5. Esperar unos 40–70 minutos. Al final el navegador descarga **`jani_model.zip`**.
+5. Esperar unos 80–100 minutos. Al final el navegador descarga **`jani_model.zip`**.
 
-**Qué hace en una sola ejecución:** entrena dos modelos (`efficientnet_lite0` y `mobilenetv3_small_100`), calibra la
-confianza, elige el umbral de "no estoy segura" con datos de otros países, exporta a ONNX, cuantiza a int8 y **se queda
-con el mejor que pese menos de 10 MB**. Ya no hay que repetir nada para el plan B.
+**Qué hace en una sola ejecución:** descarga y limpia los datos (quita duplicados y fotos dañadas), entrena dos modelos
+(`efficientnet_lite0` y `mobilenetv3_small_100`) con Kenia, Brasil y parte de Uganda, calibra la confianza con fotos de
+campo, prueba en Perú (país que nunca ve), exporta a ONNX, cuantiza a int8 y **se queda con el mejor modelo estable que
+pese menos de 10 MB**. Ya no hay que repetir nada para el plan B. Detalle y resultados: `docs/RESULTADOS_MODELO.md`.
 
 **Qué trae ese zip:**
 
@@ -95,8 +96,9 @@ deja el modo simulado sola.
 **Si una descarga de datos falla:** el notebook dice qué página abrir, qué archivo bajar y con qué nombre subirlo a Colab
 (ícono de carpeta, a la izquierda). Luego se vuelve a `Ejecutar todo`.
 
-**Qué número mirar:** `ood_uganda_holdout` y `ood_peru_holdout` en las métricas: la mitad de Uganda y Perú que no se
-usó ni para entrenar ni para elegir el umbral. La de validación sale cerca de 99% y no es representativa.
+**Qué número mirar:** la tabla `RESUMEN` del final, sobre todo **Perú** (`ood_peru_holdout`): un país que el modelo
+nunca vio. Uganda (`ood_uganda_holdout`) son hojas no vistas de un país que sí se usó en parte para entrenar. La
+validación sale cerca de 100 % y no es representativa.
 
 ### Paso C — Generar los audios (persona)
 

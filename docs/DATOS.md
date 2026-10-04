@@ -8,8 +8,8 @@ El reto exige nombrar cada dataset, su fuente, licencia y tamaño, y decir qué 
 |---|---|---|---|---|---|---|
 | JMuBEN + JMuBEN2 | Kenia | 58.549 imágenes | sana, roya, minador, phoma, cercospora | CC BY 4.0 (ficha de Hugging Face) | Entrenamiento | https://huggingface.co/datasets/Project-AgML/arabica_coffee_leaf_disease_classification |
 | BRACOL | Brasil | 1.747 hojas, 2.147 recortes | mismas 5, con severidad | CC BY 4.0 (página de Mendeley, revisado 2026-10-03) | Entrenamiento | https://data.mendeley.com/datasets/yy2k5y8mxg/1 |
-| Uganda (Soroti University) | Uganda | 3.312 imágenes | sana, roya, phoma | **Por confirmar** | Solo prueba externa | https://data.mendeley.com/datasets/k36wnd6knb/1 |
-| Perú (Saposoa) | Perú | 1.500 imágenes | sana, roya, ojo de gallo | **Por confirmar** | Solo prueba externa | https://data.mendeley.com/datasets/mfpxg4y65r/1 |
+| Uganda (Soroti University) | Uganda | 3.312 imágenes | sana, roya, phoma | CC BY 4.0 (API de Mendeley, revisado 2026-10-03) | Solo prueba externa | https://data.mendeley.com/datasets/k36wnd6knb/1 |
+| Perú (Saposoa) | Perú | 1.500 imágenes | sana, roya, ojo de gallo | CC BY 4.0 (API de Mendeley, revisado 2026-10-03) | Solo prueba externa | https://data.mendeley.com/datasets/mfpxg4y65r/1 |
 
 ## Datos previstos, no usados en el MVP
 

@@ -47,3 +47,10 @@ Cada una: qué se decidió, por qué y qué cuesta si está mal.
     `sms:?body=…` para que la persona elija el contacto. El caso se marca enviado solo si el envío se inició bien.
 21. **Revisión de calidad promovida:** se exigió probar `resolve` con un valor real no nulo y fuente `TODO` (criterio 5),
     aunque el revisor lo marcó como menor.
+22. **Paquete `english-demo` (inglés), pedido por el equipo.** Copia de las reglas y de los valores de demostración del
+    paquete de África Oriental (USD, sintéticos y marcados como tales), con las 38 frases traducidas y voz MMS
+    `facebook/mms-tts-eng` para `make_audio.py`. No representa una región real. Si está mal: ajustar `units`,
+    `backup_contact` y los valores reales del país al que apunte.
+23. **Notebook: cuantización int8 por canal, evaluada sin optimizaciones de grafo.** Medido localmente: onnxruntime-web
+    coincide con onnxruntime de Python *sin* optimizar (diferencia < 0,5 en logits) y difiere hasta 5,6 *con* optimizaciones.
+    Por eso el notebook mide la precisión del ONNX de la misma forma que correrá en el teléfono.
