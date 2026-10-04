@@ -72,6 +72,28 @@ test('b. noor-africa-oriental y cambio en caliente del paquete activo', async ({
   await expect(page.getByTestId('active-lang')).toHaveText(ES.language.name);
 });
 
+test('o. paquete en inglés: toda la app cambia a inglés y el recorrido funciona', async ({ page }) => {
+  const EN = readPack('english-demo');
+  await setSimPlan(page, ['roya']);
+  await installFromCatalog(page, 'colombia-andina');
+  await saveDefaultArea(page);
+  await installFromCatalog(page, 'english-demo');
+  await expect(page.locator('html')).toHaveAttribute('lang', EN.language.code);
+  await goHome(page);
+  await expect(page.getByRole('heading', { name: phrase(EN, 'welcome') })).toBeVisible();
+  await expect(page.getByTestId('active-lang')).toHaveText(EN.language.name);
+  await fullRoute(page, EN);
+  // Ninguna frase en español queda visible tras el recorrido en inglés.
+  await expect(page.getByText(phrase(ES, 'pending'), { exact: true })).toHaveCount(0);
+
+  // Volver a español en caliente.
+  await page.getByRole('button', { name: phrase(EN, 'packs') }).click();
+  await page.getByTestId('pack-installed-colombia-andina').click();
+  await expect(page.locator('html')).toHaveAttribute('lang', ES.language.code);
+  await goHome(page);
+  await expect(page.getByRole('heading', { name: phrase(ES, 'welcome') })).toBeVisible();
+});
+
 test('c. "no estoy segura": más de la mitad dudosas sugiere CONSULT', async ({ page }) => {
   await setSimPlan(page, ['low_confidence', 'low_confidence', 'low_confidence', 'roya', 'roya']);
   await installFromCatalog(page, 'colombia-andina');

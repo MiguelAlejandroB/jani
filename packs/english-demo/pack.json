@@ -1,0 +1,343 @@
+{
+  "id": "english-demo",
+  "version": "0.1.0",
+  "language": {
+    "code": "en",
+    "name": "English",
+    "needs_native_review": false
+  },
+  "crop": {
+    "species": "arabica",
+    "model": "arabica-v1"
+  },
+  "units": {
+    "weight": "kg",
+    "currency": "USD",
+    "product": "dry parchment coffee"
+  },
+  "backup_contact": {
+    "role": "extension officer / cooperative",
+    "phone": null
+  },
+  "classes": {
+    "sana": {
+      "label": "Healthy leaf",
+      "phrase": "dx_sana"
+    },
+    "roya": {
+      "label": "Coffee leaf rust",
+      "phrase": "dx_roya"
+    },
+    "minador": {
+      "label": "Coffee leaf miner",
+      "phrase": "dx_minador"
+    },
+    "phoma": {
+      "label": "Phoma leaf spot",
+      "phrase": "dx_phoma"
+    },
+    "cercospora": {
+      "label": "Brown eye spot (Cercospora)",
+      "phrase": "dx_cercospora"
+    }
+  },
+  "calendar": {
+    "rainy_months": [],
+    "harvest_months": [],
+    "source": "TODO"
+  },
+  "climate_normals": {
+    "source": "TODO: NASA POWER, promedio mensual histórico (training/build_climate.py)",
+    "monthly_rain_mm": [],
+    "monthly_temp_c": []
+  },
+  "risk_rules": {
+    "validated_by": "TODO: ingeniero agrícola del equipo",
+    "note": "Puntos de partida ilustrativos. Deben validarse antes de la demo.",
+    "points": {
+      "affected_share_over_30pct": 2,
+      "rainy_month": 1,
+      "user_reports_heavy_rain": 1,
+      "no_treatment_last_60_days": 1
+    },
+    "thresholds": {
+      "medium": 2,
+      "high": 4
+    }
+  },
+  "economics": {
+    "typical_yield_kg_per_ha": {
+      "value": null,
+      "source": "TODO"
+    },
+    "price_per_kg": {
+      "value": null,
+      "date": "TODO",
+      "source": "TODO"
+    },
+    "loss_share_by_risk": {
+      "roya": {
+        "low": [
+          null,
+          null
+        ],
+        "medium": [
+          null,
+          null
+        ],
+        "high": [
+          null,
+          null
+        ],
+        "source": "TODO"
+      },
+      "minador": {
+        "low": [
+          null,
+          null
+        ],
+        "medium": [
+          null,
+          null
+        ],
+        "high": [
+          null,
+          null
+        ],
+        "source": "TODO"
+      },
+      "phoma": {
+        "low": [
+          null,
+          null
+        ],
+        "medium": [
+          null,
+          null
+        ],
+        "high": [
+          null,
+          null
+        ],
+        "source": "TODO"
+      },
+      "cercospora": {
+        "low": [
+          null,
+          null
+        ],
+        "medium": [
+          null,
+          null
+        ],
+        "high": [
+          null,
+          null
+        ],
+        "source": "TODO"
+      }
+    },
+    "treatments": {
+      "roya": [
+        {
+          "id": "t1",
+          "label": "TODO",
+          "cost_per_ha": null,
+          "residual_risk": "medium",
+          "source": "TODO"
+        }
+      ],
+      "minador": [
+        {
+          "id": "t1",
+          "label": "TODO",
+          "cost_per_ha": null,
+          "residual_risk": "medium",
+          "source": "TODO"
+        }
+      ],
+      "phoma": [
+        {
+          "id": "t1",
+          "label": "TODO",
+          "cost_per_ha": null,
+          "residual_risk": "medium",
+          "source": "TODO"
+        }
+      ],
+      "cercospora": [
+        {
+          "id": "t1",
+          "label": "TODO",
+          "cost_per_ha": null,
+          "residual_risk": "medium",
+          "source": "TODO"
+        }
+      ]
+    }
+  },
+  "phrases": {
+    "welcome": "Take a photo of a coffee leaf.",
+    "retake": "The photo isn't clear. Please take it again.",
+    "dx_sana": "The leaf looks healthy.",
+    "dx_roya": "I see signs that look like coffee leaf rust.",
+    "dx_minador": "I see signs that look like coffee leaf miner.",
+    "dx_phoma": "I see signs that look like phoma leaf spot.",
+    "dx_cercospora": "I see signs that look like brown eye spot.",
+    "unsure": "I'm not sure. Please ask a person.",
+    "ask_rain": "Did it rain a lot this week?",
+    "ask_treatment": "Did you apply any treatment in the last two months?",
+    "yes": "Yes",
+    "no": "No",
+    "risk_low": "The risk is low.",
+    "risk_medium": "The risk is medium.",
+    "risk_high": "The risk is high.",
+    "act_cheaper": "Treating now costs less than waiting.",
+    "wait_ok": "You can wait for now. Check again next weekend.",
+    "consult": "Ask your extension officer or your cooperative.",
+    "you_decide": "The decision is yours.",
+    "opt_wait": "Wait",
+    "opt_treat": "Treat",
+    "opt_consult": "Ask someone",
+    "send_case": "Send the case by message",
+    "saved": "I saved your decision.",
+    "demo_data": "Demo data",
+    "all_healthy": "Your leaves look healthy. Check again next weekend.",
+    "more_photos": "Take another leaf.",
+    "done_photos": "Done, I have the photos.",
+    "treatment_generic": "Treatment recommended by your extension officer",
+    "kpi_loss": "What you could lose if you do nothing",
+    "kpi_cost": "What treating costs",
+    "kpi_breakeven": "Kilos you need to save for treating to pay off",
+    "kpi_net": "What you gain if you treat",
+    "ask_area": "How many hectares of coffee do you have?",
+    "pending": "Saved cases",
+    "packs": "Packs",
+    "install": "Install",
+    "import_file": "Import file"
+  },
+  "demo_values": {
+    "synthetic": true,
+    "note": "DEMO VALUES, not real data. Illustrative pack in English built from the East Africa demonstration values. Replace calendar and economics with citable data.",
+    "calendar": {
+      "rainy_months": [
+        3,
+        4,
+        5,
+        10,
+        11,
+        12
+      ],
+      "harvest_months": [
+        10,
+        11,
+        12
+      ]
+    },
+    "economics": {
+      "typical_yield_kg_per_ha": 600,
+      "price_per_kg": 3.0,
+      "currency": "USD",
+      "loss_share_by_risk": {
+        "roya": {
+          "low": [
+            0.0,
+            0.05
+          ],
+          "medium": [
+            0.05,
+            0.15
+          ],
+          "high": [
+            0.15,
+            0.35
+          ]
+        },
+        "minador": {
+          "low": [
+            0.0,
+            0.05
+          ],
+          "medium": [
+            0.05,
+            0.15
+          ],
+          "high": [
+            0.15,
+            0.35
+          ]
+        },
+        "phoma": {
+          "low": [
+            0.0,
+            0.05
+          ],
+          "medium": [
+            0.05,
+            0.15
+          ],
+          "high": [
+            0.15,
+            0.35
+          ]
+        },
+        "cercospora": {
+          "low": [
+            0.0,
+            0.05
+          ],
+          "medium": [
+            0.05,
+            0.15
+          ],
+          "high": [
+            0.15,
+            0.35
+          ]
+        }
+      },
+      "treatments": {
+        "roya": [
+          {
+            "id": "t1",
+            "label_phrase": "treatment_generic",
+            "cost_per_ha": 60,
+            "residual_risk": "low"
+          }
+        ],
+        "minador": [
+          {
+            "id": "t1",
+            "label_phrase": "treatment_generic",
+            "cost_per_ha": 60,
+            "residual_risk": "low"
+          }
+        ],
+        "phoma": [
+          {
+            "id": "t1",
+            "label_phrase": "treatment_generic",
+            "cost_per_ha": 60,
+            "residual_risk": "low"
+          }
+        ],
+        "cercospora": [
+          {
+            "id": "t1",
+            "label_phrase": "treatment_generic",
+            "cost_per_ha": 60,
+            "residual_risk": "low"
+          }
+        ]
+      }
+    }
+  },
+  "audio": {
+    "dir": "audio",
+    "format": "mp3",
+    "status": "PENDIENTE: generar con training/make_audio.py o grabar"
+  },
+  "tts": {
+    "model": "facebook/mms-tts-eng"
+  }
+}

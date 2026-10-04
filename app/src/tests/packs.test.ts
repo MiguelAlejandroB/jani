@@ -3,10 +3,11 @@ import { describe, expect, it } from 'vitest';
 import { PackError, parsePackZip } from '../packs/loader';
 import andina from '../../../packs/colombia-andina/pack.json?raw';
 import noor from '../../../packs/noor-africa-oriental/pack.json?raw';
+import english from '../../../packs/english-demo/pack.json?raw';
 import { REQUIRED_PHRASE_KEYS, validatePack } from '../packs/schema';
 
 type Loose = { id: unknown; phrases: Record<string, unknown>; risk_rules: { points: Record<string, unknown> } };
-const raws: Record<string, string> = { 'colombia-andina': andina, 'noor-africa-oriental': noor };
+const raws: Record<string, string> = { 'colombia-andina': andina, 'noor-africa-oriental': noor, 'english-demo': english };
 const load = (id: string): Loose => JSON.parse(raws[id] ?? '') as Loose;
 
 const zipOf = (files: Record<string, Uint8Array>): Uint8Array => zipSync(files);
@@ -22,7 +23,7 @@ function packError(fn: () => unknown): PackError {
 }
 
 describe('validatePack', () => {
-  it.each(['colombia-andina', 'noor-africa-oriental'])('acepta %s', (id) => {
+  it.each(['colombia-andina', 'noor-africa-oriental', 'english-demo'])('acepta %s', (id) => {
     const r = validatePack(load(id));
     expect(r.ok).toBe(true);
   });

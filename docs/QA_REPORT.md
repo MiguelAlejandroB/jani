@@ -11,10 +11,10 @@ y **FALLA CONOCIDA**.
 | `npm run verify` | **Código de salida 0.** Ejecuta en orden lo que sigue. |
 | ↳ `npm run typecheck` (`tsc -b`, estricto) | 0 errores |
 | ↳ `npm run lint` (`eslint . --max-warnings 0`) | 0 errores, 0 advertencias |
-| ↳ `npm run test` (Vitest) | **12 archivos, 112/112 pruebas OK** |
+| ↳ `npm run test` (Vitest) | **12 archivos, 113/113 pruebas OK** |
 | ↳ `npm run build` | OK. Bundle JS 334,99 kB (107,81 kB gzip), CSS 3,17 kB; `dist/` total ≈ 14 MB (el `.wasm` de onnxruntime pesa 13,6 MB) |
 | ↳ precarga del service worker | 14 entradas, 14 272 KiB |
-| ↳ `npm run e2e` (Playwright, Chromium, build de producción) | **18/18 pruebas OK** en 1,8 min |
+| ↳ `npm run e2e` (Playwright, Chromium, build de producción) | **19/19 pruebas OK** en 1,4 min |
 | `npm run check:assets` | Código 1, como se esperaba: **77 faltantes** (el `.onnx` del modelo real y 38 mp3 × 2 paquetes). El resto de campos de la ficha están OK. |
 
 ## 2. Criterios de aceptación de `CLAUDE.md`
@@ -33,7 +33,7 @@ y **FALLA CONOCIDA**.
 | 10 | Las fotos no salen del teléfono; el SMS solo lleva texto | **VERIFICADO** | Las fotos solo existen como blob URLs en memoria; el `Case` guardado no las contiene. `sms.test.ts` comprueba que el cuerpo no tiene `blob:` ni `data:`. e2e `h`: ninguna petición fuera del origen. e2e `m1`/`m2`: SMS y menú de compartir con texto. |
 | 11 | P1–P4 y D1–D4 pasan con los números exactos | **VERIFICADO** | `predict.test.ts`: P1 5/HIGH, P2 2/MEDIUM, P3 0/LOW, P4 CONSULT. `decide.test.ts`: D1 [300,700]/40/[160,660] TREAT; D2 [100,300]/40/[−40,260] CONSULT; D3 [0,100]/40/[−140,60] WAIT; D4 CONSULT sin KPIs. Coinciden con las tablas de `JANI_PLAN.md`. |
 
-## 3. Pruebas unitarias (Vitest, 112/112)
+## 3. Pruebas unitarias (Vitest, 113/113)
 
 `resolve`, `predict` (P1–P4 y límite de 0,30), `decide` (D1–D4, suajili, área inválida), `session`, `quality`
 (negra, blanca, gris plano, tablero), `see` (probabilidades simuladas, cola), `modelCard` (softmax estable, regla de
@@ -42,7 +42,7 @@ filtrado de audios), `voice` (falta audio, `play` rechazado, `voiceschanged`, si
 `sms` (resumen, codificación, sin teléfono), `infer` (preproceso, inferencia ONNX real en node con el modelo de prueba,
 sesión reutilizada, longitud de logits) y `nav`.
 
-## 4. Pruebas e2e (Playwright, 18/18)
+## 4. Pruebas e2e (Playwright, 19/19)
 
 | Prueba | Qué demuestra | Estado |
 |---|---|---|
@@ -60,6 +60,7 @@ sesión reutilizada, longitud de logits) y `nav`.
 | l | Paquete instalado con otra versión en el catálogo → 🔄 y reinstalación real en IndexedDB | VERIFICADO |
 | m1, m2 | Escalamiento sin teléfono: sin menú de compartir marca enviado; con menú, cancelar no marca enviado | VERIFICADO |
 | n | Paquete importado que rompe una pantalla → ⚠️ y ⌂, sin pantalla en blanco | VERIFICADO |
+| o | Paquete en inglés: `html[lang]=en`, todo el texto en inglés, recorrido completo y vuelta a español en caliente | VERIFICADO |
 
 ## 5. Service worker (precarga)
 

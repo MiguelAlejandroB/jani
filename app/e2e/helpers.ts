@@ -8,7 +8,7 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 export const APP_DIR = join(HERE, '..');
 export const REPO_DIR = join(APP_DIR, '..');
 
-export const PACK_IDS = ['colombia-andina', 'noor-africa-oriental'] as const;
+export const PACK_IDS = ['colombia-andina', 'noor-africa-oriental', 'english-demo'] as const;
 export type PackId = (typeof PACK_IDS)[number];
 export type PackJson = { id: string; language: { code: string; name: string }; phrases: Record<string, string> };
 
