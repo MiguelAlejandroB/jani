@@ -23,6 +23,10 @@ import {
 const ES = readPack('colombia-andina');
 const SW = readPack('noor-africa-oriental');
 
+// Modo simulado y regla antigua de riesgo para todo el archivo (un solo lugar, ver helpers.ts): sin SW, porque
+// page.route no intercepta lo que atiende un service worker. Las pruebas de modo avión (h) lo desactivan.
+test.use({ simMode: true, legacyRisk: true, serviceWorkers: 'block' });
+
 test.beforeEach(async ({ page }) => {
   await page.goto('/');
 });
@@ -33,6 +37,18 @@ test('a. recorrido completo con colombia-andina instalado desde el catálogo', a
   await saveDefaultArea(page);
   await goHome(page);
   await fullRoute(page, ES);
+});
+
+test.describe('a2. pantallas del manual (modo simulado, parámetros del manual)', () => {
+  test.use({ legacyRisk: false });
+  test('a2. recorrido completo con Riesgo y Decisión del manual; Confirmación usa el nivel del manual', async ({ page }) => {
+    await setSimPlan(page, ['roya']);
+    await installFromCatalog(page, 'colombia-andina');
+    await saveDefaultArea(page);
+    await goHome(page);
+    const r = await fullRoute(page, ES);
+    expect(r.screen).toBe('manual');
+  });
 });
 
 test('b. noor-africa-oriental y cambio en caliente del paquete activo', async ({ page }) => {
@@ -244,46 +260,49 @@ async function waitForServiceWorker(page: Page): Promise<void> {
     .toEqual([]);
 }
 
-test('h. OFFLINE: recorrido completo en modo avión sin ninguna petición de red', async ({ page, context, baseURL }) => {
-  test.setTimeout(150_000);
-  await setSimPlan(page, ['roya']);
-  await waitForServiceWorker(page);
+test.describe('h. modo avión (service worker, modelo real y fotos de hoja real)', () => {
+  test.use({ simMode: false, legacyRisk: false, serviceWorkers: 'allow' });
+  test('h. OFFLINE: recorrido completo en modo avión sin ninguna petición de red', async ({ page, context, baseURL }) => {
+    test.setTimeout(150_000);
+    await waitForServiceWorker(page);
 
-  const origin = new URL(baseURL ?? '').origin;
-  const requests: Request[] = [];
-  const failed: string[] = [];
-  context.on('request', (r) => requests.push(r));
-  context.on('requestfailed', (r) => failed.push(`${r.url()} ${r.failure()?.errorText ?? ''}`));
+    const origin = new URL(baseURL ?? '').origin;
+    const requests: Request[] = [];
+    const failed: string[] = [];
+    context.on('request', (r) => requests.push(r));
+    context.on('requestfailed', (r) => failed.push(`${r.url()} ${r.failure()?.errorText ?? ''}`));
 
-  await context.setOffline(true);
-  await page.reload();
-  await expect(screen(page, 'paquetes')).toBeVisible();
-  expect(await page.evaluate(() => navigator.onLine)).toBe(false);
+    await context.setOffline(true);
+    await page.reload();
+    await expect(screen(page, 'paquetes')).toBeVisible();
+    expect(await page.evaluate(() => navigator.onLine)).toBe(false);
 
-  await installFromCatalog(page, 'colombia-andina');
-  await saveDefaultArea(page);
-  await goHome(page);
-  await fullRoute(page, ES);
+    await installFromCatalog(page, 'colombia-andina');
+    await saveDefaultArea(page);
+    await goHome(page);
+    const route = await fullRoute(page, ES, 0, { leaf: 'roya' });
+    console.log(`[h] pantalla: ${route.screen}, nivel: ${route.level}`);
 
-  const offOrigin = requests
-    .map((r) => r.url())
-    .filter((u) => !u.startsWith('data:'))
-    .filter((u) => new URL(u).origin !== origin);
-  const notFromSw = [];
-  for (const r of requests) {
-    const u = r.url();
-    if (u.startsWith('data:') || u.startsWith('blob:')) continue;
-    const res = await r.response();
-    if (!res || !res.fromServiceWorker()) notFromSw.push(u);
-  }
-  console.log(
-    `[h] peticiones registradas: ${requests.length}; fuera de origen: ${offOrigin.length}; fallidas: ${failed.length}; no servidas por SW: ${notFromSw.length}`,
-  );
-  console.log(`[h] urls: ${[...new Set(requests.map((r) => r.url().replace(origin, '').replace(/^blob:.*/, 'blob:')))].join(', ')}`);
-  expect(failed, 'peticiones fallidas offline').toEqual([]);
-  expect(offOrigin, 'peticiones a otro origen').toEqual([]);
-  expect(notFromSw, 'peticiones no servidas por el service worker').toEqual([]);
-  expect(requests.some((r) => r.url().endsWith('/packs/colombia-andina.zip'))).toBe(true);
+    const offOrigin = requests
+      .map((r) => r.url())
+      .filter((u) => !u.startsWith('data:'))
+      .filter((u) => new URL(u).origin !== origin);
+    const notFromSw = [];
+    for (const r of requests) {
+      const u = r.url();
+      if (u.startsWith('data:') || u.startsWith('blob:')) continue;
+      const res = await r.response();
+      if (!res || !res.fromServiceWorker()) notFromSw.push(u);
+    }
+    console.log(
+      `[h] peticiones registradas: ${requests.length}; fuera de origen: ${offOrigin.length}; fallidas: ${failed.length}; no servidas por SW: ${notFromSw.length}`,
+    );
+    console.log(`[h] urls: ${[...new Set(requests.map((r) => r.url().replace(origin, '').replace(/^blob:.*/, 'blob:')))].join(', ')}`);
+    expect(failed, 'peticiones fallidas offline').toEqual([]);
+    expect(offOrigin, 'peticiones a otro origen').toEqual([]);
+    expect(notFromSw, 'peticiones no servidas por el service worker').toEqual([]);
+    expect(requests.some((r) => r.url().endsWith('/packs/colombia-andina.zip'))).toBe(true);
+  });
 });
 
 type TestCard = {
@@ -388,7 +407,8 @@ test.describe('i. camino real ONNX (fixture de prueba)', () => {
     expect(ortUrls.every((u) => u.startsWith(`${origin}/ort/`))).toBe(true);
     expect(urls.some((u) => u.endsWith('/models/arabica-v1/tiny_model.onnx'))).toBe(true);
     expect(urls.filter((u) => !u.startsWith('data:') && new URL(u).origin !== origin)).toEqual([]);
-    expect(failed).toEqual([]);
+    // La ficha del segmentador se responde 404 a propósito (fixture simMode) y su petición se aborta al recargar.
+    expect(failed.filter((f) => !f.includes('/models/leafseg-v1/model_card.json'))).toEqual([]);
     expect(consoleErrors.filter((e) => e.includes('not_implemented'))).toEqual([]);
   });
 });
@@ -414,7 +434,7 @@ test.describe('j. ficha del modelo inválida o inferencia que falla', () => {
     await expect(page.getByTestId('photo-btn')).toBeDisabled();
 
     // json.dump de Python puede escribir NaN en métricas: se tolera.
-    body = CARD_RAW.replace(/"metrics":\s*\{\}/, '"metrics": {"f1": NaN, "loss": Infinity}');
+    body = CARD_RAW.replace(/"metrics":\s*\{/, '"metrics": {"f1": NaN, "loss": Infinity, ');
     expect(body).not.toBe(CARD_RAW);
     await page.getByTestId('card-retry').click();
     await expect(page.getByTestId('card-error')).toHaveCount(0);

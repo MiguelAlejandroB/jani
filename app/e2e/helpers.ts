@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { deflateSync } from 'node:zlib';
+import { deflateSync, gunzipSync } from 'node:zlib';
 import { test as base, expect, type Page } from '@playwright/test';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -23,8 +23,34 @@ export function phrase(p: PackJson, key: string): string {
   return v;
 }
 
-/** Cada prueba falla si la página lanzó algún error no capturado. */
-export const test = base.extend<{ pageErrors: string[] }>({
+type SimOptions = {
+  /** Modo simulado: ficha con `recommended_file: null` y sin segmentador (necesita `serviceWorkers: 'block'`). */
+  simMode: boolean;
+  /** Fuerza la ruta de respaldo (regla antigua de decide.ts): 404 a los parámetros del manual. */
+  legacyRisk: boolean;
+};
+
+/**
+ * Cada prueba falla si la página lanzó algún error no capturado.
+ * Con `test.use({ simMode: true, serviceWorkers: 'block' })` el modo simulado se fuerza aquí, en un solo lugar:
+ * page.route no intercepta lo que atiende un service worker, por eso las pruebas de modo avión no lo usan.
+ */
+export const test = base.extend<{ pageErrors: string[]; simRoutes: void } & SimOptions>({
+  simMode: [false, { option: true }],
+  legacyRisk: [false, { option: true }],
+  simRoutes: [
+    async ({ page, simMode, legacyRisk }, use) => {
+      if (simMode) {
+        const card = JSON.parse(readFileSync(join(APP_DIR, 'public', 'models', 'arabica-v1', 'model_card.json'), 'utf8')) as Record<string, unknown>;
+        card.recommended_file = null;
+        await page.route('**/models/arabica-v1/model_card.json', (r) => r.fulfill({ contentType: 'application/json', body: JSON.stringify(card) }));
+        await page.route('**/models/leafseg-v1/model_card.json', (r) => r.fulfill({ status: 404, body: '' }));
+      }
+      if (legacyRisk) await page.route('**/models/riesgo-v1/params.json', (r) => r.fulfill({ status: 404, body: '' }));
+      await use();
+    },
+    { auto: true },
+  ],
   pageErrors: [
     async ({ page }, use) => {
       const errors: string[] = [];
@@ -93,22 +119,33 @@ export function noiseChannelMeans(seed: number, size = 224): [number, number, nu
   return [(sum[0] ?? 0) / n, (sum[1] ?? 0) / n, (sum[2] ?? 0) / n];
 }
 
-/** PNG RGB 224×224 con ruido determinista (brillo medio ~130, Laplaciano con varianza muy alta). */
-export function noisePng(seed: number, size = 224): Buffer {
-  const px = noisePixels(seed, size);
-  const raw = Buffer.alloc(size * (size * 3 + 1));
-  for (let y = 0; y < size; y++) {
-    const o = y * (size * 3 + 1);
+function encodePng(width: number, height: number, colorType: 2 | 6, pixels: Uint8Array): Buffer {
+  const ch = colorType === 6 ? 4 : 3;
+  const raw = Buffer.alloc(height * (width * ch + 1));
+  for (let y = 0; y < height; y++) {
+    const o = y * (width * ch + 1);
     raw[o] = 0; // filtro "None"
-    raw.set(px.subarray(y * size * 3, (y + 1) * size * 3), o + 1);
+    raw.set(pixels.subarray(y * width * ch, (y + 1) * width * ch), o + 1);
   }
   const ihdr = Buffer.alloc(13);
-  ihdr.writeUInt32BE(size, 0);
-  ihdr.writeUInt32BE(size, 4);
+  ihdr.writeUInt32BE(width, 0);
+  ihdr.writeUInt32BE(height, 4);
   ihdr[8] = 8; // bits
-  ihdr[9] = 2; // RGB
+  ihdr[9] = colorType;
   const sig = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
   return Buffer.concat([sig, chunk('IHDR', ihdr), chunk('IDAT', deflateSync(raw)), chunk('IEND', Buffer.alloc(0))]);
+}
+
+/** PNG RGB 224×224 con ruido determinista (brillo medio ~130, Laplaciano con varianza muy alta). */
+export function noisePng(seed: number, size = 224): Buffer {
+  return encodePng(size, size, 2, noisePixels(seed, size));
+}
+
+/** Foto de hoja real (tests/fixtures/leaf_<name>_256.rgba.gz: RGBA crudo 256x256 en gzip) convertida a PNG. */
+export function leafPng(name: 'roya' | 'sana' = 'roya'): Buffer {
+  const rgba = gunzipSync(readFileSync(join(APP_DIR, 'tests', 'fixtures', `leaf_${name}_256.rgba.gz`)));
+  if (rgba.length !== 256 * 256 * 4) throw new Error(`fixture leaf_${name}_256 con tamaño inesperado: ${rgba.length}`);
+  return encodePng(256, 256, 6, rgba);
 }
 
 // ---------- Navegación del recorrido ----------
@@ -139,38 +176,50 @@ export async function saveDefaultArea(page: Page): Promise<void> {
   await page.getByTestId('area-save').click();
 }
 
-/** Inicio -> Captura y sube n fotos una a una (el input no es `multiple`). */
-export async function takePhotos(page: Page, n: number, seedBase = 1): Promise<void> {
+/** Inicio -> Captura y sube n fotos una a una (el input no es `multiple`). `leaf`: hoja real en vez de ruido. */
+export async function takePhotos(page: Page, n: number, seedBase = 1, opts: { leaf?: 'roya' | 'sana' } = {}): Promise<void> {
   await page.getByTestId('start-review').click();
   await expect(screen(page, 'captura')).toBeVisible();
   for (let i = 1; i <= n; i++) {
     await expect(page.getByTestId('photo-btn')).toBeEnabled();
-    await page.getByTestId('photo-input').setInputFiles({ name: `hoja-${i}.png`, mimeType: 'image/png', buffer: noisePng(seedBase + i) });
+    await page
+      .getByTestId('photo-input')
+      .setInputFiles({ name: `hoja-${i}.png`, mimeType: 'image/png', buffer: opts.leaf ? leafPng(opts.leaf) : noisePng(seedBase + i) });
     await expect(page.getByTestId('photo-count')).toHaveText(`${i} / 5`);
   }
   await page.getByTestId('photos-done').click();
   await expect(screen(page, 'diagnostico')).toBeVisible();
 }
 
-export type RouteResult = { level: string; suggestion: string; kpis: Record<string, string> };
+/** `screen`: pantalla de Riesgo/Decisión que apareció (la del manual con tarjetas `alt-*`, o la antigua con KPIs). */
+export type RouteResult = { level: string; suggestion: string; kpis: Record<string, string>; screen: 'manual' | 'legacy' };
 export const KPI_IDS = ['loss', 'cost', 'breakeven', 'net'] as const;
 
 /**
- * Recorrido completo con sim `roya` desde Inicio: fotos -> diagnóstico -> preguntas (sí, no) -> riesgo ->
- * decisión (KPIs visibles) -> elige la sugerencia -> confirmación -> Pendientes con un caso más.
+ * Recorrido completo desde Inicio: fotos -> diagnóstico (roya) -> preguntas (sí, no) -> riesgo -> decisión -> elige ->
+ * confirmación -> Pendientes con un caso más. Soporta las dos pantallas:
+ * la del manual (tarjetas `alt-*`; elige la primera alternativa con botón) y la antigua (KPIs; elige la sugerencia).
  * `casesBefore`: casos que la prueba ya guardó; se espera a verlos (espera positiva, sin pausas fijas).
+ * `opts.leaf`: fotos de hoja real en vez de ruido (modo avión con el modelo real).
  */
-export async function fullRoute(page: Page, pack: PackJson, casesBefore = 0): Promise<RouteResult> {
+export async function fullRoute(page: Page, pack: PackJson, casesBefore = 0, opts: { leaf?: 'roya' | 'sana' } = {}): Promise<RouteResult> {
   await expect(page.getByRole('heading', { name: phrase(pack, 'welcome') })).toBeVisible();
   await page.getByRole('button', { name: phrase(pack, 'pending') }).click();
   await expect(screen(page, 'pendientes')).toBeVisible();
   await expect(page.getByTestId('case-item')).toHaveCount(casesBefore);
   await goHome(page);
 
-  await takePhotos(page, 5);
+  await takePhotos(page, 5, 1, opts);
   const dx = page.getByTestId('dx-outcome');
   await expect(dx).toHaveAttribute('data-outcome', 'continue');
-  await expect(dx).toHaveText(phrase(pack, 'dx_roya'));
+  if (opts.leaf) {
+    // Modelo real: no se depende de una clase exacta (la hoja de roya puede salir como otra enfermedad); basta una afectada.
+    const escape = (t: string) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const affected = ['roya', 'minador', 'phoma', 'cercospora'].map((c) => escape(phrase(pack, `dx_${c}`)));
+    await expect(dx).toHaveText(new RegExp(`^(${affected.join('|')})$`));
+  } else {
+    await expect(dx).toHaveText(phrase(pack, 'dx_roya'));
+  }
   await page.getByTestId('dx-next').click();
 
   await expect(page.getByRole('heading', { name: phrase(pack, 'ask_rain') })).toBeVisible();
@@ -179,33 +228,57 @@ export async function fullRoute(page: Page, pack: PackJson, casesBefore = 0): Pr
   await page.getByTestId('answer-no').click();
 
   await expect(screen(page, 'riesgo')).toBeVisible();
-  const level = (await page.getByTestId('risk-level').getAttribute('data-level')) ?? '';
-  expect(['LOW', 'MEDIUM', 'HIGH']).toContain(level);
-  await expect(screen(page, 'riesgo').getByText(phrase(pack, `risk_${level.toLowerCase()}`))).toBeVisible();
+  // Con los parámetros del manual hay que esperar el Web Worker; con la regla antigua el nivel sale de inmediato.
+  const gauge = page.getByTestId('risk-level');
+  await expect(gauge).toHaveAttribute('data-level', /^(LOW|MEDIUM|HIGH|CONSULT)$/, { timeout: 60_000 });
+  await expect(page.getByTestId('rd-loading')).toHaveCount(0, { timeout: 60_000 });
+  const manual = (await page.getByTestId('risk-card').count()) > 0;
+  const level = (await gauge.getAttribute('data-level')) ?? '';
+  if (manual) {
+    await expect(gauge).toHaveAttribute('aria-label', phrase(pack, level === 'CONSULT' ? 'consult' : `risk_${level.toLowerCase()}`));
+  } else {
+    expect(['LOW', 'MEDIUM', 'HIGH']).toContain(level);
+    await expect(screen(page, 'riesgo').getByText(phrase(pack, `risk_${level.toLowerCase()}`))).toBeVisible();
+  }
   await page.getByTestId('risk-next').click();
 
-  await expect(screen(page, 'decision')).toBeVisible();
+  const dec = screen(page, 'decision');
+  await expect(dec).toBeVisible();
   const kpis: Record<string, string> = {};
-  for (const k of KPI_IDS) {
-    const loc = page.getByTestId(`kpi-${k}`);
-    await expect(loc).toBeVisible();
-    const text = (await loc.textContent()) ?? '';
-    expect(text).toMatch(/\d/);
-    kpis[k] = text;
-    await expect(screen(page, 'decision').getByText(phrase(pack, `kpi_${k}`), { exact: true })).toBeVisible();
+  let suggestion: string;
+  if (manual) {
+    await expect(dec.getByRole('heading', { name: phrase(pack, 'options_title') })).toBeVisible();
+    await expect(dec.locator('[data-testid^="alt-"]').first()).toBeVisible();
+    await expect(page.getByTestId('choice-CONSULT')).toBeVisible();
+    const first = dec.locator('[data-testid^="choose-"]').first();
+    const id = ((await first.getAttribute('data-testid')) ?? '').replace('choose-', '');
+    suggestion = id === 'nada' || id === 'remeasure' ? 'WAIT' : 'TREAT';
+    await first.click();
+  } else {
+    for (const k of KPI_IDS) {
+      const loc = page.getByTestId(`kpi-${k}`);
+      await expect(loc).toBeVisible();
+      const text = (await loc.textContent()) ?? '';
+      expect(text).toMatch(/\d/);
+      kpis[k] = text;
+      await expect(dec.getByText(phrase(pack, `kpi_${k}`), { exact: true })).toBeVisible();
+    }
+    const sug = page.getByTestId('decision-suggestion');
+    suggestion = (await sug.getAttribute('data-suggestion')) ?? '';
+    expect(['WAIT', 'TREAT']).toContain(suggestion);
+    await expect(sug).toHaveText(phrase(pack, suggestion === 'TREAT' ? 'act_cheaper' : 'wait_ok'));
+    await page.getByTestId(`choice-${suggestion}`).click();
   }
-  const sug = page.getByTestId('decision-suggestion');
-  const suggestion = (await sug.getAttribute('data-suggestion')) ?? '';
-  expect(['WAIT', 'TREAT']).toContain(suggestion);
-  await expect(sug).toHaveText(phrase(pack, suggestion === 'TREAT' ? 'act_cheaper' : 'wait_ok'));
-  await page.getByTestId(`choice-${suggestion}`).click();
 
   await expect(screen(page, 'confirmacion')).toBeVisible();
   await expect(page.getByRole('heading', { name: phrase(pack, 'saved') })).toBeVisible();
+  // Enviar el caso por mensaje: con el manual, si el nivel es HIGH o CONSULT; con la regla antigua, si es HIGH.
+  const canSend = level === 'HIGH' || (manual && level === 'CONSULT');
+  await expect(page.getByTestId('send-case')).toHaveCount(canSend ? 1 : 0);
   await goHome(page);
   await page.getByRole('button', { name: phrase(pack, 'pending') }).click();
   await expect(page.getByTestId('case-item')).toHaveCount(casesBefore + 1);
   await expect(page.getByTestId('case-item').filter({ hasText: phrase(pack, `opt_${suggestion.toLowerCase()}`) }).first()).toBeVisible();
   await goHome(page);
-  return { level, suggestion, kpis };
+  return { level, suggestion, kpis, screen: manual ? 'manual' : 'legacy' };
 }
