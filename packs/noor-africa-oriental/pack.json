@@ -8076,7 +8076,8 @@
     "t_result": "Matokeo",
     "t_questions": "Maswali mawili",
     "t_risk": "Hatari",
-    "t_decision": "Uamuzi"
+    "t_decision": "Uamuzi",
+    "privacy": "Picha zako hazitoki kwenye simu. Jani inafanya kazi bila intaneti."
   },
   "demo_values": {
     "synthetic": true,

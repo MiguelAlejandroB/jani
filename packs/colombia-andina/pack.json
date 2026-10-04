@@ -9411,7 +9411,8 @@
     "t_result": "Resultado",
     "t_questions": "Dos preguntas",
     "t_risk": "Riesgo",
-    "t_decision": "Decisión"
+    "t_decision": "Decisión",
+    "privacy": "Tus fotos no salen del teléfono. Jani funciona sin internet."
   },
   "demo_values": {
     "synthetic": true,

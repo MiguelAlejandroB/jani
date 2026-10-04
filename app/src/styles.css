@@ -157,3 +157,8 @@ button { font: inherit; color: inherit; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* Acerca de: resumen para la persona usuaria; los detalles técnicos se abren con 5 toques en el ícono. */
+.about-card { background: var(--paper); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px 18px; display: grid; gap: 10px; font-size: 1.05rem; line-height: 1.45; }
+.about-card p { margin: 0; }
+.about-lang { color: var(--muted); }

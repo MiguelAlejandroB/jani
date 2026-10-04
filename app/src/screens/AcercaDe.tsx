@@ -1,3 +1,4 @@
+import { useRef, useState } from 'react';
 import { DemoBadge, Screen } from '../ui';
 import { useFlow } from '../flow/FlowContext';
 import { usePack } from '../packs/PackContext';
@@ -29,9 +30,21 @@ function RowView({ k, v }: { k: string; v: string }) {
   );
 }
 
+// Toques en el ícono para abrir los detalles técnicos (equipo y jurado); la persona usuaria no los ve.
+const TAPS_FOR_DETAILS = 5;
+
 export default function AcercaDe() {
   const { card } = useFlow();
-  const { pack } = usePack();
+  const { pack, t } = usePack();
+  const taps = useRef(0);
+  const [details, setDetails] = useState(false);
+  const onIconClick = () => {
+    taps.current += 1;
+    if (taps.current >= TAPS_FOR_DETAILS) {
+      taps.current = 0;
+      setDetails((d) => !d);
+    }
+  };
 
   const modelRows: Row[] = [];
   if (card) {
@@ -65,18 +78,32 @@ export default function AcercaDe() {
   }
 
   return (
-    <Screen id="acerca" icon="ℹ️">
-      <section data-testid="about-model" style={{ display: 'grid', gap: 8 }}>
-        {modelRows.map(([k, v]) => (
-          <RowView key={k} k={k} v={v} />
-        ))}
-      </section>
-      <section data-testid="about-sources" style={{ display: 'grid', gap: 8 }}>
-        {sourceRows.map(([k, v], i) => (
-          <RowView key={`${k}-${i}`} k={k} v={v} />
-        ))}
-        {demo && <DemoBadge text={demo.note} />}
-      </section>
+    <Screen id="acerca" icon="ℹ️" title={t('about')} onIconClick={onIconClick} top>
+      <div className="about-card" data-testid="about-summary">
+        <p>{t('info_mode')}</p>
+        <p>{t('privacy')}</p>
+        {pack && (
+          <p className="about-lang">
+            {t('sec_language')}: <strong>{pack.language.name}</strong>
+          </p>
+        )}
+      </div>
+      {demo && <DemoBadge text={t('demo_data')} />}
+      {details && (
+        <>
+          <section data-testid="about-model" style={{ display: 'grid', gap: 8 }}>
+            {modelRows.map(([k, v]) => (
+              <RowView key={k} k={k} v={v} />
+            ))}
+          </section>
+          <section data-testid="about-sources" style={{ display: 'grid', gap: 8 }}>
+            {sourceRows.map(([k, v], i) => (
+              <RowView key={`${k}-${i}`} k={k} v={v} />
+            ))}
+            {demo && <DemoBadge text={demo.note} />}
+          </section>
+        </>
+      )}
     </Screen>
   );
 }

@@ -370,6 +370,9 @@ test.describe('i. camino real ONNX (fixture de prueba)', () => {
     await goHome(page);
     // La ficha cargada es la del fixture.
     await page.getByRole('button', { name: 'ℹ️', exact: true }).click();
+    // Los detalles técnicos están ocultos: se abren con 5 toques en el ícono.
+    await expect(page.getByTestId('about-model')).toHaveCount(0);
+    for (let i = 0; i < 5; i++) await page.getByTestId('screen-icon').click();
     await expect(page.getByTestId('about-model')).toContainText('tiny-test-fixture');
     await expect(page.getByTestId('about-model')).toContainText(LIMIT);
     await goHome(page);

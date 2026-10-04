@@ -8076,7 +8076,8 @@
     "t_result": "Result",
     "t_questions": "Two questions",
     "t_risk": "Risk",
-    "t_decision": "Decision"
+    "t_decision": "Decision",
+    "privacy": "Your photos never leave your phone. Jani works without internet."
   },
   "demo_values": {
     "synthetic": true,
