@@ -78,5 +78,8 @@ def default_params(S=200):
                      "remeasure_labor_days": 0.25, "harvest_wage_factor": 1.5, "price_sd": 0.12,
                      "price_age_widen_per_week": 0.01, "own_capital_rate_monthly": 0.005,
                      "f3_min_prob_better": 0.2, "max_shown": 4},
+        # Visualización (no son datos agronómicos): bandas de la probabilidad de pérdida grande (> loss_threshold)
+        # para el semáforo/cereza: < 0,33 bajo, < 0,66 medio, si no alto.
+        "display": {"risk_bands": [0.33, 0.66]},
         "calibration_age_days": 0,
     }

@@ -1,6 +1,6 @@
 {
   "id": "noor-africa-oriental",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "language": {
     "code": "sw",
     "name": "Kiswahili",
@@ -8048,7 +8048,18 @@
     "why_deadline": "Hakuna muda wa kutosha kabla ya mavuno",
     "why_labor": "Hakuna wafanyakazi wa kutosha wiki hii",
     "use_location": "Tumia mahali nilipo kwa hali ya hewa",
-    "climate_from": "Hali ya hewa ya"
+    "climate_from": "Hali ya hewa ya",
+    "risk_title": "Unachoweza kupoteza kwenye mavuno",
+    "loss_likely": "Uwezekano mkubwa",
+    "loss_between": "Inaweza kuwa kati ya",
+    "bad_year": "Katika mwaka mbaya",
+    "chance_big_loss": "Uwezekano wa hasara kubwa",
+    "calculating": "Inahesabu…",
+    "options_title": "Chaguo zako",
+    "times_better": "kati ya mara 10 ni bora kuliko kutofanya kitu",
+    "choose": "Chagua hii",
+    "not_viable": "Haiwezekani leo",
+    "remeasure_worth": "Inafaa kukagua tena baada ya wiki 3 kabla ya kutumia pesa"
   },
   "demo_values": {
     "synthetic": true,

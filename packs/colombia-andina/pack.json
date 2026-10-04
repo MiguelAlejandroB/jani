@@ -1,6 +1,6 @@
 {
   "id": "colombia-andina",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "language": {
     "code": "es",
     "name": "Español",
@@ -9383,7 +9383,18 @@
     "why_deadline": "Ya no hay tiempo antes de la cosecha",
     "why_labor": "No hay jornales suficientes esta semana",
     "use_location": "Usar mi ubicación para el clima",
-    "climate_from": "Clima de"
+    "climate_from": "Clima de",
+    "risk_title": "Lo que puedes perder en la cosecha",
+    "loss_likely": "Lo más probable",
+    "loss_between": "Puede ir de",
+    "bad_year": "En un año malo",
+    "chance_big_loss": "Probabilidad de una pérdida grande",
+    "calculating": "Calculando…",
+    "options_title": "Tus opciones",
+    "times_better": "de cada 10 veces sale mejor que no hacer nada",
+    "choose": "Elegir esta",
+    "not_viable": "No se puede hoy",
+    "remeasure_worth": "Vale la pena volver a revisar en 3 semanas antes de gastar"
   },
   "demo_values": {
     "synthetic": true,

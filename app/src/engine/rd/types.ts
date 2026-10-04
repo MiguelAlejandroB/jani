@@ -40,6 +40,8 @@ export type RdParams = {
     f3_min_prob_better: number;
     max_shown: number;
   };
+  /** Visualización: bandas de P(pérdida > loss_threshold) para bajo / medio / alto. */
+  display?: { risk_bands: [number, number] };
   calibration_age_days?: number;
   modo?: { recomendacion_automatica: boolean; razon: string | null };
 };

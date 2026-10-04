@@ -49,6 +49,8 @@ export const REQUIRED_PHRASE_KEYS: readonly string[] = [
   'info_mode', 'why_liquidity', 'why_cert', 'why_deadline', 'why_labor',
   // Clima según la ubicación (GPS).
   'use_location', 'climate_from',
+  // Pantallas de riesgo y decisión.
+  'risk_title', 'loss_likely', 'loss_between', 'bad_year', 'chance_big_loss', 'calculating', 'options_title', 'times_better', 'choose', 'not_viable', 'remeasure_worth',
 ];
 
 const POINT_KEYS = [
