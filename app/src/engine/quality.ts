@@ -52,11 +52,33 @@ export function assessQuality(rgba: Uint8ClampedArray, w: number, h: number): 'o
 }
 
 /** Solo navegador: dibuja la imagen estirada (sin recorte) a size x size y devuelve sus píxeles RGBA. */
+// Reducción con suavizado, como PIL (BILINEAR) en el entrenamiento y la calibración. Un solo drawImage de una foto de
+// 12 MP a 224 px casi no filtra: deja aliasing que multiplica ~5 veces la varianza del Laplaciano (textura) y hacía que
+// fotos reales de hojas fallaran el filtro de hoja (max_texture_var). Se reduce a la mitad por pasos y al final al tamaño.
 export function imageToRgba(image: ImageBitmap, size = QUALITY_SIZE): Uint8ClampedArray {
+  let src: CanvasImageSource = image;
+  let w = image.width;
+  let h = image.height;
+  while (w >= size * 2 || h >= size * 2) {
+    const nw = Math.max(size, Math.round(w / 2));
+    const nh = Math.max(size, Math.round(h / 2));
+    const step = context2d(nw, nh);
+    step.drawImage(src, 0, 0, w, h, 0, 0, nw, nh);
+    src = step.canvas;
+    w = nw;
+    h = nh;
+  }
+  const ctx = context2d(size, size);
+  ctx.drawImage(src, 0, 0, w, h, 0, 0, size, size);
+  return ctx.getImageData(0, 0, size, size).data;
+}
+
+function context2d(w: number, h: number): OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D {
   const canvas: OffscreenCanvas | HTMLCanvasElement =
-    typeof OffscreenCanvas !== 'undefined' ? new OffscreenCanvas(size, size) : Object.assign(document.createElement('canvas'), { width: size, height: size });
+    typeof OffscreenCanvas !== 'undefined' ? new OffscreenCanvas(w, h) : Object.assign(document.createElement('canvas'), { width: w, height: h });
   const ctx = canvas.getContext('2d') as OffscreenCanvasRenderingContext2D | CanvasRenderingContext2D | null;
   if (!ctx) throw new Error('canvas_unavailable');
-  ctx.drawImage(image, 0, 0, size, size);
-  return ctx.getImageData(0, 0, size, size).data;
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  return ctx;
 }

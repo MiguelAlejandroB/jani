@@ -68,3 +68,10 @@ Cada una: qué se decidió, por qué y qué cuesta si está mal.
     Oriental (NASA POWER), con el más cercano dentro de 150 km y, si no, el punto del paquete. La ubicación no sale del
     teléfono ni se guarda en los casos. Si está mal: las coordenadas son aproximadas (cabeceras municipales); con la
     grilla de ~0,5° de NASA POWER el efecto es pequeño.
+28. **Reducción de la foto con suavizado** (`imageToRgba`, por pasos a la mitad con `imageSmoothingQuality = 'high'`).
+    Causa de que muchas fotos reales pidieran repetirse: un solo `drawImage` de una foto de celular (≈ 4000 px) a 224 px
+    casi no filtra, y el aliasing multiplica ~5 veces la textura (varianza del Laplaciano). En Chromium, con 16 hojas
+    BRACOL a 2048 y 4032 px, la textura medida era de 490 a 1.590 frente a 100–430 en Python (PIL BILINEAR, el mismo
+    método del entrenamiento y la calibración). Con fondos de campo superaba `max_texture_var` (2.500) y la hoja se
+    descartaba. Ahora la app mide 88–264, en línea con la calibración, y el clasificador y el segmentador reciben la
+    misma imagen suavizada que vieron al entrenar.
