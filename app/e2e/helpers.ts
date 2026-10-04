@@ -185,7 +185,7 @@ export async function takePhotos(page: Page, n: number, seedBase = 1, opts: { le
     await page
       .getByTestId('photo-input')
       .setInputFiles({ name: `hoja-${i}.png`, mimeType: 'image/png', buffer: opts.leaf ? leafPng(opts.leaf) : noisePng(seedBase + i) });
-    await expect(page.getByTestId('photo-count')).toHaveText(`${i} / 5`);
+    await expect(page.getByTestId('photo-count')).toHaveText(i < 5 ? `${i} / 5` : `${i} ✓`);
   }
   await page.getByTestId('photos-done').click();
   await expect(screen(page, 'diagnostico')).toBeVisible();

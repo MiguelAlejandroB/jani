@@ -8,7 +8,9 @@ import { useNav } from '../nav';
 import { usePack } from '../packs/PackContext';
 import { BigButton, Screen } from '../ui';
 
-const MAX_PHOTOS = 10;
+// Con 5 fotos ya se puede seguir; se pueden tomar más (hasta 30) para afinar el riesgo: con 8 o más hojas desaparece
+// el aviso de pocas hojas y una foto mal clasificada pesa menos.
+const MAX_PHOTOS = 30;
 const TARGET_PHOTOS = 5;
 const TAPS_FOR_MENU = 5;
 const SIM_KEY = 'jani.sim';
@@ -106,7 +108,7 @@ export default function Captura() {
       audioNonce={rejection?.n ?? 0}
     >
       <div className="photo-count" data-testid="photo-count">
-        {photos.length} / {TARGET_PHOTOS}
+        {photos.length < TARGET_PHOTOS ? `${photos.length} / ${TARGET_PHOTOS}` : `${photos.length} ✓`}
       </div>
       {rejection && <p className="retake">{t(rejection.key)}</p>}
       {inferError && (
