@@ -50,8 +50,8 @@ if present, otherwise the phone's offline text-to-speech).
 - Labels every pixel (256×256) as **background, leaf or symptom**.
 - Severity `s = L / (H + L)` (symptom pixels over leaf + symptom), the same formula as the BRACOL expert masks.
 - Also a **leaf gate**: rejects photos with too little leaf, non-green "leaf" pixels or noise-like texture.
-- Test set (BRACOL, n = 50): mIoU **0.90**, symptom IoU 0.74, severity MAE **0.5 points**, Pearson r **0.98**,
-  severity level exact 88 % / within one level 100 %. Trained 60 epochs in Colab.
+- Test set (BRACOL, n = 50), deployed INT8: mIoU **0.885**, symptom IoU 0.73, severity MAE **0.62 points**,
+  Pearson r **0.97**, severity level exact 86 % / within one level 100 %. Trained 60 epochs in Colab.
 
 ### M1 — Calibrated classification with abstention
 - Input 224×224; outputs `softmax(z / T)` with a **temperature T** fitted on field photos, then an
@@ -96,7 +96,110 @@ Box-Muller + Marsaglia-Tsang). The app runs them in a **Web Worker** (~1.2 s on 
 
 ---
 
-## 3. Edge AI: how it runs on the phone
+## 3. How each model was trained and quantized (in depth)
+
+Both vision models are trained in **Google Colab (GPU T4)** with the notebooks in `training/`, which download the data,
+train several candidate architectures, calibrate, export to ONNX, quantize, re-evaluate the quantized file **with the
+same arithmetic as the phone**, and write a `model_card.json` that the app reads (classes, normalisation, temperature,
+thresholds, metrics). The app never hard-codes any of these values. Values below are the notebook settings and the
+**deployed** model cards in `app/public/models/`.
+
+### 3.1 M1 — leaf classifier (`training/jani_train.ipynb` → `app/public/models/arabica-v1/`)
+
+**Purpose.** Name the leaf condition so the risk model knows which disease chain to update — and refuse to answer
+when the photo is out of its competence.
+
+| Item | Setting |
+|---|---|
+| Classes | `sana` (healthy), `roya` (rust), `minador` (leaf miner), `phoma`, `cercospora` |
+| Candidates | `efficientnet_lite0` and `mobilenetv3_small_100` (timm, ImageNet-pretrained, new 5-class head) |
+| Deployed | **mobilenetv3_small_100** — chosen because it scored best on the field hold-out (0.513 vs 0.383) and is smallest |
+| Training data (deployed card) | JMuBEN/JMuBEN2, Kenya: **27,625 images** (capped at 6,500 per class); BRACOL, Brazil: **1,343 leaves** |
+| Field data | Uganda (Soroti Univ.) and Peru (Saposoa), split **by leaf** so copies of one leaf never cross splits. Notebook option: Uganda 40 % train / 20 % calibration / 40 % test; Peru 50 % calibration / 50 % test (Peru never trained on). `FIELD_SHARE = 0.25`: 1 in 4 training photos per epoch is a field photo (weighted sampler) |
+| Data cleaning | Exact/near duplicates removed with a 64-px high-pass texture descriptor over 8 rotations/flips, cosine ≥ **0.80** = same leaf (copies ≥ 0.94, different leaves ≤ 0.49); truncated images rejected by full decode |
+| Input | 224×224, stretched (no crop), RGB, ÷255, ImageNet mean/std |
+| Augmentation | RandomResizedCrop(scale 0.5–1, ratio 0.6–1.67), horizontal + vertical flips, rotation ±25°, ColorJitter(0.35, 0.35, 0.3, 0.05) |
+| Optimisation | AdamW (lr 1e-3, weight decay 1e-4), **OneCycle** schedule, cross-entropy with **label smoothing 0.1**, mixed precision (AMP), batch 64, **8 epochs**, seed 42 |
+| Checkpoint selection | Epoch with the best accuracy on the **field calibration** split (not on the in-distribution validation, which saturates at 100 %) |
+| Confidence calibration | **Temperature scaling** fitted with L-BFGS on the field calibration logits, each country weighted equally → deployed **T = 0.127** |
+| "I'm not sure" rule | Abstain if `max p < min_confidence` **or** `p₁ − p₂ < 0.15`. `min_confidence` = lowest value on a 0.40–0.95 grid reaching mean precision ≥ **0.90** with coverage ≥ **0.30** on the calibration half → deployed **0.50** |
+
+**Export and quantization.**
+1. `torch.onnx.export`, **opset 17**, input `input` [1,3,224,224] NCHW → output `logits`; `onnx.checker` validation.
+2. `quant_pre_process` (shape inference + graph clean-up).
+3. **Static post-training quantization** `quantize_static`: **QDQ format**, **per-channel** weights, weights **QInt8**,
+   activations **QUInt8**. Calibration reader: **300 images** (≈ 2/3 JMuBEN training photos + 1/3 field photos), so the
+   activation ranges cover field lighting.
+4. **Stability gate:** INT8 is used only if its accuracy differs from FP32 by ≤ **0.02** and its predictions disagree
+   with FP32 on ≤ **5 %** of photos, and the file is ≤ 10 MB (challenge limit); otherwise FP32 ships.
+5. Evaluation runs with `ORT_DISABLE_ALL` (no graph optimisation) because desktop onnxruntime fuses INT8 kernels
+   differently; unoptimised CPU matches onnxruntime-web on the phone within **< 0.5 logits**.
+
+**Size:** FP32 6.10 MB → **INT8 1.86 MB**. **Latency:** ~15 ms/photo on Colab CPU (unoptimised).
+
+**Results (deployed card).** In-distribution validation (JMuBEN, n = 4,875): 100 % — not informative. Field hold-out,
+photos never used for training or calibration: **Uganda 24.7 %** (n = 1,500), **Peru 58.0 %** (n = 200); the INT8 file on
+the combined field hold-out: 51.3 % accuracy at 95 % coverage. On Peru's unknown class (*ojo de gallo*) it abstains only
+3 % of the time. Full analysis and the planned fixes are in [docs/MODEL_RESULTS.md](docs/MODEL_RESULTS.md).
+*Caveat:* the card reports a higher score for INT8 than for FP32 on the field hold-out (51.3 % vs 28.7 %); this
+inconsistency between evaluation passes is not yet explained and should be re-checked before quoting INT8 figures.
+
+### 3.2 M2 — leaf segmenter (`training/jani_segmentation.ipynb` → `app/public/models/leafseg-v1/`)
+
+**Purpose.** Measure **how much** of the leaf is damaged (the classifier only says *what*), and reject photos that do
+not contain a leaf before anything else runs.
+
+| Item | Setting |
+|---|---|
+| Classes (output channel order) | `fondo` (background), `hoja` (leaf), `sintoma` (symptom) |
+| Candidates | LR-ASPP head on **MobileNetV3-Small** and **MobileNetV3-Large** (torchvision, ImageNet weights, dilated backbone) |
+| Deployed | **LR-ASPP MobileNetV3-Large**, best symptom IoU on validation (0.726 vs 0.706) |
+| Data | BRACOL segmentation set (Esgario et al., [lara2018](https://github.com/esgario/lara2018), MIT): **400 train / 50 val / 50 test** leaves with expert masks (black = background, green = leaf, red = symptom) |
+| Input | 256×256 stretched, RGB, ÷255, ImageNet mean/std; images cached at 320 px for random crops |
+| Augmentation | Random crop → resize 256 (bilinear image, nearest mask), rotations/flips, colour jitter |
+| Loss | Cross-entropy with **class weights** `(N / (3·nₖ))^0.5` (symptom pixels are rare) **+ Dice loss** on the symptom class |
+| Optimisation | AdamW (lr 1e-3, wd 1e-4), OneCycle, batch 16, **60 epochs**, seed 42; validated every 5 epochs; best symptom IoU kept |
+| Severity | `s = symptom / (leaf + symptom)`; display levels from BRACOL (healthy < 0.1 %, very low < 5 %, low < 10 %, high < 15 %, very high). The risk model uses its own levels (< 1 %, 1–10 %, 10–30 %, > 30 %) |
+| Leaf gate | Leaf + symptom ≥ **10 %** of the image, ≥ **64 %** of "leaf" pixels greenish (G > R and G > B), and grayscale Laplacian variance ≤ **2,500**. Thresholds set on 300 JMuBEN leaves vs 300 Food-101 non-leaf images, then re-checked on 140 field photos (Uganda/Peru) |
+
+**Export and quantization.** Same pipeline as M1: ONNX opset 17 (`input` → `logits` [1,3,256,256], per-pixel argmax),
+`quant_pre_process`, `quantize_static` with **QDQ, per-channel, QInt8 weights / QUInt8 activations**, calibration with
+**100 training images**. Stability gate: mIoU drop ≤ **0.02** and pixel disagreement with FP32 ≤ **3 %**. The small
+backbone failed the gate (shipped FP32 there); the large one passed.
+
+**Size:** FP32 12.87 MB → **INT8 3.72 MB**. **Latency:** ~62 ms/photo on CPU (unoptimised).
+
+**Results (test, n = 50)**
+
+| | FP32 | **INT8 (deployed)** |
+|---|---|---|
+| IoU background / leaf / symptom | 0.989 / 0.968 / 0.743 | 0.980 / 0.950 / **0.726** |
+| mIoU | 0.900 | **0.885** |
+| Severity MAE (points) | 0.52 | **0.62** |
+| Severity Pearson r | 0.983 | **0.968** |
+| Severity level exact / within one | 88 % / 100 % | **86 % / 100 %** |
+
+Limits: trained on 400 Brazilian leaves on a light background — severity on cluttered field backgrounds is less precise.
+
+### 3.3 M3/M4 — risk and decision calibration (`training/riesgo_decision/`, run locally)
+
+No neural network: these are probabilistic models whose parameters are **calibrated locally** and shipped as
+`app/public/models/riesgo-v1/params.json` (version `2026-10-04-v1`).
+
+| Parameter | How it was set | Status |
+|---|---|---|
+| Λ (4×4 detection matrix) | Real segmenter vs BRACOL expert masks (val + test, 100 leaves) | **Estimated**; level 3 locked |
+| Climate normals | NASA POWER daily 2001–2024, 65 sites → weekly standardised anomalies (`build_climate.py`) | Data |
+| Rust dynamics τ, γ_w | Block-coordinate fit on CATIE/Mendeley panel (442 obs.) | **Not identifiable** (A4 violated) → prior kept |
+| Treatment efficacy order | USDA ARS Hawaii 2022–23 trials (logit slope of incidence) | Consistent with priors (systemic > copper > biological) |
+| Damage g, κ, Ŷ₀, θ, regional π₀ | Expert-criteria priors, 200 parameter draws per disease | **Prior** |
+
+Verification: synthetic recovery tests (Λ error < 0.05, conformal coverage 80 % ± 3 %), 31 property tests, 8/8
+deliberate mutations caught, and Python ↔ TypeScript golden vectors.
+
+---
+
+## 4. Edge AI: how it runs on the phone
 
 - M1 and M2 are exported to **ONNX** and **INT8-quantised** (~4× smaller than FP32), executed with
   **onnxruntime-web (WebAssembly)**. The `.wasm` files ship inside the app (`app/public/ort/`), never from a CDN.
@@ -109,7 +212,7 @@ Box-Muller + Marsaglia-Tsang). The app runs them in a **Web Worker** (~1.2 s on 
 
 ---
 
-## 4. Regional packs
+## 5. Regional packs
 
 | Pack | Language | Region | Climate points |
 |---|---|---|---|
@@ -123,7 +226,7 @@ with `source: "TODO"` until a local partner signs them off.
 
 ---
 
-## 5. Repository layout
+## 6. Repository layout
 
 ```
 app/                     React 19 + Vite + TypeScript (strict) PWA, Capacitor Android project
@@ -146,7 +249,7 @@ docs/                    detailed documentation (English); docs/es/ = Spanish or
 
 ---
 
-## 6. Build and run
+## 7. Build and run
 
 Requirements: Node 20+, npm. For the APK: JDK 21 and Android SDK 35.
 
@@ -178,7 +281,7 @@ python build_climate.py     # NASA POWER climate normals for every coffee locati
 
 ---
 
-## 7. Data and licences
+## 8. Data and licences
 
 | Dataset | Country | Size | Licence | Use |
 |---|---|---|---|---|
@@ -194,7 +297,7 @@ Fonts: Fraunces (SIL OFL). Optional Swahili audio: Meta MMS-TTS (non-commercial 
 
 ---
 
-## 8. Honest limitations
+## 9. Honest limitations
 
 - **Field generalisation of M1** is weak (Peru 58 %, Uganda 25 %); abstention and "consult" mitigate it.
 - **Risk parameters are expert priors.** The public rust panel violated the monotonic-chain assumption (leaf renewal
@@ -205,7 +308,7 @@ Fonts: Fraunces (SIL OFL). Optional Swahili audio: Meta MMS-TTS (non-commercial 
 
 ---
 
-## 9. Documentation
+## 10. Documentation
 
 | Document | Content |
 |---|---|
