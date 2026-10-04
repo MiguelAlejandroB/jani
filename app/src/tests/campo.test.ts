@@ -1,7 +1,7 @@
 /// <reference types="node" />
 // @vitest-environment node
 // Regresión: "todas las fotos piden repetir". Fotos REALES de campo (Uganda y Perú, Mendeley, CC BY 4.0) que el
-// control de calidad y el filtro de hoja rechazaban sin razón. Umbrales recalibrados con datos (ver DECISIONES.md):
+// control de calidad y el filtro de hoja rechazaban sin razón. Umbrales recalibrados con datos (ver docs/DECISIONS.md):
 // la nitidez mínima y la fracción de hoja mínima se midieron contra fotos desenfocadas y fotos que no son hojas.
 import { readFileSync } from 'node:fs';
 import { createServer } from 'node:http';

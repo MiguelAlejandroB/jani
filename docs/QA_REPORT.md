@@ -1,98 +1,98 @@
-# Informe de QA del MVP
+# MVP QA report
 
-Rama `build/mvp`, código en el commit `c7abc11`. Fecha: 2026-10-03. Máquina: Windows 10, Node 20.19, Chromium de Playwright.
-Estados: **VERIFICADO** (hay un comando o prueba que lo demuestra y se leyó su salida), **NO VERIFICADO** (con el porqué)
-y **FALLA CONOCIDA**.
+Branch `build/mvp`, code at commit `c7abc11`. Date: 2026-10-03. Machine: Windows 10, Node 20.19, Playwright Chromium.
+Statuses: **VERIFIED** (a command or test proves it and its output was read), **NOT VERIFIED** (with the reason)
+and **KNOWN FAILURE**.
 
-## 1. Comandos ejecutados (resultado real)
+## 1. Commands run (actual result)
 
-| Comando (desde `app/`) | Resultado |
+| Command (from `app/`) | Result |
 |---|---|
-| `npm run verify` | **Código de salida 0.** Ejecuta en orden lo que sigue. |
-| ↳ `npm run typecheck` (`tsc -b`, estricto) | 0 errores |
-| ↳ `npm run lint` (`eslint . --max-warnings 0`) | 0 errores, 0 advertencias |
-| ↳ `npm run test` (Vitest) | **12 archivos, 113/113 pruebas OK** |
-| ↳ `npm run build` | OK. Bundle JS 334,99 kB (107,81 kB gzip), CSS 3,17 kB; `dist/` total ≈ 14 MB (el `.wasm` de onnxruntime pesa 13,6 MB) |
-| ↳ precarga del service worker | 14 entradas, 14 272 KiB |
-| ↳ `npm run e2e` (Playwright, Chromium, build de producción) | **19/19 pruebas OK** en 1,4 min |
-| `npm run check:assets` | Código 1, como se esperaba: **77 faltantes** (el `.onnx` del modelo real y 38 mp3 × 2 paquetes). El resto de campos de la ficha están OK. |
+| `npm run verify` | **Exit code 0.** Runs the following in order. |
+| ↳ `npm run typecheck` (`tsc -b`, strict) | 0 errors |
+| ↳ `npm run lint` (`eslint . --max-warnings 0`) | 0 errors, 0 warnings |
+| ↳ `npm run test` (Vitest) | **12 files, 113/113 tests OK** |
+| ↳ `npm run build` | OK. JS bundle 334.99 kB (107.81 kB gzip), CSS 3.17 kB; `dist/` total ≈ 14 MB (the onnxruntime `.wasm` weighs 13.6 MB) |
+| ↳ service worker precache | 14 entries, 14,272 KiB |
+| ↳ `npm run e2e` (Playwright, Chromium, production build) | **19/19 tests OK** in 1.4 min |
+| `npm run check:assets` | Code 1, as expected: **77 missing** (the real model's `.onnx` and 38 mp3 × 2 packs). The remaining model card fields are OK. |
 
-## 2. Criterios de aceptación de `CLAUDE.md`
+## 2. Acceptance criteria from `CLAUDE.md`
 
-| # | Criterio | Estado | Evidencia |
+| # | Criterion | Status | Evidence |
 |---|---|---|---|
-| 1 | Foto → diagnóstico → riesgo → decisión → voz funciona en **modo avión** tras la primera carga | **VERIFICADO con SEE simulado.** **NO VERIFICADO con el modelo ONNX real.** | e2e `h. OFFLINE`: carga la app, espera a que el SW controle la página y termine la precarga, `context.setOffline(true)`, recarga y hace el recorrido completo, incluida la instalación de un paquete desde el catálogo. Resultado: 0 peticiones fallidas, 0 fuera del origen y todas servidas por el SW (`fromServiceWorker`). El modelo real offline no se puede probar en e2e (DECISIONES #13): la precarga del `.wasm` y de `model_card.json` sí se comprueba. Falta la prueba manual en el teléfono (`PENDIENTES_HUMANOS.md` §4). |
-| 2 | SEE, PREDICT, DECIDE y VOICE implementados y conectados, ninguno como maqueta | **VERIFICADO** | SEE real: `engine/see.ts` + `engine/infer.ts`; el modo simulado solo corre si `recommended_file` es `null`. e2e `i` hace inferencia real en el navegador con `tiny_model.onnx` y comprueba la clase exacta. PREDICT se llama desde Preguntas y DECIDE desde Riesgo. VOICE se usa en cada pantalla (`useScreenAudio`, botón 🔊). |
-| 3 | Ningún texto visible o hablado se genera en ejecución | **VERIFICADO**, con una excepción aceptada | Todo el texto sale de `t()`/`pack.phrases`; el SMS se arma con frases del paquete (`sms.test.ts`). El panel de errores de importación ya no muestra texto técnico (e2e `f` comprueba que solo se ve ⚠️). Excepción aceptada: Acerca de usa claves de datos como etiquetas (DECISIONES #15), y el menú oculto de pruebas muestra identificadores. |
-| 4 | Ningún número agronómico o económico vive en el código | **VERIFICADO** | La auditoría de QA hizo grep de los literales numéricos en `engine/`, `screens/`, `store/` y `flow/`. Todos los valores económicos y de riesgo pasan por `resolve`. Las únicas constantes son las fijadas por la spec (DECISIONES #5). |
-| 5 | `resolve`: real con fuente → demo + `usedDemoData` → `CONSULT`; nunca inventa | **VERIFICADO** | `resolve.test.ts`: real con fuente válida; real no nulo con fuente `TODO` (usa demo); fuente vacía o nula; ancestro más cercano manda; ausente → `found:false`. P4 y D4 → CONSULT. |
-| 6 | Con `usedDemoData` se ve la etiqueta de demostración | **VERIFICADO** | e2e `e`: la etiqueta con el texto `demo_data` del paquete se ve en Riesgo y en Decisión. |
-| 7 | Clases, normalización, temperatura y umbrales salen de `model_card.json` | **VERIFICADO** | `infer.test.ts` (normalización por canal, temperatura, regla de duda); la ficha se valida al cargarla (sin valores por defecto inventados). e2e `j1`: una ficha inválida muestra ⚠️ y permite reintentar. |
-| 8 | La app sugiere; la persona elige; la elección se registra | **VERIFICADO** | e2e `a`/`b`: el caso aparece en Pendientes con la elección. e2e `e`: elegir una opción **no sugerida** se guarda tal cual. e2e `k2`/`k3`: si guardar falla, la elección no se pierde y se puede reintentar. |
-| 9 | Los `.wasm` de onnxruntime-web en `public/ort/`, sin CDN | **VERIFICADO** | `scripts/copy-ort.mjs` (postinstall). e2e `i` comprueba que `ort/*.wasm` y `ort/*.mjs` se cargan del mismo origen y que no hay peticiones a otros orígenes. No hay URLs `http(s)://` externas en `src/`, `index.html` ni `vite.config.ts`. |
-| 10 | Las fotos no salen del teléfono; el SMS solo lleva texto | **VERIFICADO** | Las fotos solo existen como blob URLs en memoria; el `Case` guardado no las contiene. `sms.test.ts` comprueba que el cuerpo no tiene `blob:` ni `data:`. e2e `h`: ninguna petición fuera del origen. e2e `m1`/`m2`: SMS y menú de compartir con texto. |
-| 11 | P1–P4 y D1–D4 pasan con los números exactos | **VERIFICADO** | `predict.test.ts`: P1 5/HIGH, P2 2/MEDIUM, P3 0/LOW, P4 CONSULT. `decide.test.ts`: D1 [300,700]/40/[160,660] TREAT; D2 [100,300]/40/[−40,260] CONSULT; D3 [0,100]/40/[−140,60] WAIT; D4 CONSULT sin KPIs. Coinciden con las tablas de `JANI_PLAN.md`. |
+| 1 | Photo → diagnosis → risk → decision → voice works in **airplane mode** after the first load | **VERIFIED with simulated SEE.** **NOT VERIFIED with the real ONNX model.** | e2e `h. OFFLINE`: loads the app, waits for the SW to control the page and finish the precache, `context.setOffline(true)`, reloads and does the full flow, including installing a pack from the catalog. Result: 0 failed requests, 0 outside the origin and all served by the SW (`fromServiceWorker`). The real model offline cannot be tested in e2e (DECISIONS #13): the precache of the `.wasm` and `model_card.json` is checked. The manual test on the phone is still missing (`HUMAN_TODO.md` §4). |
+| 2 | SEE, PREDICT, DECIDE and VOICE implemented and connected, none as a mockup | **VERIFIED** | Real SEE: `engine/see.ts` + `engine/infer.ts`; simulated mode only runs if `recommended_file` is `null`. e2e `i` does real inference in the browser with `tiny_model.onnx` and checks the exact class. PREDICT is called from Questions and DECIDE from Risk. VOICE is used on every screen (`useScreenAudio`, 🔊 button). |
+| 3 | No visible or spoken text is generated at runtime | **VERIFIED**, with one accepted exception | All text comes from `t()`/`pack.phrases`; the SMS is built with pack phrases (`sms.test.ts`). The import error panel no longer shows technical text (e2e `f` checks that only ⚠️ is visible). Accepted exception: About uses data keys as labels (DECISIONS #15), and the hidden test menu shows identifiers. |
+| 4 | No agronomic or economic number lives in the code | **VERIFIED** | The QA audit grepped for numeric literals in `engine/`, `screens/`, `store/` and `flow/`. All economic and risk values go through `resolve`. The only constants are those fixed by the spec (DECISIONS #5). |
+| 5 | `resolve`: real with source → demo + `usedDemoData` → `CONSULT`; never invents | **VERIFIED** | `resolve.test.ts`: real with valid source; non-null real with `TODO` source (uses demo); empty or null source; nearest ancestor governs; absent → `found:false`. P4 and D4 → CONSULT. |
+| 6 | With `usedDemoData` the demo label is shown | **VERIFIED** | e2e `e`: the label with the pack's `demo_data` text is shown in Risk and in Decision. |
+| 7 | Classes, normalization, temperature and thresholds come from `model_card.json` | **VERIFIED** | `infer.test.ts` (per-channel normalization, temperature, doubt rule); the card is validated on load (no invented default values). e2e `j1`: an invalid card shows ⚠️ and allows retrying. |
+| 8 | The app suggests; the person chooses; the choice is recorded | **VERIFIED** | e2e `a`/`b`: the case appears in Pending with the choice. e2e `e`: choosing an option that was **not suggested** is saved as is. e2e `k2`/`k3`: if saving fails, the choice is not lost and can be retried. |
+| 9 | The onnxruntime-web `.wasm` files in `public/ort/`, no CDN | **VERIFIED** | `scripts/copy-ort.mjs` (postinstall). e2e `i` checks that `ort/*.wasm` and `ort/*.mjs` load from the same origin and that there are no requests to other origins. There are no external `http(s)://` URLs in `src/`, `index.html` or `vite.config.ts`. |
+| 10 | Photos do not leave the phone; the SMS carries only text | **VERIFIED** | Photos only exist as blob URLs in memory; the saved `Case` does not contain them. `sms.test.ts` checks that the body has no `blob:` or `data:`. e2e `h`: no requests outside the origin. e2e `m1`/`m2`: SMS and share menu with text. |
+| 11 | P1–P4 and D1–D4 pass with the exact numbers | **VERIFIED** | `predict.test.ts`: P1 5/HIGH, P2 2/MEDIUM, P3 0/LOW, P4 CONSULT. `decide.test.ts`: D1 [300,700]/40/[160,660] TREAT; D2 [100,300]/40/[−40,260] CONSULT; D3 [0,100]/40/[−140,60] WAIT; D4 CONSULT without KPIs. They match the tables in `JANI_PLAN.md`. |
 
-## 3. Pruebas unitarias (Vitest, 113/113)
+## 3. Unit tests (Vitest, 113/113)
 
-`resolve`, `predict` (P1–P4 y límite de 0,30), `decide` (D1–D4, suajili, área inválida), `session`, `quality`
-(negra, blanca, gris plano, tablero), `see` (probabilidades simuladas, cola), `modelCard` (softmax estable, regla de
-duda, `NaN` tolerado, validación), `packs` (paquete válido; inválido; zip corrupto, sin `pack.json` o con JSON roto;
-filtrado de audios), `voice` (falta audio, `play` rechazado, `voiceschanged`, sin voces, tiempos límite, stop),
-`sms` (resumen, codificación, sin teléfono), `infer` (preproceso, inferencia ONNX real en node con el modelo de prueba,
-sesión reutilizada, longitud de logits) y `nav`.
+`resolve`, `predict` (P1–P4 and the 0.30 limit), `decide` (D1–D4, Swahili, invalid area), `session`, `quality`
+(black, white, flat gray, checkerboard), `see` (simulated probabilities, queue), `modelCard` (stable softmax, doubt
+rule, `NaN` tolerated, validation), `packs` (valid pack; invalid; corrupt zip, no `pack.json` or with broken JSON;
+audio filtering), `voice` (missing audio, rejected `play`, `voiceschanged`, no voices, timeouts, stop),
+`sms` (summary, encoding, no phone number), `infer` (preprocessing, real ONNX inference in node with the test model,
+reused session, logits length) and `nav`.
 
-## 4. Pruebas e2e (Playwright, 19/19)
+## 4. e2e tests (Playwright, 19/19)
 
-| Prueba | Qué demuestra | Estado |
+| Test | What it shows | Status |
 |---|---|---|
-| a | Instalar paquete → área → 5 fotos → diagnóstico → preguntas → riesgo → decisión → elegir → confirmación → Pendientes | VERIFICADO |
-| b | Mismo recorrido con el segundo paquete; cambio en caliente: `html[lang]`, frase de inicio, nombre del paquete y KPIs cambian | VERIFICADO |
-| c | Más de la mitad de las fotos dudosas → frase `unsure` y sugerencia CONSULT | VERIFICADO |
-| d | Todas sanas → `all_healthy`, sin riesgo ni KPIs | VERIFICADO |
-| e | Etiqueta de demostración en Riesgo y Decisión; elegir una opción no sugerida | VERIFICADO |
-| f | Importar `.zip` válido; vacío y corrupto muestran ⚠️ con el código correcto en `data-errors`, sin caerse | VERIFICADO |
-| g | Sin audios: ningún `pageerror`, frases visibles, botón de repetir funciona | VERIFICADO |
-| h | Modo avión: recorrido completo sin red | VERIFICADO (SEE simulado) |
-| i | Inferencia ONNX real en navegador con el modelo de prueba (servido con `page.route`, nunca copiado a `public/models`) | VERIFICADO (con conexión) |
-| j1, j2 | Ficha inválida → ⚠️ y reintento; fallo de inferencia → foto dudosa, sin bucle de "repite la foto" | VERIFICADO |
-| k1–k3 | IndexedDB que falla: la app no queda en blanco y la elección no se pierde | VERIFICADO |
-| l | Paquete instalado con otra versión en el catálogo → 🔄 y reinstalación real en IndexedDB | VERIFICADO |
-| m1, m2 | Escalamiento sin teléfono: sin menú de compartir marca enviado; con menú, cancelar no marca enviado | VERIFICADO |
-| n | Paquete importado que rompe una pantalla → ⚠️ y ⌂, sin pantalla en blanco | VERIFICADO |
-| o | Paquete en inglés: `html[lang]=en`, todo el texto en inglés, recorrido completo y vuelta a español en caliente | VERIFICADO |
+| a | Install pack → area → 5 photos → diagnosis → questions → risk → decision → choose → confirmation → Pending | VERIFIED |
+| b | Same flow with the second pack; hot switching: `html[lang]`, home phrase, pack name and KPIs change | VERIFIED |
+| c | More than half of the photos doubtful → `unsure` phrase and CONSULT suggestion | VERIFIED |
+| d | All healthy → `all_healthy`, no risk or KPIs | VERIFIED |
+| e | Demo label in Risk and Decision; choosing a non-suggested option | VERIFIED |
+| f | Import valid `.zip`; empty and corrupt ones show ⚠️ with the correct code in `data-errors`, without crashing | VERIFIED |
+| g | No audio: no `pageerror`, phrases visible, the repeat button works | VERIFIED |
+| h | Airplane mode: full flow without network | VERIFIED (simulated SEE) |
+| i | Real ONNX inference in the browser with the test model (served with `page.route`, never copied to `public/models`) | VERIFIED (with connection) |
+| j1, j2 | Invalid card → ⚠️ and retry; inference failure → doubtful photo, no "retake the photo" loop | VERIFIED |
+| k1–k3 | IndexedDB failing: the app does not go blank and the choice is not lost | VERIFIED |
+| l | Installed pack with a different version in the catalog → 🔄 and real reinstall in IndexedDB | VERIFIED |
+| m1, m2 | Escalation without a phone number: without a share menu it marks sent; with a menu, cancelling does not mark sent | VERIFIED |
+| n | Imported pack that breaks a screen → ⚠️ and ⌂, no blank screen | VERIFIED |
+| o | English pack: `html[lang]=en`, all text in English, full flow and hot switch back to Spanish | VERIFIED |
 
-## 5. Service worker (precarga)
+## 5. Service worker (precache)
 
-Leído en `dist/sw.js` tras el build: `index.html`, JS/CSS, `ort/ort-wasm-simd-threaded.wasm`,
+Read from `dist/sw.js` after the build: `index.html`, JS/CSS, `ort/ort-wasm-simd-threaded.wasm`,
 `ort/ort-wasm-simd-threaded.mjs`, `models/arabica-v1/model_card.json`, `packs/catalog.json`,
-`packs/colombia-andina.zip`, `packs/noor-africa-oriental.zip`, ícono y manifiesto. El patrón incluye `*.onnx`:
-el modelo real entra en la precarga al copiarlo y recompilar. No se precarga una segunda copia del `.wasm`.
+`packs/colombia-andina.zip`, `packs/noor-africa-oriental.zip`, icon and manifest. The pattern includes `*.onnx`:
+the real model enters the precache when it is copied and the app is rebuilt. No second copy of the `.wasm` is precached.
 
-## 6. NO VERIFICADO
+## 6. NOT VERIFIED
 
-- **Modelo ONNX real en modo avión** (criterio 1 con el modelo real): sin modelo real todavía y no se puede probar en e2e
-  (DECISIONES #13). Prueba manual: `PENDIENTES_HUMANOS.md` §4.
-- **Peso del modelo real (< 10 MB) y tiempo de inferencia en un teléfono**: sin modelo ni teléfono. `check:assets` exige < 10 MB.
-- **Audio real**: no hay mp3. Solo se probó el respaldo (voz del sistema o solo texto) y que nada falla.
-- **Voz del sistema en suajili en teléfonos reales**: depende del teléfono.
-- **iPhone/Safari**: solo se probó Chromium.
-- **APK de Android**: el proyecto de Capacitor quedó listo (`app/android`, Capacitor 7), pero no hay Android SDK ni Java
-  en esta máquina; no se compiló ni se instaló. Pasos: `PENDIENTES_HUMANOS.md` §5.
-- **Publicación de la PWA**: no se publicó (fuera del alcance de este trabajo).
+- **Real ONNX model in airplane mode** (criterion 1 with the real model): no real model yet and it cannot be tested in e2e
+  (DECISIONS #13). Manual test: `HUMAN_TODO.md` §4.
+- **Real model weight (< 10 MB) and inference time on a phone**: no model or phone. `check:assets` requires < 10 MB.
+- **Real audio**: there are no mp3 files. Only the fallback (system voice or text only) was tested, and that nothing fails.
+- **System voice in Swahili on real phones**: depends on the phone.
+- **iPhone/Safari**: only Chromium was tested.
+- **Android APK**: the Capacitor project is ready (`app/android`, Capacitor 7), but there is no Android SDK or Java
+  on this machine; it was not compiled or installed. Steps: `HUMAN_TODO.md` §5.
+- **PWA publication**: it was not published (out of scope for this work).
 
-## 7. FALLAS CONOCIDAS / limitaciones menores (no bloquean)
+## 7. KNOWN FAILURES / minor limitations (not blocking)
 
-- `check:assets` reemplaza `NaN` sin distinguir si va dentro de un texto (solo afecta al verificador, no a la app).
-- Si guardar "enviado" falla, la app igual abre el SMS (solo se avisa en la consola).
-- La validación de la ficha no exige exactamente 5 clases distintas; con 1 o 2 clases el modo simulado fallaría (el modo real no se ve afectado).
-- El botón 🔄 de actualizar aparece con cualquier versión distinta, también si la del catálogo es más vieja.
-- Los KPIs se formatean según el idioma, pero ninguna prueba e2e comprueba el formato.
-- `training/build_climate.py` no se creó (DECISIONES #11).
+- `check:assets` replaces `NaN` without distinguishing whether it is inside a string (it only affects the checker, not the app).
+- If saving "sent" fails, the app still opens the SMS (only a console notice).
+- The card validation does not require exactly 5 distinct classes; with 1 or 2 classes simulated mode would fail (real mode is not affected).
+- The 🔄 update button appears with any different version, also if the catalog one is older.
+- KPIs are formatted according to the language, but no e2e test checks the format.
+- `training/build_climate.py` was not created (DECISIONS #11).
 
-## 8. Proceso de revisión
+## 8. Review process
 
-Cada tarea (1–12) tuvo un implementador y un revisor distinto (cumplimiento de la spec y luego calidad); 4 tareas
-necesitaron rondas de corrección. Al final, un auditor revisó la rama completa contra los 11 criterios: encontró
-5 problemas importantes (atascos sin aviso por fallos de la ficha, de la inferencia o de IndexedDB; paquetes que no se actualizaban;
-texto técnico visible; SMS sin salida). Se corrigieron en `10e1ff1..c7abc11` y una revisión de esas correcciones las dio todas por resueltas.
+Each task (1–12) had an implementer and a different reviewer (spec compliance and then quality); 4 tasks
+needed rounds of fixes. At the end, an auditor reviewed the full branch against the 11 criteria: it found
+5 major problems (silent stalls due to failures of the card, the inference or IndexedDB; packs that were not updated;
+visible technical text; SMS with no way out). They were fixed in `10e1ff1..c7abc11` and a review of those fixes found them all resolved.

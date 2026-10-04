@@ -10,7 +10,7 @@ Lee pack.json, toma el modelo de voz de pack["tts"]["model"] y escribe
 humana, guarden los archivos con el mismo nombre y no ejecuten este script.
 
 Nota: los modelos MMS-TTS de Meta se publican con licencia no comercial
-(CC BY-NC 4.0, confirmar en la ficha del modelo). Declararlo en docs/DATOS.md.
+(CC BY-NC 4.0, confirmar en la ficha del modelo). Declararlo en docs/DATA.md.
 """
 import json, os, subprocess, sys
 

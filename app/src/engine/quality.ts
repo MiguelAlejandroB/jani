@@ -3,7 +3,7 @@ export const MIN_BRIGHTNESS = 40;
 export const MAX_BRIGHTNESS = 230;
 // Recalibrado con fotos reales de campo (Uganda y Perú, 140 fotos): con 60 se rechazaba el 36 % de fotos nítidas de
 // hojas (superficies lisas en primer plano); con 20 se acepta el 86 % y se sigue rechazando el 97 % de las mismas
-// fotos desenfocadas (σ = 1,5 px a 224 px). Ver docs/DECISIONES.md.
+// fotos desenfocadas (σ = 1,5 px a 224 px). Ver docs/DECISIONS.md.
 export const MIN_LAPLACIAN_VAR = 20;
 export const QUALITY_SIZE = 224;
 
