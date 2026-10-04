@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type ChangeEvent } from 'react';
 import { CLASS_IDS, type SeeResult } from '../engine/types';
 import { getSimPlan, see, type SimOutcome } from '../engine/see';
 import { buildSession } from '../engine/session';
+import { captureAudioKey, type Rejection } from '../flow/captureAudio';
 import { useFlow } from '../flow/FlowContext';
 import { useNav } from '../nav';
 import { usePack } from '../packs/PackContext';
@@ -32,7 +33,8 @@ export default function Captura() {
   const inputRef = useRef<HTMLInputElement>(null);
   const taps = useRef(0);
   const [busy, setBusy] = useState(false);
-  const [retake, setRetake] = useState(false);
+  // Motivo del último rechazo y cuántos van: cada rechazo se vuelve a decir, aunque sea el mismo motivo.
+  const [rejection, setRejection] = useState<{ key: Rejection; n: number } | null>(null);
   const [inferError, setInferError] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [, setPlanTick] = useState(0);
@@ -58,7 +60,6 @@ export default function Captura() {
     e.target.value = '';
     if (!card || files.length === 0) return;
     setBusy(true);
-    setRetake(false);
     try {
       let count = photos.length;
       for (const file of files) {
@@ -75,15 +76,17 @@ export default function Captura() {
           bitmap.close();
         }
         if (result.status === 'unsure' && result.reason === 'bad_photo') {
-          setRetake(true);
+          const key: Rejection = result.noLeaf ? 'no_leaf' : 'retake';
+          setRejection((r) => ({ key, n: (r?.n ?? 0) + 1 }));
           continue;
         }
+        setRejection(null);
         addPhoto({ url: URL.createObjectURL(file), result });
         count++;
       }
     } catch {
       // La imagen no se pudo leer: pedir otra foto.
-      setRetake(true);
+      setRejection((r) => ({ key: 'retake', n: (r?.n ?? 0) + 1 }));
     } finally {
       setBusy(false);
     }
@@ -99,12 +102,13 @@ export default function Captura() {
       id="captura"
       icon="📷"
       onIconClick={onIconClick}
-      audio={[retake ? 'retake' : photos.length >= TARGET_PHOTOS ? 'done_photos' : 'more_photos']}
+      audio={[captureAudioKey(photos.length, TARGET_PHOTOS, rejection?.key ?? null)]}
+      audioNonce={rejection?.n ?? 0}
     >
       <div className="photo-count" data-testid="photo-count">
         {photos.length} / {TARGET_PHOTOS}
       </div>
-      {retake && <p className="retake">{t('retake')}</p>}
+      {rejection && <p className="retake">{t(rejection.key)}</p>}
       {inferError && (
         <div className="pack-error" data-testid="infer-error" aria-hidden="true">
           <div className="pack-error-icon">⚠️</div>
@@ -135,7 +139,7 @@ export default function Captura() {
       />
       <BigButton
         icon="📷"
-        label={t('more_photos')}
+        label={t(photos.length === 0 ? 'take_photo' : 'more_photos')}
         testId="photo-btn"
         onClick={() => inputRef.current?.click()}
         variant="secondary"

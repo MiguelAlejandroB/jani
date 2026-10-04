@@ -24,9 +24,9 @@ export function BigButton(props: {
 
 // Marco común: volver / inicio, ícono de la pantalla, título y contenido.
 // `top`: el contenido arranca arriba (pantallas largas); por defecto queda abajo, cerca del pulgar.
-export function Screen(props: { id: ScreenId; icon: string; title?: string; children?: ReactNode; onIconClick?: () => void; audio?: string[]; top?: boolean }) {
+export function Screen(props: { id: ScreenId; icon: string; title?: string; children?: ReactNode; onIconClick?: () => void; audio?: string[]; audioNonce?: number; top?: boolean }) {
   const { go, back } = useNav();
-  const repeat = useScreenAudio(props.audio ?? []);
+  const repeat = useScreenAudio(props.audio ?? [], props.audioNonce ?? 0);
   return (
     <main className="screen" data-screen={props.id}>
       {props.id !== 'inicio' && (

@@ -20,8 +20,11 @@ function browserSpeech(): SpeechLike | undefined {
   }
 }
 
-/** Reproduce las frases al entrar a la pantalla (una vez por cambio de claves) y las detiene al salir. */
-export function useScreenAudio(keys: string[]): () => void {
+/**
+ * Reproduce las frases al entrar a la pantalla (una vez por cambio de claves) y las detiene al salir.
+ * nonce: cambiarlo vuelve a decirlas con las mismas claves (p. ej. cada foto rechazada).
+ */
+export function useScreenAudio(keys: string[], nonce = 0): () => void {
   const { pack } = usePack();
   const voice = useMemo<Voice | null>(() => {
     if (!pack) return null;
@@ -46,7 +49,7 @@ export function useScreenAudio(keys: string[]): () => void {
     if (!voice || !joined) return;
     void voice.sayAll(joined.split('|'));
     return () => voice.stop();
-  }, [voice, joined]);
+  }, [voice, joined, nonce]);
 
   return useCallback(() => {
     if (!voice || !joined) return;
