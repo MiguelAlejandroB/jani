@@ -1,14 +1,53 @@
-# Jani — offline AI decision support for coffee farmers
+<div align="center">
+
+<img src="app/public/icon.svg" alt="Jani logo" width="112" />
+
+# Jani
+
+### Offline AI decision support for coffee farmers
+
+**Photograph a leaf → measure the damage → project the loss → choose what to do.**
+All on the phone. No internet. Photos never leave the device.
+
+<br />
+
+<a href="https://github.com/MiguelAlejandroB/jani/releases/download/v0.1.0/Jani.apk"><img src="https://img.shields.io/badge/Download%20APK-Android%20·%20v0.1.0%20·%2019%20MB-B5733F?style=for-the-badge&logo=android&logoColor=white" alt="Download APK" /></a>
+&nbsp;
+<a href="https://bloom-coffee-visions.lovable.app/"><img src="https://img.shields.io/badge/Landing%20page-Visit%20site-4E3B2A?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Landing page" /></a>
+&nbsp;
+<a href="#2-the-four-models"><img src="https://img.shields.io/badge/How%20it%20works-4%20models-5E7F4A?style=for-the-badge&logo=onnx&logoColor=white" alt="How it works" /></a>
+
+<br /><br />
+
+![Offline](https://img.shields.io/badge/works-offline-5E7F4A)
+![ONNX INT8](https://img.shields.io/badge/ONNX-INT8-005CED?logo=onnx&logoColor=white)
+![WebAssembly](https://img.shields.io/badge/onnxruntime--web-WASM-654FF0?logo=webassembly&logoColor=white)
+![React](https://img.shields.io/badge/React%2019-Vite%20·%20TypeScript-3178C6?logo=typescript&logoColor=white)
+![Capacitor](https://img.shields.io/badge/Capacitor-Android-119EFF?logo=capacitor&logoColor=white)
+![Languages](https://img.shields.io/badge/languages-Español%20·%20English%20·%20Kiswahili-B5733F)
+
+<sub>Built for the <b>Small AI for Development</b> hackathon (World Bank × Hack-Nation) · Agriculture track</sub>
+
+</div>
+
+---
 
 Jani is an Android app that turns a phone into an **offline plant-health advisor**. A farmer photographs coffee leaves;
 Jani measures the damage, names the disease, projects the yield loss to harvest and compares what to do — **treat,
-wait or consult a person** — in kilograms of coffee. Everything runs **on the device**: no internet after install, and
-photos never leave the phone.
+wait or consult a person** — in kilograms of coffee.
 
-Built for the **Small AI for Development** hackathon (World Bank × Hack-Nation), Agriculture track.
+| | |
+|---|---|
+| 📲 **Download** | [Jani.apk (v0.1.0)](https://github.com/MiguelAlejandroB/jani/releases/download/v0.1.0/Jani.apk) — Android 8+ recommended (installs from Android 6), ~19 MB |
+| 🌐 **Landing page** | [bloom-coffee-visions.lovable.app](https://bloom-coffee-visions.lovable.app/) |
+| ✈️ **Offline** | Internet only to download; then works in airplane mode |
+| 🔒 **Privacy** | Photos stay on the phone; SMS to an agent carries text only |
 
-**Download (Android):** [Jani.apk — v0.1.0](https://github.com/MiguelAlejandroB/jani/releases/download/v0.1.0/Jani.apk)
-· Android 8+ recommended (installs from Android 6) · ~19 MB · works in airplane mode.
+### Install in 4 steps
+1. Open the **Download APK** button from your Android phone.
+2. Open `Jani.apk` from Downloads; allow *Install unknown apps* for your browser if asked.
+3. If Play Protect warns, tap **More details → Install anyway** (test build, not on Play Store yet).
+4. Open Jani, pick your language pack, optionally set your hectares and use your location for local weather.
 
 > Jani suggests; the farmer decides. It does not replace an extension agent.
 
