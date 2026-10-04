@@ -56,6 +56,8 @@ describe('integración app -> RIESGO y DECISIÓN', () => {
     expect(out.decision!.alternativas.some((a) => a.id === 'nada')).toBe(true);
     expect(out.decision!.recomendacion).toBeNull();     // parámetros prior: nunca una recomendación única
     expect(out.autoRecommendation).toBe(false);          // regla de parada §7 (ver informe de calibración)
+    expect(out.y0Kg).toBe(2000);                         // para mostrar las pérdidas en kg
+    expect(out.riskBands).toEqual(params.display!.risk_bands);
   });
 
   it('todas sanas: no hay cadena de enfermedad ni decisión', () => {
@@ -63,5 +65,12 @@ describe('integración app -> RIESGO y DECISIÓN', () => {
     const out = runRd(params, inputs);
     expect(out.decision).toBeNull();
     expect(out.risk.ell.p90).toBe(0);
+  });
+
+  it('sin bandas de visualización en los parámetros: el resultado no las inventa', () => {
+    const inputs = buildInputs(loadPack('colombia-andina'), [ok('roya')], { areaHa: 2, now: NOW, heavyRain: false })!;
+    const { display: _omit, ...rest } = params;
+    void _omit;
+    expect(runRd(rest as RdParams, inputs).riskBands).toBeUndefined();
   });
 });

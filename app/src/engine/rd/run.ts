@@ -130,6 +130,10 @@ export type RdResult = {
   paramsVersion: string;
   autoRecommendation: boolean;
   climate: ClimateChoice;
+  /** Cosecha esperada sin daño (kg) para pasar las fracciones de pérdida a kilos. */
+  y0Kg: number;
+  /** Bandas de visualización bajo/medio/alto (params.display); ausentes => la pantalla pide consultar. */
+  riskBands?: [number, number];
 };
 
 /** Corre adaptador -> RIESGO -> DECISIÓN. Sin enfermedades vistas no hay riesgo que calcular. */
@@ -145,6 +149,8 @@ export function runRd(params: RdParams, inputs: RdInputs, seed = 1): RdResult {
     paramsVersion: params.version,
     autoRecommendation: params.modo?.recomendacion_automatica ?? false,
     climate: inputs.climate,
+    y0Kg: inputs.y0Kg,
+    ...(params.display?.risk_bands ? { riskBands: params.display.risk_bands } : {}),
   };
 }
 
