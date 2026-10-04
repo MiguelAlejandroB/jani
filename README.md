@@ -43,7 +43,7 @@ wait or consult a person** — in kilograms of coffee.
 
 | | |
 |---|---|
-| 📲 **Download** | [Jani.apk (v0.1.0)](https://github.com/MiguelAlejandroB/jani/releases/download/v0.1.0/Jani.apk) — Android 8+ recommended (installs from Android 6), ~19 MB |
+| 📲 **Download** | [Jani.apk (v0.1.0)](https://github.com/MiguelAlejandroB/jani/releases/download/v0.1.0/Jani.apk) — Android 8+ recommended (installs from Android 6), ~19 MB · also in this repo: [`download/Jani.apk`](download/Jani.apk) · [all releases](https://github.com/MiguelAlejandroB/jani/releases) |
 | 🌐 **Landing page** | [bloom-coffee-visions.lovable.app](https://bloom-coffee-visions.lovable.app/) |
 | ✈️ **Offline** | Internet only to download; then works in airplane mode |
 | 🔒 **Privacy** | Photos stay on the phone; SMS to an agent carries text only |
