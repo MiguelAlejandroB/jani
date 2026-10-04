@@ -73,7 +73,10 @@
     "non_leaf_rejected": 0.0033333333333333335,
     "n_jmuben": 300,
     "n_non_leaf": 300,
-    "min_leaf_fraction": 0.25
+    "min_leaf_fraction": 0.25,
+    "min_green_fraction": 0.64,
+    "max_texture_var": 2500,
+    "post_training_note": "min_green_fraction y max_texture_var se calibraron después del entrenamiento (sin reentrenar): el modelo solo marca 'hoja' casi en cualquier imagen, así que se exige que los píxeles 'hoja' sean verdosos (G > R y G > B) y que la imagen no tenga textura de ruido (varianza del Laplaciano en gris 224x224). Hojas BRACOL con fondo claro, verde, texturizado, oscurecidas o con ruido leve: verde 0.68-1.00, textura 5-1370. Ruido, personas, paisajes, flores, documentos: verde 0.00-0.60 o textura 1450-10000."
   },
   "files": {
     "int8": "model_int8.onnx"

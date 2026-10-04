@@ -2,6 +2,7 @@ import { inputSize, runModel } from './infer';
 import { applyUnsureRule, softmax } from './modelCard';
 import type { ModelCard } from './modelCard';
 import { assessQuality, imageToRgba, QUALITY_SIZE } from './quality';
+import { checkLeaf, severityLevel, type SegCard } from './segment';
 import type { ClassId, SeeResult } from './types';
 
 export type SimOutcome = ClassId | 'low_confidence' | 'low_margin' | 'bad_photo';
@@ -45,16 +46,27 @@ export function simulatedProbs(outcome: SimOutcome, classes: readonly ClassId[])
   return classes.map((c) => (c === outcome ? 0.9 : 0.1 / (n - 1)));
 }
 
-export async function see(image: ImageBitmap, card: ModelCard, opts?: { size?: number }): Promise<SeeResult> {
+/** seg: ficha del segmentador; si está, primero se comprueba que haya una hoja y se mide la severidad. */
+export async function see(image: ImageBitmap, card: ModelCard, opts?: { size?: number; seg?: SegCard | null }): Promise<SeeResult> {
   const size = opts?.size ?? QUALITY_SIZE;
   const rgba = imageToRgba(image, size);
   if (assessQuality(rgba, size, size) === 'bad_photo') return { status: 'unsure', reason: 'bad_photo' };
   if (card.recommended_file !== null) {
-    // Modo real: la imagen se estira a la entrada del modelo y se infiere con ONNX.
+    // Modo real. 1) Segmentador: si no hay hoja, se pide otra foto (el clasificador no la ve).
+    const seg = opts?.seg;
+    let severity: { fraction: number; level: string } | undefined;
+    if (seg && seg.recommended_file !== null) {
+      const [, segW] = inputSize(seg);
+      const leaf = await checkLeaf(imageToRgba(image, segW), rgba, size, seg, new URL(`./models/leafseg-v1/${seg.recommended_file}`, document.baseURI).href);
+      if (leaf.gate === 'not_leaf') return { status: 'unsure', reason: 'bad_photo', noLeaf: true };
+      severity = { fraction: leaf.stats.severity, level: severityLevel(leaf.stats.severity, seg) };
+    }
+    // 2) Clasificador: la imagen se estira a la entrada del modelo y se infiere con ONNX.
     const [inH, inW] = inputSize(card);
     const input = inH === size && inW === size ? rgba : imageToRgba(image, inW);
     const logits = await runModel(input, card, new URL(`./models/arabica-v1/${card.recommended_file}`, document.baseURI).href);
-    return applyUnsureRule(softmax(logits, card.temperature), card, card.classes);
+    const result = applyUnsureRule(softmax(logits, card.temperature), card, card.classes);
+    return result.status === 'ok' && severity ? { ...result, severity } : result;
   }
 
   const outcome = nextSimOutcome();

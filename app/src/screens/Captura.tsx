@@ -28,7 +28,7 @@ function appendSim(outcome: SimOutcome): void {
 export default function Captura() {
   const { t } = usePack();
   const { go } = useNav();
-  const { card, cardError, reloadCard, photos, addPhoto, setSession } = useFlow();
+  const { card, segCard, cardError, reloadCard, photos, addPhoto, setSession } = useFlow();
   const inputRef = useRef<HTMLInputElement>(null);
   const taps = useRef(0);
   const [busy, setBusy] = useState(false);
@@ -66,7 +66,7 @@ export default function Captura() {
         const bitmap = await createImageBitmap(file);
         let result: SeeResult;
         try {
-          result = await see(bitmap, card);
+          result = await see(bitmap, card, { seg: segCard });
         } catch (err) {
           console.warn('see', err);
           result = INFER_FAILED;

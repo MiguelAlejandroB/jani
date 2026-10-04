@@ -15,15 +15,18 @@ function configure(): void {
   }
 }
 
+/** Lo que la inferencia necesita de una ficha (clasificador o segmentador). */
+export type ModelIO = { input: { name: string; shape: number[]; mean: number[]; std: number[] }; output: { name: string } };
+
 /** Alto y ancho de entrada (shape NCHW, ya validada al cargar la ficha). */
-export function inputSize(card: ModelCard): [h: number, w: number] {
+export function inputSize(card: ModelIO): [h: number, w: number] {
   const [, , h, w] = card.input.shape;
   if (h === undefined || w === undefined) throw new Error('input_shape');
   return [h, w];
 }
 
 /** RGBA (tamaño = shape[2]×shape[3]) -> Float32Array NCHW normalizado con mean/std del card. */
-export function preprocess(rgba: Uint8ClampedArray, card: ModelCard): Float32Array {
+export function preprocess(rgba: Uint8ClampedArray, card: ModelIO): Float32Array {
   const [h, w] = inputSize(card);
   const plane = h * w;
   const [m0, m1, m2] = card.input.mean;
@@ -55,13 +58,18 @@ export function getSession(url: string): Promise<ort.InferenceSession> {
   return s;
 }
 
-export async function runModel(rgba: Uint8ClampedArray, card: ModelCard, modelUrl: string): Promise<number[]> {
+/** Salida cruda del modelo (float32, en el orden del tensor). */
+export async function runRaw(rgba: Uint8ClampedArray, card: ModelIO, modelUrl: string): Promise<Float32Array> {
   const session = await getSession(modelUrl);
   const input = new ort.Tensor('float32', preprocess(rgba, card), card.input.shape);
   const out = await session.run({ [card.input.name]: input });
   const logits = out[card.output.name];
   if (!logits) throw new Error('output_missing');
-  const values = Array.from(logits.data as Float32Array);
+  return logits.data as Float32Array;
+}
+
+export async function runModel(rgba: Uint8ClampedArray, card: ModelCard, modelUrl: string): Promise<number[]> {
+  const values = Array.from(await runRaw(rgba, card, modelUrl));
   if (values.length !== card.classes.length) throw new Error('logits_length');
   return values;
 }

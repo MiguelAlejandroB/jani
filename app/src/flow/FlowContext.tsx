@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { loadModelCard, type ModelCard } from '../engine/modelCard';
 import { resetSim } from '../engine/see';
+import { loadSegCard, type SegCard } from '../engine/segment';
 import { usePack } from '../packs/PackContext';
 import { saveCase } from '../store/cases';
 import type { Case, Choice, DecideResult, PredictResult, SeeResult, Session } from '../engine/types';
@@ -9,6 +10,8 @@ export type FlowPhoto = { url: string; result: SeeResult };
 
 type FlowCtx = {
   card: ModelCard | null;
+  /** Ficha del segmentador (filtro "¿hay una hoja?" y severidad). null si no cargó: se clasifica sin filtro. */
+  segCard: SegCard | null;
   /** La ficha no se pudo cargar o no es válida: la captura muestra ⚠️ y permite reintentar. */
   cardError: boolean;
   reloadCard: () => void;
@@ -40,6 +43,7 @@ export function FlowProvider({ children }: { children: ReactNode }) {
   const [card, setCard] = useState<ModelCard | null>(null);
   const [cardError, setCardError] = useState(false);
   const [cardAttempt, setCardAttempt] = useState(0);
+  const [segCard, setSegCard] = useState<SegCard | null>(null);
   const [photos, setPhotos] = useState<FlowPhoto[]>([]);
   const [session, setSession] = useState<Session | null>(null);
   const [heavyRain, setHeavyRain] = useState<boolean | null>(null);
@@ -64,6 +68,22 @@ export function FlowProvider({ children }: { children: ReactNode }) {
         console.warn('model_card', e);
         setCard(null);
         setCardError(true);
+      });
+    return () => {
+      alive = false;
+    };
+  }, [cardAttempt]);
+
+  useEffect(() => {
+    let alive = true;
+    loadSegCard()
+      .then((c) => {
+        if (alive) setSegCard(c);
+      })
+      .catch((e: unknown) => {
+        if (!alive) return;
+        console.warn('seg_card', e);
+        setSegCard(null);
       });
     return () => {
       alive = false;
@@ -130,10 +150,10 @@ export function FlowProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<FlowCtx>(
     () => ({
-      card, cardError, reloadCard, photos, session, heavyRain, treated, risk, decision, choice, caseId, savedCase,
+      card, segCard, cardError, reloadCard, photos, session, heavyRain, treated, risk, decision, choice, caseId, savedCase,
       startReview, addPhoto, setSession: setNewSession, setAnswers, setRisk, setDecision, setChoice, saveCurrentCase, setSavedCase,
     }),
-    [card, cardError, reloadCard, photos, session, heavyRain, treated, risk, decision, choice, caseId, savedCase, startReview, addPhoto, setNewSession, setAnswers, saveCurrentCase],
+    [card, segCard, cardError, reloadCard, photos, session, heavyRain, treated, risk, decision, choice, caseId, savedCase, startReview, addPhoto, setNewSession, setAnswers, saveCurrentCase],
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

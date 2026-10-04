@@ -1,8 +1,8 @@
 export type ClassId = 'sana' | 'roya' | 'minador' | 'phoma' | 'cercospora';
 export const CLASS_IDS: readonly ClassId[] = ['sana', 'roya', 'minador', 'phoma', 'cercospora'];
 export type SeeResult =
-  | { status: 'ok'; classId: ClassId; confidence: number; probs: number[] }
-  | { status: 'unsure'; reason: 'bad_photo' | 'low_confidence' | 'low_margin'; probs?: number[] };
+  | { status: 'ok'; classId: ClassId; confidence: number; probs: number[]; severity?: { fraction: number; level: string } }
+  | { status: 'unsure'; reason: 'bad_photo' | 'low_confidence' | 'low_margin'; probs?: number[]; /** bad_photo porque el segmentador no vio una hoja. */ noLeaf?: true };
 export type Session = { results: SeeResult[]; dominant: ClassId | null; affectedShare: number; unsureShare: number };
 export type RiskLevel = 'LOW' | 'MEDIUM' | 'HIGH';
 export type PredictInput = { dominant: ClassId; affectedShare: number; month: number; heavyRainThisWeek: boolean; treatedLast60Days: boolean };

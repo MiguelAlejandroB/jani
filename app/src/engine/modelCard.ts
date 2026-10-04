@@ -26,7 +26,7 @@ export class ModelCardError extends Error {
 }
 
 /** Cambia por null los tokens sueltos NaN / Infinity / -Infinity (json.dump de Python), sin tocar el interior de las cadenas. */
-function nullifyNonFinite(text: string): string {
+export function nullifyNonFinite(text: string): string {
   let out = '';
   let inString = false;
   for (let i = 0; i < text.length; i++) {
