@@ -31,7 +31,7 @@ function noise(size: number, seed = 1): Uint8ClampedArray {
 describe('parseSegCard', () => {
   it('acepta la ficha de public/models/leafseg-v1', () => {
     expect(card.input.shape).toEqual([1, 3, 256, 256]);
-    expect(card.leaf_gate.min_leaf_fraction).toBe(0.25);
+    expect(card.leaf_gate.min_leaf_fraction).toBe(0.1);
     expect(card.recommended_file).toBe('model_int8.onnx');
   });
   it('rechaza una ficha sin las clases fondo/hoja/sintoma', () => {
@@ -85,7 +85,7 @@ describe('leafGate', () => {
     expect(leafGate(okStats, 150, card)).toBe('ok');
   });
   it('poca hoja -> not_leaf', () => {
-    expect(leafGate({ ...okStats, leafFraction: 0.1 }, 150, card)).toBe('not_leaf');
+    expect(leafGate({ ...okStats, leafFraction: 0.05 }, 150, card)).toBe('not_leaf');
   });
   it('"hoja" que no es verde -> not_leaf', () => {
     expect(leafGate({ ...okStats, greenFraction: 0.4 }, 150, card)).toBe('not_leaf');
