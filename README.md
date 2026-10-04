@@ -26,7 +26,12 @@ All on the phone. No internet. Photos never leave the device.
 ![Capacitor](https://img.shields.io/badge/Capacitor-Android-119EFF?logo=capacitor&logoColor=white)
 ![Languages](https://img.shields.io/badge/languages-Español%20·%20English%20·%20Kiswahili-B5733F)
 
-<sub>Built for the <b>Small AI for Development</b> hackathon (World Bank × Hack-Nation) · Agriculture track</sub>
+<sub>Developed by <a href="https://berinpartners.com/"><b>Berin Partners</b></a> · Built for the <b>Small AI for Development</b> hackathon (World Bank × Hack-Nation) · Agriculture track</sub>
+
+<br /><br />
+
+<a href="https://berinpartners.com/"><img src="https://img.shields.io/badge/Berin%20Partners-Website-13221A?style=flat-square&logo=googlechrome&logoColor=white" alt="Berin Partners website" /></a>
+<a href="https://www.linkedin.com/company/berin-partners"><img src="https://img.shields.io/badge/Berin%20Partners-LinkedIn-0A66C2?style=flat-square&logo=linkedin&logoColor=white" alt="Berin Partners on LinkedIn" /></a>
 
 </div>
 
@@ -360,3 +365,17 @@ Fonts: Fraunces (SIL OFL). Optional Swahili audio: Meta MMS-TTS (non-commercial 
 | [docs/HUMAN_TODO.md](docs/HUMAN_TODO.md) | What the team must still provide (real values, audio, validation) |
 | [JANI_PLAN.md](JANI_PLAN.md) | Original product specification (historical) |
 | [docs/es/](docs/es/) | Spanish originals |
+
+---
+
+## 11. Credits
+
+<div align="center">
+
+**Jani is designed and developed by [Berin Partners](https://berinpartners.com/).**
+
+[🌐 berinpartners.com](https://berinpartners.com/) · [💼 LinkedIn](https://www.linkedin.com/company/berin-partners) · [☕ Jani landing page](https://bloom-coffee-visions.lovable.app/) · [📲 Download the APK](https://github.com/MiguelAlejandroB/jani/releases/download/v0.1.0/Jani.apk)
+
+<sub>Datasets © their authors under the licences listed in section 8.</sub>
+
+</div>
