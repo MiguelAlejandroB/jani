@@ -6,7 +6,8 @@ import { captureAudioKey, type Rejection } from '../flow/captureAudio';
 import { useFlow } from '../flow/FlowContext';
 import { useNav } from '../nav';
 import { usePack } from '../packs/PackContext';
-import { BigButton, Screen } from '../ui';
+import { Icon } from '../icons';
+import { BigButton, Pill, Screen } from '../ui';
 
 // Con 5 fotos ya se puede seguir; se pueden tomar más (hasta 30) para afinar el riesgo: con 8 o más hojas desaparece
 // el aviso de pocas hojas y una foto mal clasificada pesa menos.
@@ -99,36 +100,101 @@ export default function Captura() {
     go('diagnostico');
   };
 
+  const n = photos.length;
+  const extras = photos.slice(TARGET_PHOTOS);
   return (
     <Screen
       id="captura"
-      icon="📷"
+      icon="camera"
+      eyebrow={t('app_name')}
+      title={t('t_photos')}
       onIconClick={onIconClick}
-      audio={[captureAudioKey(photos.length, TARGET_PHOTOS, rejection?.key ?? null)]}
+      audio={[captureAudioKey(n, TARGET_PHOTOS, rejection?.key ?? null)]}
       audioNonce={rejection?.n ?? 0}
+      actions={
+        <>
+          <BigButton
+            icon="camera"
+            label={t(n === 0 ? 'take_photo' : 'more_photos')}
+            testId="photo-btn"
+            onClick={() => inputRef.current?.click()}
+            variant="secondary"
+            disabled={busy || !card || n >= MAX_PHOTOS}
+          />
+          <BigButton icon="check" label={t('done_photos')} testId="photos-done" onClick={done} disabled={n < 1 || busy} />
+        </>
+      }
     >
-      <div className="photo-count" data-testid="photo-count">
-        {photos.length < TARGET_PHOTOS ? `${photos.length} / ${TARGET_PHOTOS}` : `${photos.length} ✓`}
+      {/* Progreso por segmentos: N de 5 y porcentaje; desde la 5.ª foto, N ✓. */}
+      <div>
+        <div className="progress-head">
+          <span className="photo-count" data-testid="photo-count">
+            {n < TARGET_PHOTOS ? `${n} / ${TARGET_PHOTOS}` : `${n} ✓`}
+          </span>
+          <span className="num" aria-hidden="true">
+            {Math.min(100, Math.round((n / TARGET_PHOTOS) * 100))}%
+          </span>
+        </div>
+        <div className="segments" aria-hidden="true">
+          {Array.from({ length: TARGET_PHOTOS }, (_, i) => (
+            <span key={i} className={`segment${i < n ? ' on' : ''}`} />
+          ))}
+        </div>
       </div>
-      {rejection && <p className="retake">{t(rejection.key)}</p>}
+      {rejection && (
+        <p className="warn retake">
+          <Icon name="alert" />
+          <span>{t(rejection.key)}</span>
+        </p>
+      )}
       {inferError && (
         <div className="pack-error" data-testid="infer-error" aria-hidden="true">
           <div className="pack-error-icon">⚠️</div>
         </div>
       )}
       {cardError && (
-        <div className="pack-error" data-testid="card-error">
+        <div className="pack-error card" data-testid="card-error">
           <div className="pack-error-icon">⚠️</div>
-          <p className="question">{t('unsure')}</p>
-          <BigButton icon="🔄" testId="card-retry" variant="secondary" onClick={reloadCard} />
+          <p className="slot-name">{t('unsure')}</p>
+          <BigButton icon="repeat" ariaLabel="🔄" testId="card-retry" variant="secondary" onClick={reloadCard} />
         </div>
       )}
-      <div className="thumbs">
-        {photos.map((p) => (
-          <div className="thumb" key={p.url}>
-            <img src={p.url} alt="" />
+      {/* Cinco ranuras (una hoja por planta); las fotos de más se cuentan abajo. */}
+      {Array.from({ length: TARGET_PHOTOS }, (_, i) => {
+        const p = photos[i];
+        return (
+          <div key={i} className={`slot${!p && i === n ? ' next' : ''}`}>
+            <div className={`slot-thumb${p ? '' : ' empty'}`}>{p ? <img src={p.url} alt="" /> : <Icon name="plus" size={26} />}</div>
+            <div className="slot-text">
+              <p className="slot-name">
+                {t('plant')} {i + 1}
+              </p>
+              {!p && i === n && <p className="slot-hint">{t('frame_leaf')}</p>}
+            </div>
+            {p && (
+              <Pill tone="leaf" icon="check">
+                {t('photo_ok')}
+              </Pill>
+            )}
           </div>
-        ))}
+        );
+      })}
+      {extras.length > 0 && (
+        <div className="extras" data-testid="photo-extras">
+          <div className="extras-thumbs">
+            {extras.slice(-4).map((p) => (
+              <img key={p.url} src={p.url} alt="" />
+            ))}
+          </div>
+          <span className="extras-count">+{extras.length}</span>
+        </div>
+      )}
+      <div className="tip">
+        <p className="tip-title">
+          <Icon name="leaf" size={18} />
+          {t('tip')}
+        </p>
+        <p>{t('zigzag')}</p>
       </div>
       <input
         ref={inputRef}
@@ -139,15 +205,6 @@ export default function Captura() {
         data-testid="photo-input"
         onChange={(e) => void onFiles(e)}
       />
-      <BigButton
-        icon="📷"
-        label={t(photos.length === 0 ? 'take_photo' : 'more_photos')}
-        testId="photo-btn"
-        onClick={() => inputRef.current?.click()}
-        variant="secondary"
-        disabled={busy || !card || photos.length >= MAX_PHOTOS}
-      />
-      <BigButton icon="✅" label={t('done_photos')} testId="photos-done" onClick={done} disabled={photos.length < 1 || busy} />
       {simulated && menuOpen && (
         <div className="sim-menu" data-testid="sim-menu">
           <div className="sim-plan">{JSON.stringify(getSimPlan())}</div>
@@ -157,7 +214,7 @@ export default function Captura() {
               data-testid={`sim-${o}`}
               onClick={() => {
                 appendSim(o);
-                setPlanTick((n) => n + 1);
+                setPlanTick((k) => k + 1);
               }}
             >
               {o}
@@ -172,7 +229,7 @@ export default function Captura() {
               } catch {
                 // nada
               }
-              setPlanTick((n) => n + 1);
+              setPlanTick((k) => k + 1);
             }}
           >
             🗑

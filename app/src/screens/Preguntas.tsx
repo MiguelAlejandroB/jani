@@ -37,12 +37,28 @@ export default function Preguntas() {
     go('riesgo');
   };
 
+  const key = rain === null ? 'ask_rain' : 'ask_treatment';
   return (
-    <Screen id="preguntas" icon={rain === null ? '🌧️' : '💧'} title={t(rain === null ? 'ask_rain' : 'ask_treatment')} audio={[rain === null ? 'ask_rain' : 'ask_treatment']}>
-      <div className="answer-row">
-        <BigButton icon="👍" label={t('yes')} testId="answer-yes" onClick={() => answer(true)} />
-        <BigButton icon="👎" label={t('no')} testId="answer-no" variant="secondary" onClick={() => answer(false)} />
-      </div>
+    <Screen
+      id="preguntas"
+      icon={rain === null ? 'rain' : 'drop'}
+      eyebrow={t('app_name')}
+      title={t('t_questions')}
+      audio={[key]}
+      actions={
+        <div className="answer-row">
+          <BigButton icon="check" label={t('yes')} testId="answer-yes" onClick={() => answer(true)} />
+          <BigButton icon="close" label={t('no')} testId="answer-no" variant="secondary" onClick={() => answer(false)} />
+        </div>
+      }
+    >
+      <section className="card lg question-card" key={key}>
+        <div className="steps" aria-hidden="true">
+          <span className="segment on" />
+          <span className={`segment${rain === null ? '' : ' on'}`} />
+        </div>
+        <h2 className="question fade-rise">{t(key)}</h2>
+      </section>
     </Screen>
   );
 }
