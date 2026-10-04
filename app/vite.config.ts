@@ -20,7 +20,7 @@ export default defineConfig({
     dropDuplicateOrtWasm,
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icon.svg'],
+      includeAssets: ['icon.svg', 'icon-maskable.svg'],
       manifest: {
         name: 'Jani',
         short_name: 'Jani',
@@ -33,7 +33,7 @@ export default defineConfig({
         // Tamaño explícito y propósitos separados: Chrome avisa con sizes 'any' + 'any maskable'.
         icons: [
           { src: 'icon.svg', sizes: '512x512', type: 'image/svg+xml', purpose: 'any' },
-          { src: 'icon.svg', sizes: '512x512', type: 'image/svg+xml', purpose: 'maskable' },
+          { src: 'icon-maskable.svg', sizes: '512x512', type: 'image/svg+xml', purpose: 'maskable' },
         ],
       },
       workbox: {

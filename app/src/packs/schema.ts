@@ -51,6 +51,9 @@ export const REQUIRED_PHRASE_KEYS: readonly string[] = [
   'use_location', 'climate_from',
   // Pantallas de riesgo y decisión.
   'risk_title', 'loss_likely', 'loss_between', 'bad_year', 'chance_big_loss', 'calculating', 'options_title', 'times_better', 'choose', 'not_viable', 'remeasure_worth',
+  // Rediseño: marca, barra superior, títulos de pantalla y secciones de ajustes.
+  'app_name', 'start_check', 'about', 'back', 'listen', 'next', 'go_home', 'sec_language', 'sec_farm', 'sec_place',
+  'sec_model', 'sec_sources', 't_photos', 't_result', 't_questions', 't_risk', 't_decision',
 ];
 
 const POINT_KEYS = [
