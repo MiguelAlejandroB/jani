@@ -30,7 +30,10 @@ describe('applyUnsureRule', () => {
     expect(r).toMatchObject({ status: 'ok', classId: 'roya', confidence: 0.9 });
   });
   it('low_confidence si max < min_confidence', () => {
-    expect(applyUnsureRule([0.5, 0.2, 0.1, 0.1, 0.1], card, classes)).toMatchObject({ status: 'unsure', reason: 'low_confidence' });
+    // Relativo al umbral de la ficha activa: sirve con la de ejemplo y con la real.
+    const max = card.unsure_rule.min_confidence - 0.01;
+    const rest = (1 - max) / 4;
+    expect(applyUnsureRule([max, rest, rest, rest, rest], card, classes)).toMatchObject({ status: 'unsure', reason: 'low_confidence' });
   });
   it('low_margin si margen < min_margin', () => {
     const c = { ...card, unsure_rule: { min_confidence: 0.4, min_margin: 0.15 } };
@@ -63,7 +66,9 @@ describe('simulatedProbs', () => {
       const p = simulatedProbs(id, card.classes) ?? [];
       expect(applyUnsureRule(p, card, card.classes)).toMatchObject({ status: 'ok', classId: id });
     }
-    expect(applyUnsureRule(simulatedProbs('low_confidence', card.classes) ?? [], card, card.classes)).toMatchObject({ reason: 'low_confidence' });
+    // Las salidas simuladas low_* se definen contra una regla fija (0.8 / 0.15), no contra la ficha real.
+    const strict = { ...card, unsure_rule: { min_confidence: 0.8, min_margin: 0.15 } };
+    expect(applyUnsureRule(simulatedProbs('low_confidence', card.classes) ?? [], strict, card.classes)).toMatchObject({ reason: 'low_confidence' });
     const relaxed = { ...card, unsure_rule: { min_confidence: 0.4, min_margin: 0.15 } };
     expect(applyUnsureRule(simulatedProbs('low_margin', card.classes) ?? [], relaxed, card.classes)).toMatchObject({ reason: 'low_margin' });
   });

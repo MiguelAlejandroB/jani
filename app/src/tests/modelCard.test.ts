@@ -12,14 +12,15 @@ describe('parseModelCard', () => {
   });
 
   it('tolera NaN / Infinity / -Infinity sueltos (json.dump de Python) y los vuelve null', () => {
-    const text = cardRaw.replace('"metrics": {}', '"metrics": {"f1": NaN, "loss": Infinity, "x": -Infinity, "nota": "NaN Infinity"}');
+    // Funciona con cualquier ficha (de ejemplo o real): se insertan las claves al inicio de "metrics".
+    const text = cardRaw.replace(/"metrics": \{/, '"metrics": {"f1": NaN, "loss": Infinity, "x": -Infinity, "nota": "NaN Infinity",');
     expect(text).not.toBe(cardRaw);
     const card = parseModelCard(text);
-    expect(card.metrics).toEqual({ f1: null, loss: null, x: null, nota: 'NaN Infinity' });
+    expect(card.metrics).toMatchObject({ f1: null, loss: null, x: null, nota: 'NaN Infinity' });
   });
 
   it('NaN en un campo que se usa invalida la ficha', () => {
-    const text = cardRaw.replace('"temperature": 1.0', '"temperature": NaN');
+    const text = cardRaw.replace(/"temperature": [-+0-9.eE]+/, '"temperature": NaN');
     expect(text).not.toBe(cardRaw);
     expect(() => parseModelCard(text)).toThrow(/temperature/);
   });

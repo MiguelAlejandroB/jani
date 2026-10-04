@@ -1,6 +1,6 @@
 {
-  "_note": "FICHA DE EJEMPLO. Se reemplaza por la que genera el notebook.",
-  "id": "arabica-v1-placeholder",
+  "id": "arabica-v1-mobilenetv3_small_100",
+  "architecture": "mobilenetv3_small_100",
   "classes": [
     "sana",
     "roya",
@@ -35,16 +35,126 @@
     "name": "logits",
     "postprocess": "softmax(logits / temperature)"
   },
-  "temperature": 1.0,
+  "temperature": 0.12692862749099731,
   "unsure_rule": {
-    "min_confidence": 0.7,
+    "min_confidence": 0.5,
     "min_margin": 0.15
   },
   "files": {
-    "fp32": null,
-    "int8": null
+    "int8": "model_int8.onnx"
   },
-  "recommended_file": null,
-  "size_mb": {},
-  "metrics": {}
+  "recommended_file": "model_int8.onnx",
+  "size_mb": {
+    "int8": 1.86
+  },
+  "metrics": {
+    "in_distribution_val": {
+      "n": 4875,
+      "accuracy_all": 1.0,
+      "coverage": 1.0,
+      "accuracy_when_answering": 1.0,
+      "escalation_rate": 0.0
+    },
+    "ood_uganda_holdout": {
+      "n": 1500,
+      "accuracy_all": 0.24666666984558105,
+      "coverage": 0.9906666874885559,
+      "accuracy_when_answering": 0.2483176290988922,
+      "escalation_rate": 0.009333312511444092
+    },
+    "ood_peru_holdout": {
+      "n": 200,
+      "accuracy_all": 0.5799999833106995,
+      "coverage": 0.9800000190734863,
+      "accuracy_when_answering": 0.5765306353569031,
+      "escalation_rate": 0.019999980926513672
+    },
+    "ood_peru_unknown_class_abstention": {
+      "n": 199,
+      "abstention_rate": 0.030150771141052246
+    },
+    "onnx_fp32_ood_holdout": {
+      "n": 1500,
+      "accuracy_all": 0.28733333945274353,
+      "coverage": 0.9893333315849304,
+      "accuracy_when_answering": 0.2884097099304199,
+      "escalation_rate": 0.01066666841506958,
+      "ms_per_image_colab_cpu": 12.1
+    },
+    "onnx_int8_ood_holdout": {
+      "n": 1500,
+      "accuracy_all": 0.512666642665863,
+      "coverage": 0.949999988079071,
+      "accuracy_when_answering": 0.5185964703559875,
+      "escalation_rate": 0.050000011920928955,
+      "ms_per_image_colab_cpu": 14.8
+    }
+  },
+  "candidates": [
+    {
+      "model": "efficientnet_lite0",
+      "file": "int8",
+      "size_mb": {
+        "fp32": 13.46,
+        "int8": 3.8
+      },
+      "score": 0.382666677236557,
+      "score_source": "ood_holdout",
+      "min_confidence": 0.8
+    },
+    {
+      "model": "mobilenetv3_small_100",
+      "file": "int8",
+      "size_mb": {
+        "fp32": 6.1,
+        "int8": 1.86
+      },
+      "score": 0.512666642665863,
+      "score_source": "ood_holdout",
+      "min_confidence": 0.5
+    }
+  ],
+  "training": {
+    "epochs": 8,
+    "img_size": 224,
+    "max_per_class_jmuben": 6500,
+    "seed": 42,
+    "threshold_rule": "el umbral más bajo con precisión ≥ 0.9 y cobertura ≥ 0.3 en la mitad 'calib' de Uganda+Perú"
+  },
+  "training_data": [
+    {
+      "name": "JMuBEN / JMuBEN2",
+      "country": "Kenia",
+      "license": "CC BY 4.0",
+      "source": "https://huggingface.co/datasets/Project-AgML/arabica_coffee_leaf_disease_classification",
+      "doi": [
+        "10.17632/t2r6rszp5c.1",
+        "10.17632/tgv3zb82nd.1"
+      ],
+      "images_used": 27625
+    },
+    {
+      "name": "BRACOL",
+      "country": "Brasil",
+      "license": "CC BY 4.0",
+      "source": "https://data.mendeley.com/datasets/yy2k5y8mxg/1",
+      "images_used": 1343
+    }
+  ],
+  "evaluation_data_never_trained_on": [
+    {
+      "name": "Uganda (Soroti University)",
+      "source": "https://data.mendeley.com/datasets/k36wnd6knb/1"
+    },
+    {
+      "name": "Perú (Saposoa)",
+      "source": "https://data.mendeley.com/datasets/mfpxg4y65r/1"
+    }
+  ],
+  "known_limits": [
+    "Solo hojas de arábica; no cubre frutos ni robusta.",
+    "JMuBEN son hojas recortadas y con aumentación: la validación interna está inflada.",
+    "El número honesto es 'ood_*_holdout': la mitad de Uganda/Perú que no se usó para elegir el umbral.",
+    "No reconoce deficiencias nutricionales ni enfermedades fuera de las 5 clases."
+  ]
 }
