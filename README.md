@@ -26,7 +26,7 @@ All on the phone. No internet. Photos never leave the device.
 ![Capacitor](https://img.shields.io/badge/Capacitor-Android-119EFF?logo=capacitor&logoColor=white)
 ![Languages](https://img.shields.io/badge/languages-Español%20·%20English%20·%20Kiswahili-B5733F)
 
-<sub>Developed by <a href="https://berinpartners.com/"><b>Berin Partners</b></a> · Built for the <b>Small AI for Development</b> hackathon (World Bank × Hack-Nation) · Agriculture track</sub>
+<sub>Developed by <b>Miguel Alejandro Bermúdez</b> and <b>Juan Camilo Bermúdez</b> · <a href="https://berinpartners.com/"><b>Berin Partners</b></a> · Built for the <b>Small AI for Development</b> hackathon (World Bank × Hack-Nation) · Agriculture track</sub>
 
 <br /><br />
 
@@ -436,6 +436,8 @@ Fonts: Fraunces (SIL OFL). Optional Swahili audio: Meta MMS-TTS (non-commercial 
 <div align="center">
 
 **Jani is designed and developed by [Berin Partners](https://berinpartners.com/).**
+
+**Team:** Miguel Alejandro Bermúdez · Juan Camilo Bermúdez
 
 [🌐 berinpartners.com](https://berinpartners.com/) · [💼 LinkedIn](https://www.linkedin.com/company/berin-partners) · [☕ Jani landing page](https://bloom-coffee-visions.lovable.app/) · [📲 Download the APK](https://github.com/MiguelAlejandroB/jani/releases/download/v0.1.0/Jani.apk)
 
