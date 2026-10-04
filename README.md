@@ -73,27 +73,30 @@ Documentos de estado: `docs/PROGRESO.md`, `docs/DECISIONES.md`, `docs/QA_REPORT.
 1. Ir a https://colab.research.google.com
 2. `Archivo → Subir notebook` y elegir `training/jani_train.ipynb`. **Se sube el archivo; no hay que copiar y pegar nada.**
 3. `Entorno de ejecución → Cambiar tipo de entorno → GPU T4 → Guardar`.
-4. `Entorno de ejecución → Ejecutar todo`.
-5. Esperar. Al final el navegador descarga `jani_model_efficientnet_lite0.zip`.
+4. `Entorno de ejecución → Ejecutar todo`. No hay que cambiar nada en la configuración.
+5. Esperar unos 40–70 minutos. Al final el navegador descarga **`jani_model.zip`**.
+
+**Qué hace en una sola ejecución:** entrena dos modelos (`efficientnet_lite0` y `mobilenetv3_small_100`), calibra la
+confianza, elige el umbral de "no estoy segura" con datos de otros países, exporta a ONNX, cuantiza a int8 y **se queda
+con el mejor que pese menos de 10 MB**. Ya no hay que repetir nada para el plan B.
 
 **Qué trae ese zip:**
 
 | Archivo | Qué es |
 |---|---|
-| `model_int8.onnx` | El modelo comprimido (el que normalmente se usa) |
-| `model_fp32.onnx` | El mismo modelo sin comprimir |
-| `model_card.json` | Ficha: clases, normalización, umbrales, métricas y cuál archivo usar |
+| `model_int8.onnx` o `model_fp32.onnx` | El modelo elegido (uno solo) |
+| `model_card.json` | Ficha: clases, normalización, temperatura, umbrales, métricas, fuentes y comparación de candidatos |
 | `confusion_*.png` | Gráficos de aciertos y errores, para el video |
 
-Son **dos archivos del mismo modelo**, no dos modelos distintos.
+**Dónde va:** descomprimir todo dentro de `app/public/models/arabica-v1/`, reemplazando el `model_card.json` de
+ejemplo. Luego, en `app/`: `npm run check:assets` (todo el bloque "Modelo" debe salir OK) y `npm run build`. La app
+deja el modo simulado sola.
 
-**Dónde va:** descomprimir todo dentro de `app/public/models/arabica-v1/`, reemplazando el `model_card.json` de ejemplo. La app detecta el modelo real sola.
+**Si una descarga de datos falla:** el notebook dice qué página abrir, qué archivo bajar y con qué nombre subirlo a Colab
+(ícono de carpeta, a la izquierda). Luego se vuelve a `Ejecutar todo`.
 
-**¿Hay que entrenar más de una vez?** Solo si el notebook lo pide. Si al final imprime que conviene el plan B, cambiar en la celda Configuración a `MODEL_NAME = "mobilenetv3_small_100"` y ejecutar todo de nuevo. Se usa uno solo de los dos.
-
-**Si una descarga de datos falla:** el notebook dice qué página abrir, qué archivo bajar y con qué nombre subirlo a Colab (ícono de carpeta, a la izquierda). Luego se vuelve a ejecutar esa celda.
-
-**Qué número mirar:** la precisión en Uganda y Perú ("fuera de distribución"). La de validación sale cerca de 99% y no es representativa.
+**Qué número mirar:** `ood_uganda_holdout` y `ood_peru_holdout` en las métricas: la mitad de Uganda y Perú que no se
+usó ni para entrenar ni para elegir el umbral. La de validación sale cerca de 99% y no es representativa.
 
 ### Paso C — Generar los audios (persona)
 

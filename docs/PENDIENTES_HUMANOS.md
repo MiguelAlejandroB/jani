@@ -13,9 +13,8 @@ npm run verify         # tipos + lint + pruebas unitarias + build + pruebas e2e:
 
 ## 1. Cuando llegue el modelo (Colab)
 
-1. Descomprimir `jani_model_efficientnet_lite0.zip` **dentro de** `app/public/models/arabica-v1/`, reemplazando el
-   `model_card.json` de ejemplo. Deben quedar `model_card.json` y el `.onnx` que nombra `recommended_file`
-   (normalmente `model_int8.onnx`).
+1. Descomprimir `jani_model.zip` **dentro de** `app/public/models/arabica-v1/`, reemplazando el
+   `model_card.json` de ejemplo. Deben quedar `model_card.json` y el único `.onnx` del zip (el que nombra `recommended_file`).
 2. Comprobar:
    ```bash
    npm run check:assets
@@ -29,7 +28,7 @@ npm run verify         # tipos + lint + pruebas unitarias + build + pruebas e2e:
    ```
    Al cargar `model_card.json` con `recommended_file` distinto de `null`, la app deja el modo simulado sola.
    El menú oculto de pruebas (tocar 5 veces el ícono de Captura) deja de aparecer: es la señal de que usa el modelo real.
-4. Si el notebook recomienda el plan B, repetir con la salida de `mobilenetv3_small_100`. Solo un modelo a la vez.
+4. No hay plan B manual: el notebook entrena los dos modelos y deja en el zip solo el mejor que pesa ≤ 10 MB.
 
 ## 2. Cuando lleguen los audios
 
