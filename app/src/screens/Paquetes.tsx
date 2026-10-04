@@ -2,7 +2,8 @@ import { useEffect, useRef, useState, type ChangeEvent } from 'react';
 import { fetchCatalog, installPackFromCatalog, installPackFromZip, PackError, type CatalogEntry } from '../packs/loader';
 import { usePack } from '../packs/PackContext';
 import type { Pack } from '../packs/schema';
-import { AREA_DEFAULT_HA, AREA_MAX_HA, AREA_MIN_HA, AREA_STEP_HA } from '../store/settings';
+import { climateFor, requestLocation, type ClimateChoice } from '../engine/rd/location';
+import { AREA_DEFAULT_HA, AREA_MAX_HA, AREA_MIN_HA, AREA_STEP_HA, getLocation, setLocation } from '../store/settings';
 import { BigButton, Screen } from '../ui';
 
 export default function Paquetes() {
@@ -107,8 +108,57 @@ export default function Paquetes() {
             </button>
           </div>
           <BigButton testId="area-save" icon="✅" onClick={() => void setAreaHa(area)} />
+          <LocationClimate />
         </>
       )}
     </Screen>
+  );
+}
+
+/** "Usar mi ubicación para el clima": pide permiso, guarda la ubicación solo en el teléfono y muestra el punto de
+ *  clima elegido (el más cercano del paquete). Sin permiso o lejos de todos los puntos, se usa el del paquete. */
+function LocationClimate() {
+  const { pack, t } = usePack();
+  const [choice, setChoice] = useState<ClimateChoice | null>(null);
+  const [state, setState] = useState<'idle' | 'busy' | 'error'>('idle');
+  const normals = pack?.climate_normals as Parameters<typeof climateFor>[0] | undefined;
+
+  useEffect(() => {
+    let alive = true;
+    getLocation()
+      .then((loc) => {
+        if (alive && normals) setChoice(climateFor(normals, loc ? { lat: loc.lat, lon: loc.lon } : null)?.choice ?? null);
+      })
+      .catch(() => undefined);
+    return () => {
+      alive = false;
+    };
+  }, [normals]);
+
+  const ask = async () => {
+    setState('busy');
+    try {
+      const loc = await requestLocation();
+      await setLocation({ ...loc, date: new Date().toISOString() });
+      if (normals) setChoice(climateFor(normals, loc)?.choice ?? null);
+      setState('idle');
+    } catch (e) {
+      console.warn('location', e);
+      setState('error');
+    }
+  };
+
+  if (!normals?.points?.length) return null;
+  return (
+    <div className="location-climate">
+      <BigButton icon={state === 'busy' ? '⏳' : '📍'} label={t('use_location')} variant="secondary" testId="use-location" onClick={() => void ask()} />
+      {state === 'error' && <div className="pack-error-icon" data-testid="location-error">⚠️</div>}
+      {choice && (
+        <p className="location-point" data-testid="climate-point" data-source={choice.source}>
+          🌦️ {t('climate_from')} {choice.name}
+          {choice.km !== null ? ` (${choice.km.toLocaleString(pack?.language.code)} km)` : ''}
+        </p>
+      )}
+    </div>
   );
 }

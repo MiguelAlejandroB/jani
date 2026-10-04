@@ -28,8 +28,8 @@ describe('validatePack', () => {
     expect(r.ok).toBe(true);
   });
 
-  it('exige 89 claves de frases (38 del MVP + 38 de la interfaz + 13 de riesgo y decisión)', () => {
-    expect(REQUIRED_PHRASE_KEYS).toHaveLength(89);
+  it('exige 91 claves de frases (38 del MVP + 38 de la interfaz + 13 de riesgo y decisión + 2 de ubicación)', () => {
+    expect(REQUIRED_PHRASE_KEYS).toHaveLength(91);
     expect(REQUIRED_PHRASE_KEYS[0]).toBe('welcome');
   });
 

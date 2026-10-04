@@ -47,6 +47,8 @@ export const REQUIRED_PHRASE_KEYS: readonly string[] = [
   // v0.4: modelos de RIESGO y DECISIÓN (acciones del catálogo, banderas de validez, razones de inviabilidad).
   'alt_copper', 'alt_bio', 'alt_miner', 'alt_remeasure', 'flag_prior', 'flag_sample', 'flag_detector', 'flag_climate',
   'info_mode', 'why_liquidity', 'why_cert', 'why_deadline', 'why_labor',
+  // Clima según la ubicación (GPS).
+  'use_location', 'climate_from',
 ];
 
 const POINT_KEYS = [

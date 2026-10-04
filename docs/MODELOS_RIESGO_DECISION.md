@@ -65,7 +65,7 @@ observa, la app activa `detector_no_corregible` y pide un técnico, como manda e
 
 | Qué | Datos | Resultado |
 |---|---|---|
-| Clima semanal normal | NASA POWER diario 2001–2024: Chinchiná (Colombia) y Nyeri (Kenia) | Anomalías estandarizadas por semana del año en cada paquete |
+| Clima semanal normal | NASA POWER diario 2001–2024 en **59 puntos cafeteros**: 32 municipios de Colombia; 27 zonas de Kenia, Uganda, Tanzania, Ruanda, Burundi y Etiopía (`build_climate.py`) | Anomalías estandarizadas por semana del año en cada paquete. La app usa el punto más cercano al teléfono (ver §7). |
 | Λ | Segmentador M2 vs. máscaras de expertos BRACOL | Arriba; nivel 3 bloqueado |
 | Dinámica de la roya (τ0, γ_w) | CATIE/Mendeley (Lasso et al. 2020, CC BY 4.0): 442 observaciones, 111 fechas | **No identificable.** La incidencia **baja** en el 45 % de los intervalos de 14 días (renovación foliar): rompe el supuesto A4. Fuera de muestra, el error es 13,5 puntos con Markov, 12,4 con persistencia y 11,5 con regresión lineal. Se mantiene el prior y la regla de parada §7 queda activa. |
 | Eficacia de productos | USDA ARS Hawái 2022–23 (CC0) | Pendiente del logit de incidencia por semana: Priaxor −0,24/−0,15 (baja), cobres 0,00/+0,12, biológicos +0,11/+0,15. Coincide con el orden de los priors del catálogo (sistémico > cobre > biológico). Solo indicio: no hay parcela sin tratar. |
@@ -94,3 +94,15 @@ cd training/riesgo_decision
 ..\..\.venv\Scripts\python run_calibration.py --rust data/CLRI_14D.csv --usda data/usda_fungicides_clr.csv --lambda_json data/lambda.json
 cd ../../app && npx vitest run src/tests/rd.golden.test.ts            # la app sigue igual a Python
 ```
+
+## 7. Clima según la ubicación (GPS)
+
+- En **Paquetes → 📍 Usar mi ubicación para el clima**, la persona da permiso. El GPS funciona sin internet.
+- La app guarda la ubicación **solo en el teléfono** (IndexedDB) y elige el punto cafetero más cercano del paquete,
+  si está a menos de `max_km` (150 km).
+- Sin permiso, o lejos de todos los puntos, se usa `default_point`: Chinchiná para Colombia y Nyeri para África Oriental.
+- En el caso guardado queda solo el **nombre** del punto, nunca las coordenadas, y nada sale del teléfono.
+- Pruebas: `app/src/tests/location.test.ts` (distancia, punto más cercano, respaldo, `buildInputs`) y
+  `app/e2e/ubicacion.spec.ts` (navegador con ubicación simulada en Pitalito, Huila).
+- Agregar puntos: editar `REGIONS` en `training/riesgo_decision/build_climate.py`, correrlo y volver a generar los
+  paquetes. No hay que tocar código de la app.

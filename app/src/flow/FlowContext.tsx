@@ -7,7 +7,7 @@ import { saveCase } from '../store/cases';
 import type { Case, Choice, DecideResult, PredictResult, RdSummary, SeeResult, Session } from '../engine/types';
 import { computeRd } from '../engine/rd/client';
 import { buildInputs, type RdResult } from '../engine/rd/run';
-import { AREA_DEFAULT_HA } from '../store/settings';
+import { AREA_DEFAULT_HA, getLocation } from '../store/settings';
 
 export type FlowPhoto = { url: string; result: SeeResult };
 /** Estado del cálculo de RIESGO + DECISIÓN (corre en un Web Worker). 'unavailable': faltan datos en el paquete. */
@@ -19,6 +19,7 @@ function summarize(r: RdResult): RdSummary {
     usedDemoData: r.usedDemoData,
     ell: r.risk.ell,
     banderas: r.risk.banderas,
+    clima: r.climate.name,
     recomendacion: r.decision?.recomendacion ?? null,
     alternativas: (r.decision?.alternativas ?? []).map((a) => ({ id: a.id, ce: a.margen?.ce ?? null, viable_hoy: a.viable_hoy, razon_no_viable: a.razon_no_viable })),
   };
@@ -147,19 +148,27 @@ export function FlowProvider({ children }: { children: ReactNode }) {
     (heavyRain: boolean) => {
       if (!session || !pack) return;
       const run = ++rdRun.current;
-      const inputs = buildInputs(pack, session.results, { areaHa: areaHa ?? AREA_DEFAULT_HA, now: new Date(), heavyRain });
-      if (!inputs) {
-        setRd({ status: 'unavailable' });
-        return;
-      }
       setRd({ status: 'loading' });
-      computeRd(inputs)
+      // Ubicación guardada en el teléfono (si la persona dio permiso en Paquetes) -> clima del punto más cercano.
+      getLocation()
+        .catch(() => undefined)
+        .then((loc) => {
+          const inputs = buildInputs(pack, session.results, {
+            areaHa: areaHa ?? AREA_DEFAULT_HA,
+            now: new Date(),
+            heavyRain,
+            location: loc ? { lat: loc.lat, lon: loc.lon } : null,
+          });
+          if (!inputs) throw new Error('rd_inputs_unavailable');
+          return computeRd(inputs);
+        })
         .then((result) => {
           if (rdRun.current === run) setRd({ status: 'ready', result });
         })
         .catch((e: unknown) => {
           console.warn('rd', e);
-          if (rdRun.current === run) setRd({ status: 'error' });
+          if (rdRun.current !== run) return;
+          setRd({ status: e instanceof Error && e.message === 'rd_inputs_unavailable' ? 'unavailable' : 'error' });
         });
     },
     [session, pack, areaHa],

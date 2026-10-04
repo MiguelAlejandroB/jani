@@ -64,3 +64,7 @@ Cada una: qué se decidió, por qué y qué cuesta si está mal.
 26. **Catálogo de acciones de demostración** (poda, sistémico, cobre, biológico, minador) con eficacias Beta de criterio
     experto, ordenadas como sugiere el dataset del USDA. El catálogo real queda en `economics.catalog` con fuente `TODO`
     para que lo firme extensión técnica, sin tocar código.
+27. **Clima por ubicación (GPS) con puntos por región**, pedido por el equipo: 32 puntos en Colombia y 27 en África
+    Oriental (NASA POWER), con el más cercano dentro de 150 km y, si no, el punto del paquete. La ubicación no sale del
+    teléfono ni se guarda en los casos. Si está mal: las coordenadas son aproximadas (cabeceras municipales); con la
+    grilla de ~0,5° de NASA POWER el efecto es pequeño.

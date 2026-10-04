@@ -24,6 +24,8 @@ export type RdSummary = {
   usedDemoData: boolean;
   ell: { p10: number; p50: number; p90: number; cvar10: number; p_sobre_umbral: number };
   banderas: string[];
+  /** Nombre del punto de clima usado (no se guardan coordenadas). */
+  clima?: string;
   recomendacion: string | null;
   alternativas: { id: string; ce: number | null; viable_hoy: boolean; razon_no_viable: string | null }[];
 };
