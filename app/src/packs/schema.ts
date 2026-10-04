@@ -54,6 +54,8 @@ export const REQUIRED_PHRASE_KEYS: readonly string[] = [
   // Rediseño: marca, barra superior, títulos de pantalla y secciones de ajustes.
   'app_name', 'start_check', 'about', 'back', 'listen', 'next', 'go_home', 'sec_language', 'sec_farm', 'sec_place',
   'sec_model', 'sec_sources', 't_photos', 't_result', 't_questions', 't_risk', 't_decision', 'privacy',
+  // Diseño CaféLens: pestaña de inicio, chip sin conexión, consejo de campo, foto lista, foto dudosa y caso enviado.
+  'home', 'works_offline', 'tip', 'photo_ok', 'unclear', 'sent',
 ];
 
 const POINT_KEYS = [

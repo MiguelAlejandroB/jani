@@ -8077,7 +8077,13 @@
     "t_questions": "Maswali mawili",
     "t_risk": "Hatari",
     "t_decision": "Uamuzi",
-    "privacy": "Picha zako hazitoki kwenye simu. Jani inafanya kazi bila intaneti."
+    "privacy": "Picha zako hazitoki kwenye simu. Jani inafanya kazi bila intaneti.",
+    "home": "Mwanzo",
+    "works_offline": "Inafanya kazi bila intaneti",
+    "tip": "Ushauri",
+    "photo_ok": "Tayari",
+    "unclear": "Haieleweki",
+    "sent": "Imetumwa"
   },
   "demo_values": {
     "synthetic": true,

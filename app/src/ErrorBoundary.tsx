@@ -20,12 +20,13 @@ export class ErrorBoundary extends Component<Props, State> {
     if (!this.state.failed) return this.props.children;
     return (
       <main className="screen" data-screen="error" data-testid="screen-error">
-        <div className="screen-icon" aria-hidden="true">
-          ⚠️
-        </div>
-        <div className="screen-body">
+        <div className="screen-body error-body">
+          <div className="error-icon" aria-hidden="true">
+            ⚠️
+          </div>
           <BigButton
-            icon="⌂"
+            icon="home"
+            ariaLabel="⌂"
             testId="error-home"
             onClick={() => {
               this.setState({ failed: false });

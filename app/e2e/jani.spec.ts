@@ -369,7 +369,7 @@ test.describe('i. camino real ONNX (fixture de prueba)', () => {
     await installFromCatalog(page, 'colombia-andina');
     await goHome(page);
     // La ficha cargada es la del fixture.
-    await page.getByRole('button', { name: 'ℹ️', exact: true }).click();
+    await page.getByRole('button', { name: phrase(ES, 'about'), exact: true }).click();
     // Los detalles técnicos están ocultos: se abren con 5 toques en el ícono.
     await expect(page.getByTestId('about-model')).toHaveCount(0);
     for (let i = 0; i < 5; i++) await page.getByTestId('screen-icon').click();
@@ -400,9 +400,9 @@ test.describe('i. camino real ONNX (fixture de prueba)', () => {
     await takePhotos(page, N, SEED_BASE);
     await expect(page.getByTestId('dx-outcome')).toHaveAttribute('data-outcome', expectedOutcome);
     await expect(page.getByTestId('dx-outcome')).toHaveText(expectedText);
-    // Ninguna foto quedó como dudosa (❓): todas pasaron por la inferencia real con resultado `ok`.
+    // Ninguna foto quedó como dudosa (badge "unsure"): todas pasaron por la inferencia real con resultado `ok`.
     await expect(screen(page, 'diagnostico').locator('.thumb-badge')).toHaveCount(N);
-    await expect(screen(page, 'diagnostico').locator('.thumb-badge', { hasText: '❓' })).toHaveCount(0);
+    await expect(screen(page, 'diagnostico').locator('.thumb-badge[data-status="unsure"]')).toHaveCount(0);
 
     const ortUrls = urls.filter((u) => /\/ort\/ort-wasm[^/]*\.(wasm|mjs)$/.test(u));
     console.log(`[i] ort cargado desde: ${ortUrls.map((u) => u.replace(origin, '')).join(', ')}`);
@@ -462,7 +462,7 @@ test.describe('j. ficha del modelo inválida o inferencia que falla', () => {
     await expect(page.getByText(phrase(ES, 'retake'))).toHaveCount(0);
     await page.getByTestId('photos-done').click();
     await expect(page.getByTestId('dx-outcome')).toHaveAttribute('data-outcome', 'consult');
-    await expect(screen(page, 'diagnostico').locator('.thumb-badge', { hasText: '❓' })).toHaveCount(1);
+    await expect(screen(page, 'diagnostico').locator('.thumb-badge[data-status="unsure"]')).toHaveCount(1);
   });
 });
 
@@ -570,7 +570,7 @@ test.describe('l. actualización de un paquete instalado', () => {
     await page.getByRole('button', { name: phrase(ES, 'packs') }).click();
     const upd = page.getByTestId('pack-install-colombia-andina');
     await expect(upd).toBeVisible();
-    await expect(upd).toContainText('🔄');
+    await expect(upd.locator('[data-icon="repeat"]')).toHaveCount(1);
     await expect(upd).toContainText(phrase(ES, 'install'));
     await upd.click();
     // Instalada la nueva versión, la entrada de actualización desaparece y el paquete sigue activo.
@@ -606,7 +606,7 @@ async function sentCount(page: Page): Promise<number> {
   await goHome(page);
   await page.getByRole('button', { name: phrase(ES, 'pending') }).click();
   await expect(page.getByTestId('case-item').first()).toBeVisible();
-  const n = await page.getByTestId('case-item').filter({ hasText: '📨' }).count();
+  const n = await page.getByTestId('case-item').filter({ has: page.getByTestId('case-sent') }).count();
   await goHome(page);
   return n;
 }
@@ -666,7 +666,7 @@ test('n. un paquete importado que pasa la validación pero rompe una pantalla: �
   await page.getByTestId('pack-import-input').setInputFiles({ name: 'cojo.zip', mimeType: 'application/zip', buffer: zip });
   await expect(page.getByTestId('pack-installed-colombia-andina')).toHaveClass(/primary/);
   await goHome(page);
-  await page.getByRole('button', { name: 'ℹ️', exact: true }).click();
+  await page.getByRole('button', { name: phrase(ES, 'about'), exact: true }).click();
   const err = page.getByTestId('screen-error');
   await expect(err).toBeVisible();
   await expect(err).toContainText('⚠️');

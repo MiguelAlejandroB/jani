@@ -79,12 +79,12 @@ export function Icon({ name, size = 24, className, strokeWidth = 1.9 }: { name: 
 
 /** Color del punto de cada estado de la hoja (miniaturas, listas). */
 export const STATUS_COLOR: Record<string, string> = {
-  sana: 'var(--green-cherry)',
-  roya: 'var(--pinton)',
-  minador: 'var(--roast)',
-  phoma: 'var(--ink)',
-  cercospora: 'var(--cherry)',
-  unsure: '#8A948D',
+  sana: 'var(--leaf)',
+  roya: 'var(--clay)',
+  minador: 'var(--sun)',
+  phoma: 'var(--espresso)',
+  cercospora: 'var(--cherry-red)',
+  unsure: 'var(--mist)',
 };
 
 /** Hoja con un punto de color: el ícono de cada enfermedad o estado. */
@@ -92,19 +92,19 @@ export function LeafStatus({ status, size = 24 }: { status: string; size?: numbe
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false" data-icon="leaf">
       <path d={LEAF} />
-      <circle cx="17.5" cy="17.5" r="4.5" stroke="var(--paper)" strokeWidth={2} style={{ fill: STATUS_COLOR[status] ?? STATUS_COLOR.unsure }} />
+      <circle cx="17.5" cy="17.5" r="4.5" stroke="var(--card)" strokeWidth={2} style={{ fill: STATUS_COLOR[status] ?? STATUS_COLOR.unsure }} />
     </svg>
   );
 }
 
-/** Ícono de la app: hoja de café con nervio claro y una cereza en su pedúnculo, sobre un cuadrado verde hoja. */
+/** Ícono de la app: hoja de café con nervio claro y una cereza en su pedúnculo, sobre un cuadrado espresso. */
 export function BrandMark({ size = 40, className }: { size?: number; className?: string }) {
   return (
     <svg className={className} width={size} height={size} viewBox="0 0 64 64" aria-hidden="true" focusable="false">
-      <rect width="64" height="64" rx="15" fill="#1F4D2B" />
-      <path d="M10 46C8 28 20 11 46 10c1.5 23-12 37-36 36z" fill="#6E9B3A" />
-      <path d="M10 46 38 18M19 37l-1-8M26 30l-.5-8.5M19 37l8 1M26 30l8.5.5M49 42c0-4-4-7-11-7.5" fill="none" stroke="#E4EFD9" strokeWidth="2.2" strokeLinecap="round" />
-      <circle cx="49" cy="50" r="8" fill="#B8322A" />
+      <rect width="64" height="64" rx="15" fill="#3A2A1C" />
+      <path d="M10 46C8 28 20 11 46 10c1.5 23-12 37-36 36z" fill="#8A9A5B" />
+      <path d="M10 46 38 18M19 37l-1-8M26 30l-.5-8.5M19 37l8 1M26 30l8.5.5M49 42c0-4-4-7-11-7.5" fill="none" stroke="#F5EFE6" strokeWidth="2.2" strokeLinecap="round" />
+      <circle cx="49" cy="50" r="8" fill="#C17A54" />
       <ellipse cx="46.2" cy="47.2" rx="2.2" ry="3" fill="#fff" opacity="0.35" transform="rotate(-30 46.2 47.2)" />
     </svg>
   );

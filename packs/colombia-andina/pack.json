@@ -9412,7 +9412,13 @@
     "t_questions": "Dos preguntas",
     "t_risk": "Riesgo",
     "t_decision": "Decisión",
-    "privacy": "Tus fotos no salen del teléfono. Jani funciona sin internet."
+    "privacy": "Tus fotos no salen del teléfono. Jani funciona sin internet.",
+    "home": "Inicio",
+    "works_offline": "Funciona sin internet",
+    "tip": "Consejo",
+    "photo_ok": "Lista",
+    "unclear": "Dudosa",
+    "sent": "Enviado"
   },
   "demo_values": {
     "synthetic": true,

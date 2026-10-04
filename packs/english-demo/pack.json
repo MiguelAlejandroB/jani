@@ -8077,7 +8077,13 @@
     "t_questions": "Two questions",
     "t_risk": "Risk",
     "t_decision": "Decision",
-    "privacy": "Your photos never leave your phone. Jani works without internet."
+    "privacy": "Your photos never leave your phone. Jani works without internet.",
+    "home": "Home",
+    "works_offline": "Works offline",
+    "tip": "Tip",
+    "photo_ok": "Ready",
+    "unclear": "Unclear",
+    "sent": "Sent"
   },
   "demo_values": {
     "synthetic": true,
