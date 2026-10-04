@@ -41,6 +41,8 @@ export default defineConfig({
         // packs/catalog.json y packs/*.zip (el audio va dentro de los zips). Soltar el modelo real en
         // public/models/arabica-v1/ y recompilar basta: el patrón ya lo cubre.
         globPatterns: ['**/*.{js,mjs,css,html,svg,png,json,webmanifest,wasm,onnx,zip}'],
+        // Lo que el notebook deja junto al modelo (zip de entrega, matrices de confusión, ejemplos) no lo usa la app.
+        globIgnores: ['**/node_modules/**', 'models/**/*.zip', 'models/**/*.png'],
         navigateFallback: 'index.html',
         maximumFileSizeToCacheInBytes: 30 * 1024 * 1024,
       },
