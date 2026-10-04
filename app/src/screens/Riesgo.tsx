@@ -5,14 +5,15 @@ import { useRedirectIf } from '../flow/useRedirect';
 import { useNav } from '../nav';
 import { usePack } from '../packs/PackContext';
 import { AREA_DEFAULT_HA } from '../store/settings';
+import { Icon, type IconName } from '../icons';
 import { BigButton, CherryGauge, DemoBadge, Dots, RangeBar, Screen } from '../ui';
 import { flagPhrases, kg, rdLevel, tenths, type ViewLevel } from './rdView';
 
-const FACTOR_ICONS: Record<string, string> = {
-  affected_share_over_30pct: '🍂',
-  rainy_month: '📅',
-  user_reports_heavy_rain: '🌧️',
-  no_treatment_last_60_days: '🚫💧',
+const FACTOR_ICONS: Record<string, IconName> = {
+  affected_share_over_30pct: 'leaf',
+  rainy_month: 'calendar',
+  user_reports_heavy_rain: 'rain',
+  no_treatment_last_60_days: 'drop-off',
 };
 
 const levelKey = (l: ViewLevel) => (l === 'CONSULT' ? 'consult' : `risk_${l.toLowerCase()}`);
@@ -36,13 +37,13 @@ export default function Riesgo() {
 
   if (rd.status === 'loading') {
     return (
-      <Screen id="riesgo" icon="" top audio={['calculating']}>
-        <div className="risk-head">
+      <Screen id="riesgo" icon="shield" eyebrow={t('app_name')} title={t('t_risk')} audio={['calculating']}>
+        <section className="card lg risk-head">
           <CherryGauge level="CONSULT" label={t('calculating')} ripening />
           <p className="level-phrase" data-testid="rd-loading">
             {t('calculating')}
           </p>
-        </div>
+        </section>
       </Screen>
     );
   }
@@ -51,23 +52,28 @@ export default function Riesgo() {
   if (!res) {
     const label = t(levelKey(risk.level));
     return (
-      <Screen id="riesgo" icon="" top audio={[levelKey(risk.level)]}>
-        <div className="risk-head">
+      <Screen
+        id="riesgo"
+        icon="shield"
+        eyebrow={t('app_name')}
+        title={t('t_risk')}
+        audio={[levelKey(risk.level)]}
+        chips={risk.level !== 'CONSULT' && risk.usedDemoData ? <DemoBadge text={t('demo_data')} /> : undefined}
+        actions={<BigButton icon="arrow-right" label={t('next')} testId="risk-next" onClick={next} />}
+      >
+        <section className="card lg risk-head">
           <CherryGauge level={risk.level} label={label} />
           <p className="level-phrase">{label}</p>
-        </div>
-        {risk.level !== 'CONSULT' && (
-          <div className="factors">
-            {risk.factors.map((f) => (
-              <span key={f} data-testid={`factor-${f}`}>
-                {FACTOR_ICONS[f] ?? '•'}
-              </span>
-            ))}
-          </div>
-        )}
-        {risk.level !== 'CONSULT' && risk.usedDemoData && <DemoBadge text={t('demo_data')} />}
-        <div className="push" />
-        <BigButton icon="➜" testId="risk-next" onClick={next} />
+          {risk.level !== 'CONSULT' && (
+            <div className="factors">
+              {risk.factors.map((f) => (
+                <span key={f} data-testid={`factor-${f}`}>
+                  {FACTOR_ICONS[f] ? <Icon name={FACTOR_ICONS[f]} size={28} /> : '•'}
+                </span>
+              ))}
+            </div>
+          )}
+        </section>
       </Screen>
     );
   }
@@ -84,14 +90,21 @@ export default function Riesgo() {
   const flags = flagPhrases(res.risk.banderas);
 
   return (
-    <Screen id="riesgo" icon="" top audio={[levelKey(level)]}>
-      <div className="risk-head">
+    <Screen
+      id="riesgo"
+      icon="shield"
+      eyebrow={t('app_name')}
+      title={t('t_risk')}
+      audio={[levelKey(level)]}
+      chips={res.usedDemoData ? <DemoBadge text={t('demo_data')} /> : undefined}
+      actions={<BigButton icon="arrow-right" label={t('next')} testId="risk-next" onClick={next} />}
+    >
+      <section className="card lg risk-head">
         <CherryGauge level={level} label={label} />
         <p className="level-phrase">{label}</p>
-      </div>
-      {res.usedDemoData && <DemoBadge text={t('demo_data')} />}
+      </section>
 
-      <section className="card" data-testid="risk-card">
+      <section className="card lg" data-testid="risk-card">
         <h2 className="card-title">{t('risk_title')}</h2>
         <div>
           <div className="label">{t('loss_likely')}</div>
@@ -134,11 +147,11 @@ export default function Riesgo() {
       )}
 
       <p className="footer-line" data-testid="rd-climate" data-source={res.climate.source}>
-        {res.climate.source === 'gps' ? '📍 ' : ''}
-        {t('climate_from')} {res.climate.name}
+        <Icon name={res.climate.source === 'gps' ? 'pin' : 'sun'} size={18} />
+        <span>
+          {t('climate_from')} {res.climate.name}
+        </span>
       </p>
-      <div className="push" />
-      <BigButton icon="➜" testId="risk-next" onClick={next} />
     </Screen>
   );
 }

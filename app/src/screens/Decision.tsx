@@ -4,14 +4,18 @@ import { useFlow } from '../flow/FlowContext';
 import { useRedirectIf } from '../flow/useRedirect';
 import { useNav } from '../nav';
 import { usePack } from '../packs/PackContext';
-import { BigButton, CherryGauge, DemoBadge, Dots, SaveError, Screen } from '../ui';
+import { Icon, type IconName } from '../icons';
+import { BigButton, CherryGauge, DemoBadge, Dots, Glyph, Pill, SaveError, Screen } from '../ui';
 import { altChoice, altViews, catalogIndex, REMEASURE, type AltView } from './rdView';
 
-const OPTIONS: ReadonlyArray<{ choice: Choice; icon: string; key: string }> = [
-  { choice: 'WAIT', icon: '⏳', key: 'opt_wait' },
-  { choice: 'TREAT', icon: '💧', key: 'opt_treat' },
-  { choice: 'CONSULT', icon: '🧑‍🌾', key: 'opt_consult' },
+const OPTIONS: ReadonlyArray<{ choice: Choice; icon: IconName; key: string }> = [
+  { choice: 'WAIT', icon: 'clock', key: 'opt_wait' },
+  { choice: 'TREAT', icon: 'drop', key: 'opt_treat' },
+  { choice: 'CONSULT', icon: 'person', key: 'opt_consult' },
 ];
+
+// Íconos del catálogo del paquete (emoji) -> íconos de línea propios; los desconocidos se muestran tal cual.
+const CATALOG_ICON: Record<string, IconName> = { '⏳': 'clock', '✂️': 'scissors', '💧': 'drop', '🟦': 'shield', '🌿': 'sprout', '🐛': 'bug' };
 
 export default function Decision() {
   const { t, pack } = usePack();
@@ -38,13 +42,13 @@ export default function Decision() {
 
   if (rd.status === 'loading') {
     return (
-      <Screen id="decision" icon="" top audio={['calculating']}>
-        <div className="risk-head">
+      <Screen id="decision" icon="scale" eyebrow={t('app_name')} title={t('t_decision')} audio={['calculating']}>
+        <section className="card lg risk-head">
           <CherryGauge level="CONSULT" label={t('calculating')} ripening />
           <p className="level-phrase" data-testid="rd-loading">
             {t('calculating')}
           </p>
-        </div>
+        </section>
       </Screen>
     );
   }
@@ -61,7 +65,7 @@ export default function Decision() {
         <section key={a.id} className={`card alt${a.viable ? '' : ' off'}`} data-testid={`alt-${a.id}`} data-suggested={suggested ? 'true' : undefined}>
           <div className="alt-head">
             <span className="alt-icon" aria-hidden="true">
-              {a.icon}
+              <Glyph name={CATALOG_ICON[a.icon] ?? a.icon} size={26} />
             </span>
             <h2 className="alt-name">{t(a.phrase)}</h2>
           </div>
@@ -93,18 +97,34 @@ export default function Decision() {
             <div className="chips">
               {!a.viable && (
                 <span className="chip stop" data-testid={`not-viable-${a.id}`}>
-                  ⛔ {t('not_viable')}
+                  <Icon name="ban" size={16} />
+                  {t('not_viable')}
                   {a.why ? ` · ${t(a.why)}` : ''}
                 </span>
               )}
-              {a.hidden.labor && <span className="chip hidden-cost">👷 {t('hidden_labor')}</span>}
-              {a.hidden.money && <span className="chip hidden-cost">🏦 {t('hidden_money')}</span>}
-              {a.hidden.cert && <span className="chip hidden-cost">🏷️ {t('hidden_cert')}</span>}
+              {a.hidden.labor && (
+                <span className="chip hidden-cost">
+                  <Icon name="person" size={16} />
+                  {t('hidden_labor')}
+                </span>
+              )}
+              {a.hidden.money && (
+                <span className="chip hidden-cost">
+                  <Icon name="coins" size={16} />
+                  {t('hidden_money')}
+                </span>
+              )}
+              {a.hidden.cert && (
+                <span className="chip hidden-cost">
+                  <Icon name="tag" size={16} />
+                  {t('hidden_cert')}
+                </span>
+              )}
             </div>
           )}
           {a.viable && (
             <BigButton
-              icon="✓"
+              icon="check"
               label={t('choose')}
               testId={`choose-${a.id}`}
               variant={suggested ? 'primary' : 'secondary'}
@@ -116,53 +136,81 @@ export default function Decision() {
     };
 
     return (
-      <Screen id="decision" icon="" top audio={[...(auto ? [] : ['info_mode']), 'options_title', 'you_decide']}>
-        {res.usedDemoData && <DemoBadge text={t('demo_data')} />}
+      <Screen
+        id="decision"
+        icon="scale"
+        eyebrow={t('t_decision')}
+        title={t('options_title')}
+        audio={[...(auto ? [] : ['info_mode']), 'options_title', 'you_decide']}
+        chips={
+          <>
+            <Pill tone="leaf" icon="person">
+              {t('you_decide')}
+            </Pill>
+            {res.usedDemoData && <DemoBadge text={t('demo_data')} />}
+          </>
+        }
+        actions={
+          <>
+            {saveError && <SaveError />}
+            <BigButton icon="person" label={t('opt_consult')} testId="choice-CONSULT" variant="secondary" onClick={() => choose('CONSULT')} />
+          </>
+        }
+      >
         {!auto && (
           <div className="note-box" data-testid="info-mode">
-            <span aria-hidden="true">ℹ️</span>
+            <Icon name="info" size={22} />
             <span>{t('info_mode')}</span>
           </div>
         )}
-        <h1 className="screen-title">{t('options_title')}</h1>
         {alts.map(card)}
         {d.recomendar_remedir && (
           <section className="card alt" data-testid={`alt-${REMEASURE}`}>
             <div className="alt-head">
               <span className="alt-icon" aria-hidden="true">
-                🔁
+                <Icon name="repeat" size={26} />
               </span>
               <h2 className="alt-name">{t('alt_remeasure')}</h2>
             </div>
             <p className="alt-note">{t('remeasure_worth')}</p>
-            <BigButton icon="✓" label={t('choose')} testId={`choose-${REMEASURE}`} variant="secondary" onClick={() => choose(altChoice(REMEASURE), REMEASURE)} />
+            <BigButton icon="check" label={t('choose')} testId={`choose-${REMEASURE}`} variant="secondary" onClick={() => choose(altChoice(REMEASURE), REMEASURE)} />
           </section>
         )}
-        <p className="question">{t('you_decide')}</p>
-        {saveError && <SaveError />}
-        <BigButton icon="🧑‍🌾" label={t('opt_consult')} testId="choice-CONSULT" variant="secondary" onClick={() => choose('CONSULT')} />
       </Screen>
     );
   }
 
   // Respaldo: regla antigua (decide.ts) cuando el cálculo del manual no está disponible.
   const k = decision.kpis;
-  const rows: Array<{ id: string; icon: string; label: string; value: string }> = k
+  const rows: Array<{ id: string; icon: IconName; label: string; value: string }> = k
     ? [
-        { id: 'loss', icon: '📉', label: t('kpi_loss'), value: range(k.expectedLossKg) },
-        { id: 'cost', icon: '💰', label: t('kpi_cost'), value: `${num(k.treatmentCostKg)} ${unit}` },
-        { id: 'breakeven', icon: '⚖️', label: t('kpi_breakeven'), value: `${num(k.breakEvenKg)} ${unit}` },
-        { id: 'net', icon: '📈', label: t('kpi_net'), value: range(k.netBenefitKg) },
+        { id: 'loss', icon: 'trend-down', label: t('kpi_loss'), value: range(k.expectedLossKg) },
+        { id: 'cost', icon: 'coins', label: t('kpi_cost'), value: `${num(k.treatmentCostKg)} ${unit}` },
+        { id: 'breakeven', icon: 'scale', label: t('kpi_breakeven'), value: `${num(k.breakEvenKg)} ${unit}` },
+        { id: 'net', icon: 'trend-up', label: t('kpi_net'), value: range(k.netBenefitKg) },
       ]
     : [];
 
   return (
-    <Screen id="decision" icon="⚖️" audio={[decision.phrase, 'you_decide']}>
-      {decision.usedDemoData && <DemoBadge text={t('demo_data')} />}
+    <Screen
+      id="decision"
+      icon="scale"
+      eyebrow={t('app_name')}
+      title={t('t_decision')}
+      audio={[decision.phrase, 'you_decide']}
+      chips={
+        <>
+          <Pill tone="leaf" icon="person">
+            {t('you_decide')}
+          </Pill>
+          {decision.usedDemoData && <DemoBadge text={t('demo_data')} />}
+        </>
+      }
+    >
       {rows.map((r) => (
         <div className="kpi" key={r.id}>
           <span className="kpi-icon" aria-hidden="true">
-            {r.icon}
+            <Icon name={r.icon} size={22} />
           </span>
           <span className="kpi-label">{r.label}</span>
           <span className="kpi-value" data-testid={`kpi-${r.id}`}>
@@ -170,10 +218,11 @@ export default function Decision() {
           </span>
         </div>
       ))}
-      <p className="question" data-testid="decision-suggestion" data-suggestion={decision.suggestion}>
-        {t(decision.phrase)}
-      </p>
-      <p className="question">{t('you_decide')}</p>
+      <section className="reco">
+        <p className="suggestion" data-testid="decision-suggestion" data-suggestion={decision.suggestion}>
+          {t(decision.phrase)}
+        </p>
+      </section>
       {saveError && <SaveError />}
       {OPTIONS.map((o) => (
         <BigButton
