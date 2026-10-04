@@ -77,6 +77,7 @@ wait or consult a person** — in kilograms of coffee.
 | 📲 **Download** | [Jani.apk (v0.1.0)](https://github.com/MiguelAlejandroB/jani/releases/download/v0.1.0/Jani.apk) — Android 8+ recommended (installs from Android 6), ~19 MB · also in this repo: [`download/Jani.apk`](download/Jani.apk) · [all releases](https://github.com/MiguelAlejandroB/jani/releases) |
 | 🌐 **Landing page** | [bloom-coffee-visions.lovable.app](https://bloom-coffee-visions.lovable.app/) |
 | ✈️ **Offline** | Internet only to download; then works in airplane mode |
+| 📄 **One-pager** | [docs/ONE_PAGER.md](docs/ONE_PAGER.md) — the hackathon report in one page |
 | 🔒 **Privacy** | Photos stay on the phone; SMS to an agent carries text only |
 
 ### Install in 4 steps
@@ -419,6 +420,7 @@ Fonts: Fraunces (SIL OFL). Optional Swahili audio: Meta MMS-TTS (non-commercial 
 
 | Document | Content |
 |---|---|
+| [docs/ONE_PAGER.md](docs/ONE_PAGER.md) | **One-page report** for the jury: challenge, models, results, challenges, timeline |
 | [docs/RISK_DECISION_MODELS.md](docs/RISK_DECISION_MODELS.md) | Risk & decision implementation, calibration, verification |
 | [docs/RISK_DECISION_MODELS_MANUAL.md](docs/RISK_DECISION_MODELS_MANUAL.md) | Full mathematical specification of M3/M4 |
 | [docs/MODEL_RESULTS.md](docs/MODEL_RESULTS.md) | M1 training runs and field results |
