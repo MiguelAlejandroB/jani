@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useMemo } from 'react';
+import { Capacitor } from '@capacitor/core';
+import { TextToSpeech } from '@capacitor-community/text-to-speech';
 import { createVoice, type AudioLike, type SpeechLike, type UtteranceLike, type Voice } from '../engine/voice';
 import { getPackAudio } from '../packs/loader';
 import { usePack } from '../packs/PackContext';
@@ -20,6 +22,24 @@ function browserSpeech(): SpeechLike | undefined {
   }
 }
 
+// En el APK (WebView de Android) no existe speechSynthesis: se usa el motor de texto a voz del teléfono,
+// que funciona sin conexión. speak() resuelve cuando termina de hablar.
+const NATIVE = Capacitor.isNativePlatform();
+
+function nativeSpeech(): SpeechLike {
+  return {
+    getVoices: () => [],
+    speak: (u) => {
+      TextToSpeech.speak({ text: u.text, lang: u.lang, rate: 1.0, category: 'playback' })
+        .then(() => u.onend?.())
+        .catch(() => u.onerror?.());
+    },
+    cancel: () => {
+      void TextToSpeech.stop().catch(() => undefined);
+    },
+  };
+}
+
 /**
  * Reproduce las frases al entrar a la pantalla (una vez por cambio de claves) y las detiene al salir.
  * nonce: cambiarlo vuelve a decirlas con las mismas claves (p. ej. cada foto rechazada).
@@ -36,11 +56,12 @@ export function useScreenAudio(keys: string[], nonce = 0): () => void {
       createUrl: (b) => URL.createObjectURL(b),
       revokeUrl: (u) => URL.revokeObjectURL(u),
       makeUtterance: (text, lang) => {
+        if (NATIVE) return { text, lang, onend: null, onerror: null };
         const u = new SpeechSynthesisUtterance(text);
         u.lang = lang;
         return u as unknown as UtteranceLike;
       },
-      speech: browserSpeech(),
+      speech: NATIVE ? nativeSpeech() : browserSpeech(),
     });
   }, [pack]);
 

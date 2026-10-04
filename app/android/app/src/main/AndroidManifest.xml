@@ -41,4 +41,10 @@
     <!-- GPS para elegir el punto de clima más cercano (solo dentro del teléfono). -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <!-- Android 11+: permite encontrar el motor de texto a voz del teléfono (audio de las frases). -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.TTS_SERVICE" />
+        </intent>
+    </queries>
 </manifest>

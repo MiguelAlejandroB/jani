@@ -22,6 +22,7 @@
     "e2e:install": "node scripts/e2e.mjs install"
   },
   "dependencies": {
+    "@capacitor-community/text-to-speech": "^6.1.0",
     "@capacitor/core": "^7.6.9",
     "fflate": "^0.8.3",
     "idb-keyval": "^6.3.0",
