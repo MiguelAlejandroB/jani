@@ -42,6 +42,12 @@ REGIONS = {
         ("Bukoba, Tanzania", -1.33, 31.81), ("Huye, Rwanda", -2.60, 29.74), ("Ngozi, Burundi", -2.91, 29.83),
         ("Jimma, Ethiopia", 7.67, 36.83), ("Yirgacheffe, Ethiopia", 6.16, 38.20), ("Hawassa, Sidama, Ethiopia", 7.05, 38.48),
     ],
+    # Otros cafetales (para el paquete de demostración en inglés): EE. UU. y América.
+    "america": [
+        ("Kona, Hawaii, USA", 19.52, -155.92), ("Kauai, Hawaii, USA", 21.90, -159.58), ("Yauco, Puerto Rico, USA", 18.03, -66.85),
+        ("Varginha, Minas Gerais, Brazil", -21.55, -45.43), ("Antigua, Guatemala", 14.56, -90.73),
+        ("Tarrazú, Costa Rica", 9.66, -84.02),
+    ],
 }
 
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "clima_puntos.json")
