@@ -1,0 +1,13 @@
+# Vision notebooks (run in Google Colab, GPU T4). Each notebook installs these in its first cell.
+# jani_train.ipynb (M1 classifier) and jani_segmentation.ipynb (M2 segmenter)
+torch
+torchvision
+timm
+datasets
+onnx
+onnxruntime
+onnxscript
+scikit-learn
+pillow
+numpy
+matplotlib

@@ -1,0 +1,8 @@
+# Risk & decision models (M3/M4): Python reference, calibration and tests. Python 3.11+ (tested on 3.13).
+numpy>=2.0
+scipy>=1.13
+pandas>=2.2
+scikit-learn>=1.5
+pillow>=10.0
+onnxruntime>=1.18      # calibrate_lambda.py: runs the segmenter to estimate the detection matrix Λ
+pytest>=8.0

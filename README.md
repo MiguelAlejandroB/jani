@@ -37,6 +37,37 @@ All on the phone. No internet. Photos never leave the device.
 
 ---
 
+## Project summary
+
+**The problem.** Smallholder coffee farmers like *Noor* often notice a spot on a leaf with no agronomist nearby and no
+mobile signal. Leaf rust and other diseases spread fast; by the time advice arrives, part of the harvest is gone — or
+money is spent on a treatment that was not worth it.
+
+**What we built.** **Jani**, an Android app that works **100 % offline** on the phones farmers already have. The farmer
+photographs a few leaves; Jani checks each photo, measures how much of the leaf is damaged, names the likely disease (or
+says *"I'm not sure"*), estimates how many **kilograms** of coffee could be lost by harvest using local climate, and
+compares the options — do nothing, prune, fungicide, copper, biological — including hidden costs such as labour and
+interest. The farmer chooses; high-risk cases can be sent to an extension agent by SMS (text only).
+
+**Who benefits.** Smallholder coffee farmers with low connectivity and low digital literacy (voice on every screen,
+icons, one action per screen), and the extension services and cooperatives that support them.
+
+**What works today.** The full route photo → diagnosis → risk → decision → voice runs in **airplane mode** on a real
+Android phone (APK above). Two vision models — 1.9 MB and 3.7 MB, INT8 — plus a Bayesian risk model and a risk-averse
+decision model run entirely on the device; photos never leave it. Three regional packs (Spanish, English, Kiswahili)
+change language, prices and climate **without touching code**, and the app is honest about uncertainty: it shows
+ranges, flags demo data and abstains instead of guessing.
+
+```mermaid
+flowchart LR
+  A[📷 Photos] --> B[M2 Segmenter<br/>leaf gate + severity]
+  B --> C[M1 Classifier<br/>calibrated + abstain]
+  C --> D[M3 Risk<br/>Markov + 1,000 particles<br/>+ local climate]
+  D --> E[M4 Decision<br/>certainty equivalent in kg]
+  E --> F[👩‍🌾 Farmer chooses<br/>save · SMS to agent]
+  P[(Regional pack<br/>phrases · prices · climate)] -.-> C & D & E
+```
+
 Jani is an Android app that turns a phone into an **offline plant-health advisor**. A farmer photographs coffee leaves;
 Jani measures the damage, names the disease, projects the yield loss to harvest and compares what to do — **treat,
 wait or consult a person** — in kilograms of coffee.
@@ -325,6 +356,30 @@ python build_climate.py     # NASA POWER climate normals for every coffee locati
 
 ---
 
+### Dependencies and environment files
+
+| Part | Environment | Dependencies file |
+|---|---|---|
+| App (PWA + Android) | Node 20+, npm | [`app/package.json`](app/package.json) / `package-lock.json` |
+| Android APK | JDK 21, Android SDK 35 (build-tools 35), Gradle wrapper 8.11 | [`app/android/`](app/android/) |
+| Risk & decision (Python reference, calibration, tests) | Python 3.11+ | [`training/riesgo_decision/requirements.txt`](training/riesgo_decision/requirements.txt) |
+| Vision training (Colab GPU) | Google Colab | [`training/requirements-colab.txt`](training/requirements-colab.txt) (installed by each notebook) |
+
+Runtime app dependencies: `onnxruntime-web` (on-device inference, WASM), `react` / `react-dom` (UI), `idb-keyval`
+(IndexedDB storage), `fflate` (pack zips), `@capacitor/core` + `@capacitor-community/text-to-speech` (Android shell and
+offline voice). Dev: Vite + `vite-plugin-pwa` (Workbox precache), TypeScript 6, Vitest, Playwright, ESLint.
+No API keys or `.env` files are needed: nothing calls a server.
+
+### Dataset
+
+**N/A — no new dataset was generated.** Jani uses the public datasets in section 8. Small derived artefacts needed to
+reproduce the risk model are versioned in [`training/riesgo_decision/data/`](training/riesgo_decision/data/):
+weekly climate normals per coffee site (`clima_puntos.json`, `clima_semanal.json`), the detection matrix Λ
+(`lambda.json`), the rust panel and fungicide trials used for calibration (`CLRI_14D.csv`, `usda_fungicides_clr.csv`)
+and the calibration report.
+
+---
+
 ## 8. Data and licences
 
 | Dataset | Country | Size | Licence | Use |
@@ -349,6 +404,14 @@ Fonts: Fraunces (SIL OFL). Optional Swahili audio: Meta MMS-TTS (non-commercial 
   "technical-criteria estimate" flag. Real harvests per plot, captured by the follow-up feature, are needed.
 - **Prices, yields and costs are demo values** until local partners provide sourced numbers.
 - The APK is a **debug build** (not on Play Store).
+
+---
+
+### If we had more time
+- Re-train M1 with more field photos per country and re-check the INT8-vs-FP32 gap on the field hold-out.
+- Replace demo prices, yields and expert priors with sourced values from local partners; record real harvests per
+  plot with the follow-up feature to calibrate the disease dynamics.
+- Native-speaker review and recorded audio for Kiswahili; signed release build on Play Store.
 
 ---
 
