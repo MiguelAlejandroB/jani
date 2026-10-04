@@ -159,8 +159,8 @@ def run_risk(chains, params, weeks_z, y0_kg, seed=1, n=None):
         flags.update(f)
         lam = params["lambda"]
         for s in range(4):
-            relevant = cc.n[s] > 0 or (s >= 1 and cc.n_censored > 0)
-            if relevant and lam[s][s] <= 0.5:
+            # Solo niveles observados: una hoja censurada (">= 1", sin segmentador) no observó el nivel 3.
+            if cc.n[s] > 0 and lam[s][s] <= 0.5:
                 flags.add("detector_no_corregible")
         for i, p in enumerate(parts):
             _, _, g, kappa = damage_params(params, k, p["d"])

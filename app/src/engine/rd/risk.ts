@@ -149,8 +149,8 @@ export function runRisk(
     const { parts, ess, flags: f } = initParticles(cc, params, rng, n);
     f.forEach((x) => flags.add(x));
     for (let s = 0; s < 4; s++) {
-      const relevant = cc.n[s]! > 0 || (s >= 1 && cc.n_censored > 0);
-      if (relevant && params.lambda[s]![s]! <= 0.5) flags.add('detector_no_corregible');
+      // Solo niveles observados: una hoja censurada (">= 1", sin segmentador) no observó el nivel 3.
+      if (cc.n[s]! > 0 && params.lambda[s]![s]! <= 0.5) flags.add('detector_no_corregible');
     }
     parts.forEach((p, i) => {
       const dp = damageParams(params, k, p.d);

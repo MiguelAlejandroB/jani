@@ -108,6 +108,14 @@ def test_banderas(P):
     p["lambda"][2] = [0.0, 0.5, 0.4, 0.1]
     out = run_risk({"roya": chain([5, 2, 2, 1])}, p, weeks(), 2000, n=N)
     assert "detector_no_corregible" in out["banderas"]
+    # Nivel 3 bloqueado (fila uniforme), pero solo hay hojas censuradas (">= 1", sin segmentador) y de nivel 1:
+    # nadie observó el nivel 3, así que no se pide técnico por el detector.
+    p = copy.deepcopy(P)
+    p["lambda"][3] = [0.25, 0.25, 0.25, 0.25]
+    out = run_risk({"roya": chain([7, 2, 0, 0], cens=3)}, p, weeks(), 2000, n=N)
+    assert "detector_no_corregible" not in out["banderas"]
+    out = run_risk({"roya": chain([7, 2, 0, 1])}, p, weeks(), 2000, n=N)
+    assert "detector_no_corregible" in out["banderas"]
     out = run_risk({"roya": chain([5, 2, 2, 1])}, P, weeks(4, (3.0, 0, 0)), 2000, n=N)
     assert "clima_fuera_de_rango" in out["banderas"] and "parametros_prior" in out["banderas"]
 
